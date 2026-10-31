@@ -34,27 +34,6 @@ export function todayItems(state, now = new Date()) {
   return { pending, done: doneToday, total: pending.length + doneToday.length };
 }
 
-// ---------- Hábitos que tocan hoy y su progreso
-export function habitsToday(state, now = new Date()) {
-  const today = iso(now), wd = isoWeekday(now);
-  const ws = iso(weekStart(now));
-  const logs = state.habits.logs;
-  const valueOn = (id, day) => logs.filter(l => l.habitId === id && l.date === day).reduce((s, l) => s + (l.value || 0), 0);
-
-  return state.habits.habits.filter(h => !h.archived).map(h => {
-    const f = h.frequency || { type: "daily" };
-    const value = valueOn(h.id, today);
-    const target = h.target || 1;
-    let weekly = null;
-    if (f.type === "weekly") {
-      const days = new Set(logs.filter(l => l.habitId === h.id && l.date >= ws && l.date <= today && l.value >= target).map(l => l.date));
-      weekly = { done: days.size, goal: f.times || 1 };
-    }
-    const due = f.type === "daily" || (f.type === "days" && (f.days || []).includes(wd)) || (f.type === "weekly" && weekly.done < weekly.goal);
-    return { id: h.id, name: h.name, unit: h.unit || "", value, target, pct: Math.min(100, Math.round(value / target * 100)), done: value >= target, due, weekly };
-  }).filter(h => h.due || h.done);
-}
-
 // ---------- Dinero
 export function money(state, now = new Date()) {
   const fin = state.finance;

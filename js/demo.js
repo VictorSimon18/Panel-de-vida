@@ -82,36 +82,56 @@ export function buildDemo(alias) {
     { id: "lrn-excel", name: "Excel avanzado", type: "curso", done: 24, total: 24, unit: "lecciones", startedAt: d(-60), finishedAt: d(-10) }
   ];
 
-  // ---- Hábitos (últimos 21 días; hoy a medias)
+  // ---- Hábitos (últimas 17 semanas; hoy a medias)
   s.habits.habits = [
-    { id: "hb-agua", name: "Agua", unit: "L", target: 2, frequency: { type: "daily" } },
-    { id: "hb-leer", name: "Leer", unit: "págs.", target: 20, frequency: { type: "daily" } },
-    { id: "hb-gym", name: "Gimnasio", unit: "sesión", target: 1, frequency: { type: "weekly", times: 4 } },
-    { id: "hb-medit", name: "Meditar", unit: "min", target: 10, frequency: { type: "days", days: [1, 3, 5] } }
+    { id: "hb-agua", name: "Beber agua", unit: "L", target: 2, step: 0.5, frequency: { type: "daily" }, createdAt: d(-120) },
+    { id: "hb-leer", name: "Leer", unit: "págs.", target: 20, step: 5, frequency: { type: "daily" }, createdAt: d(-120) },
+    { id: "hb-gym", name: "Gimnasio", unit: "sesión", target: 1, step: 1, auto: "gym", frequency: { type: "weekly", times: 4 }, createdAt: d(-120) },
+    { id: "hb-medit", name: "Meditar", unit: "min", target: 10, step: 5, frequency: { type: "days", days: [1, 3, 5] }, createdAt: d(-120) }
   ];
-  for (let i = 21; i >= 1; i--) {
-    const day = d(-i);
-    s.habits.logs.push({ id: nid("l"), habitId: "hb-agua", date: day, value: r() < .85 ? 2 : 1.5 });
-    if (r() < .75) s.habits.logs.push({ id: nid("l"), habitId: "hb-leer", date: day, value: 20 + Math.round(r() * 10) });
+  for (let i = 119; i >= 1; i--) {
+    const day = d(-i), wd = ((addDays(now, -i).getDay() + 6) % 7) + 1;
+    const good = i < 40 ? .9 : .7; // últimamente más constante
+    s.habits.logs.push({ id: nid("l"), habitId: "hb-agua", date: day, value: r() < good ? 2 : r() < .5 ? 1.5 : 1 });
+    if (r() < good - .1) s.habits.logs.push({ id: nid("l"), habitId: "hb-leer", date: day, value: 20 + Math.round(r() * 10) });
+    if ([1, 3, 5].includes(wd) && r() < good) s.habits.logs.push({ id: nid("l"), habitId: "hb-medit", date: day, value: 10 });
   }
   s.habits.logs.push({ id: nid("l"), habitId: "hb-agua", date: today, value: 1.5 });
-  s.habits.logs.push({ id: nid("l"), habitId: "hb-leer", date: today, value: 12 });
+  s.habits.logs.push({ id: nid("l"), habitId: "hb-leer", date: today, value: 10 });
 
-  const ws = weekStart(now);
-  [0, 2].forEach(off => {
-    const day = addDays(ws, off);
-    if (iso(day) <= today) {
-      s.habits.workouts.push({ id: nid("wo"), date: iso(day), type: "gym", minutes: 70, sets: [] });
-      s.habits.logs.push({ id: nid("l"), habitId: "hb-gym", date: iso(day), value: 1 });
-    }
-  });
-  s.habits.workouts.push({ id: nid("wo"), date: d(-5), type: "futbol", minutes: 90 });
+  // ---- Gimnasio: rutinas y 8 semanas de entrenos con progresión
+  s.habits.routines = [
+    { id: "rt-torso", name: "Torso", exercises: [
+      { id: "e1", name: "Press banca", sets: 4, reps: 8 }, { id: "e2", name: "Remo con barra", sets: 4, reps: 8 },
+      { id: "e3", name: "Press militar", sets: 3, reps: 10 }, { id: "e4", name: "Dominadas", sets: 3, reps: 8 }] },
+    { id: "rt-pierna", name: "Pierna", exercises: [
+      { id: "e5", name: "Sentadilla", sets: 4, reps: 6 }, { id: "e6", name: "Peso muerto rumano", sets: 3, reps: 10 },
+      { id: "e7", name: "Prensa", sets: 3, reps: 12 }, { id: "e8", name: "Gemelos", sets: 4, reps: 15 }] }
+  ];
+  const base = { "Press banca": 70, "Remo con barra": 60, "Press militar": 40, "Dominadas": 0, "Sentadilla": 90, "Peso muerto rumano": 80, "Prensa": 160, "Gemelos": 60 };
+  for (let wk = 7; wk >= 0; wk--) {
+    const ws = addDays(weekStart(now), -7 * wk);
+    [[0, "rt-torso"], [1, "rt-pierna"], [3, "rt-torso"], [4, "rt-pierna"]].forEach(([off, rid], k) => {
+      const day = addDays(ws, off);
+      if (iso(day) > today || (wk === 0 && k > 1)) return;
+      const rt = s.habits.routines.find(x => x.id === rid);
+      const inc = (7 - wk) * 1.25;
+      s.habits.workouts.push({ id: nid("wo"), date: iso(day), type: "gym", routineId: rid, minutes: 60 + Math.round(r() * 20),
+        exercises: rt.exercises.map(ex => ({ name: ex.name, sets: Array.from({ length: ex.sets }, () => ({ w: Math.round((base[ex.name] + inc * (ex.name === "Prensa" ? 4 : 1)) / 2.5) * 2.5, r: ex.reps })) })) });
+    });
+  }
+  // fútbol: entrenamiento los martes, partido algunos sábados
+  for (let wk = 7; wk >= 0; wk--) {
+    const ws = addDays(weekStart(now), -7 * wk);
+    if (iso(addDays(ws, 1)) <= today) s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, 1)), type: "futbol", kind: "entrenamiento", minutes: 90, note: "" });
+    if (wk % 2 === 0 && iso(addDays(ws, 5)) < today) s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, 5)), type: "futbol", kind: "partido", minutes: 70, note: "Liga" });
+  }
 
   for (let i = 13; i >= 0; i--) {
     s.habits.sleep.push({ id: nid("s"), date: d(-i), hours: Math.round((6.2 + r() * 2.2) * 10) / 10, quality: 3 + Math.round(r() * 2) });
-    s.habits.mood.push({ id: nid("m"), date: d(-i), value: 3 + Math.round(r() * 2) });
+    s.habits.mood.push({ id: nid("m"), date: d(-i), value: 2 + Math.round(r() * 3) });
   }
-  s.habits.body = [{ id: "bd1", date: d(-7), weight: 76.4 }, { id: "bd2", date: today, weight: 75.9 }];
+  s.habits.body = [0, 1, 2, 3, 4, 5, 6, 7].map(k => ({ id: nid("bd"), date: d(-7 * (7 - k)), weight: Math.round((78.2 - k * 0.32 + r() * .4) * 10) / 10, fat: Math.round((19 - k * .2) * 10) / 10, waist: k % 2 ? null : 86 - k * .4 }));
 
   // ---- Agenda
   s.agenda.tasks = [

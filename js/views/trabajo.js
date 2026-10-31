@@ -1,13 +1,14 @@
 // Trabajo y estudios: horas por semana, proyectos con hitos y aprendizaje.
 
 import { areaHeader } from "./area.js";
-import { esc, openSheet, closeSheet, toast } from "../ui.js";
+import { esc, openSheet, closeSheet } from "../ui.js";
 import { icon } from "../icons.js";
 import { addDays, parseISO } from "../stats.js";
 import { stackChart, ring } from "../charts.js";
 import { registerQuickAction } from "../quickadd.js";
 import { KINDS, KIND_COLOR, LEARN_TYPES, fmtMin, fmtHours, weekBreakdown, weeksHistory, projectStats } from "../work.js";
 import { openTimeForm, openProjectForm, openProjectDetail, openLearnForm, stepLearn } from "./trabajo-forms.js";
+import { openWorkoutForm, openFutbolForm } from "./deporte-forms.js";
 
 const ui = { tab: "tiempo", week: 0, archived: false };
 const TABS = { tiempo: "Tiempo", proyectos: "Proyectos", aprendizaje: "Aprendizaje" };
@@ -28,7 +29,8 @@ registerQuickAction("train", () => {
     if (!b) return;
     closeSheet();
     if (b.dataset.pick === "trabajo" || b.dataset.pick === "estudio") openTimeForm({ kind: b.dataset.pick });
-    else toast("Los entrenos llegan con Hábitos y deporte (fase 5)");
+    else if (b.dataset.pick === "gym") openWorkoutForm();
+    else openFutbolForm();
   });
 });
 

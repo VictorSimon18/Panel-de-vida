@@ -1,11 +1,12 @@
 // Pantalla de resumen (variante A · HUD compacto) conectada a los datos.
 
 import { AREAS, levelFromXp, titleFor } from "../game.js";
-import { esc, int, money as eur, longDate, monthName, uid } from "../ui.js";
+import { esc, int, money as eur, longDate, monthName, toast } from "../ui.js";
 import { icon } from "../icons.js";
 import { backupDue } from "../backup.js";
 import { update } from "../state.js";
-import { todayItems, habitsToday, money, week, streak, iso, parseISO } from "../stats.js";
+import { todayItems, money, week, streak, iso, parseISO } from "../stats.js";
+import { habitsToday, habitValue, setHabitValue, AUTO_LABEL } from "../habits.js";
 import { weekChart, ring } from "../charts.js";
 
 const PRI = { alta: ["Alta", "var(--danger)"], media: ["Media", "var(--agenda)"], baja: ["Baja", "var(--muted)"] };
@@ -86,7 +87,7 @@ function habitsCard(state) {
   if (!list.length) return `<section class="card">${header}<div class="empty">Hoy no te toca ningún hábito. Día libre.</div></section>`;
 
   return `<section class="card">${header}<div class="list">${list.map(h => `
-    <button class="item tap${h.done ? " is-done" : ""}" type="button" data-habit="${h.id}" aria-pressed="${h.done}">
+    <button class="item tap${h.done ? " is-done" : ""}" type="button" data-habit="${h.id}"${h.auto ? ` data-auto="${h.auto}"` : ""} aria-pressed="${h.done}">
       ${ring(h.pct, "#ff3d9a", { size: 34, stroke: 4 })}
       <span class="t">${esc(h.name)}<small class="num">${num1(h.value)} / ${num1(h.target)} ${esc(h.unit)}${h.weekly ? ` · ${h.weekly.done}/${h.weekly.goal} esta semana` : ""}</small></span>
       <span class="tick" style="--c:var(--hab)">${icon.check}</span>
@@ -138,18 +139,14 @@ export function mount(root, _state, signal) {
       return;
     }
     const h = e.target.closest("[data-habit]");
+    if (h?.dataset.auto) { toast(`Se marca solo al apuntar ${AUTO_LABEL[h.dataset.auto]}`); return; }
     if (h) {
       update(s => {
         const habit = s.habits.habits.find(x => x.id === h.dataset.habit);
-        if (!habit) return;
+        if (!habit || habit.auto) return;
         const today = iso();
-        const todays = s.habits.logs.filter(l => l.habitId === habit.id && l.date === today);
-        const value = todays.reduce((a, l) => a + (l.value || 0), 0);
-        if (value >= (habit.target || 1)) {
-          s.habits.logs = s.habits.logs.filter(l => !(l.habitId === habit.id && l.date === today));
-        } else {
-          s.habits.logs.push({ id: uid(), habitId: habit.id, date: today, value: (habit.target || 1) - value });
-        }
+        const value = habitValue(s, habit, today);
+        setHabitValue(s, habit.id, today, value >= (habit.target || 1) ? 0 : habit.target || 1);
       });
     }
   }, { signal });

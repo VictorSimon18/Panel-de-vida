@@ -71,12 +71,15 @@ export function areaChart(points, { color = "#39ff9c", format = v => v, id = "ac
   const line = points.map((p, i) => `${i ? "L" : "M"}${r1(x(i))} ${r1(y(p.value))}`).join(" ");
   const area = `${line} L${r1(x(points.length - 1))} ${pad.t + ih} L${r1(x(0))} ${pad.t + ih} Z`;
   const last = points.length - 1;
+  // como mucho ~6 etiquetas en el eje X para que no se pisen
+  const step = Math.max(1, Math.ceil(points.length / 6));
+  const showLabel = i => i === last || (i % step === 0 && last - i >= step);
   let g = `<line x1="${pad.l}" x2="${w - pad.r}" y1="${pad.t + ih}" y2="${pad.t + ih}" stroke="rgba(120,170,255,.12)"/>`;
   g += `<path d="${area}" fill="url(#${id}-fill)"/>`;
   g += `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 4px ${color})"/>`;
   points.forEach((p, i) => {
     g += `<circle cx="${r1(x(i))}" cy="${r1(y(p.value))}" r="${i === last ? 3.5 : 2}" fill="${color}"><title>${p.label}: ${format(p.value)}</title></circle>`;
-    g += `<text x="${r1(x(i))}" y="${h - 6}" font-size="10" text-anchor="${i === 0 ? "start" : i === last ? "end" : "middle"}" fill="${i === last ? "#e8f1ff" : "#8a9cc4"}" font-weight="${i === last ? 700 : 500}">${p.label}</text>`;
+    if (showLabel(i)) g += `<text x="${r1(x(i))}" y="${h - 6}" font-size="10" text-anchor="${i === 0 ? "start" : i === last ? "end" : "middle"}" fill="${i === last ? "#e8f1ff" : "#8a9cc4"}" font-weight="${i === last ? 700 : 500}">${p.label}</text>`;
   });
   // valor actual siempre arriba a la derecha, sin pisar la línea
   g += `<text x="${w - pad.r}" y="10" font-size="11" font-weight="700" text-anchor="end" fill="${color}">${format(points[last].value)}</text>`;
@@ -120,4 +123,36 @@ export function stackChart(points, { colors = ["#4d8bff", "#22e5ff"], unit = "h"
     if (i % labelEvery === 0 || p.highlight) g += `<text x="${r1(cx(i))}" y="${h - 6}" font-size="10" text-anchor="middle" fill="${p.highlight ? "#e8f1ff" : "#8a9cc4"}" font-weight="${p.highlight ? 700 : 500}">${p.label}</text>`;
   });
   return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de horas">${g}</svg>`;
+}
+
+/**
+ * Mapa de calor tipo calendario: columnas = semanas, filas = días (L…D).
+ * days: [{ date, level: 0-4 | null }] en orden, empezando en lunes. color: color base.
+ */
+export function heatmap(days, { color = "#ff3d9a", today = null } = {}) {
+  const weeks = Math.ceil(days.length / 7);
+  const cell = 14, gap = 3, left = 14, topPad = 14;
+  const w = left + weeks * (cell + gap), h = topPad + 7 * (cell + gap);
+  const alpha = [0, .25, .5, .78, 1];
+  let g = "";
+  ["L", "", "X", "", "V", "", "D"].forEach((l, i) => { if (l) g += `<text x="0" y="${topPad + i * (cell + gap) + cell - 3}" font-size="9" fill="#56668f">${l}</text>`; });
+  let lastMonth = null;
+  days.forEach((d, i) => {
+    const col = Math.floor(i / 7), row = i % 7;
+    const x = left + col * (cell + gap), y = topPad + row * (cell + gap);
+    const m = d.date.slice(5, 7);
+    if (row === 0 && m !== lastMonth) {
+      lastMonth = m;
+      const name = new Intl.DateTimeFormat("es-ES", { month: "short" }).format(new Date(d.date + "T12:00")).replace(".", "");
+      if (col < weeks - 1) g += `<text x="${x}" y="9" font-size="9" fill="#8a9cc4">${name}</text>`;
+    }
+    const future = today && d.date > today;
+    if (future) return;
+    let fill = "rgba(255,255,255,.05)", extra = "";
+    if (d.level == null) fill = "rgba(255,255,255,.02)";
+    else if (d.level > 0) { fill = color; extra = ` fill-opacity="${alpha[d.level]}"${d.level === 4 ? ` style="filter:drop-shadow(0 0 3px ${color})"` : ""}`; }
+    const isToday = d.date === today;
+    g += `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="3" fill="${fill}"${extra}${isToday ? ` stroke="#e8f1ff" stroke-width="1.2"` : ""}><title>${d.date}</title></rect>`;
+  });
+  return `<div class="heat-wrap"><svg class="heat" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Mapa de calor">${g}</svg></div>`;
 }

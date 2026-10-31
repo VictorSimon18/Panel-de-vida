@@ -16,7 +16,7 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 | 2 | Estilo completo y pantalla de resumen | ✅ |
 | 3 | Finanzas | ✅ |
 | 4 | Trabajo y estudios | ✅ |
-| 5 | Hábitos y deporte | ⏳ |
+| 5 | Hábitos y deporte | ✅ |
 | 6 | Agenda y tareas | ⏳ |
 | 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ⏳ |
 
@@ -41,6 +41,20 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 - **Tiempo:** apuntas a mano las horas de trabajo o de estudio, con botones rápidos de +15 min, +30 min, +1 h y +2 h y un proyecto opcional. Arriba ves la semana día a día y puedes ir a semanas anteriores. Debajo, las horas de las últimas 8 semanas.
 - **Proyectos y objetivos:** se dividen en hitos. El porcentaje de avance sale de los hitos completados. Cada proyecto puede tener fecha límite y muestra las horas que le has dedicado. Los terminados se pueden archivar.
 - **Aprendizaje:** cursos, libros y habilidades con su progreso (p. ej. 12/40 lecciones). Con **+1** avanzas una unidad.
+
+## Hábitos y deporte
+
+- **Hábitos:**
+  - Cada hábito tiene un objetivo con cantidad (p. ej. 2 L) y lo que suma cada toque de **+** (p. ej. 0,5 L).
+  - La frecuencia puede ser diaria, en días concretos o X veces por semana.
+  - Un hábito puede **marcarse solo** al apuntar un entreno de gimnasio, de fútbol o cualquiera.
+- **Rachas:** días seguidos cumpliendo (o semanas, en los hábitos semanales). Si no cumples un día que tocaba, la racha vuelve a 0. Mientras el día de hoy no termina, no rompe la racha.
+- **Mapa de calor:** uno general de 17 semanas y otro dentro de cada hábito. Toca un hábito para verlo junto con su mejor racha y su % de cumplimiento.
+- **Gimnasio:** rutinas guardadas. Al entrenar, cada ejercicio sale relleno con lo que hiciste la última vez, y el peso de la primera serie se copia a las siguientes. Avisa de los récords nuevos y muestra la evolución de cada ejercicio con su 1RM estimado (fórmula de Epley).
+- **Fútbol:** entrenamientos y partidos con sus minutos.
+- **Cuerpo:** peso, % de grasa y cintura, con gráfico.
+- **Bienestar:** horas y calidad del sueño, y estado de ánimo (de Fatal a Genial) de los últimos 14 días.
+- **Botón +:** *Hábito, sueño o ánimo* abre el registro rápido del día, y *Entreno o tiempo* incluye Gimnasio y Fútbol.
 
 ## Navegación
 
@@ -109,6 +123,8 @@ js/
   finance.js            Lógica de finanzas: categorías, saldos, fijos automáticos
   work.js               Lógica de trabajo y estudios: horas por semana, proyectos, aprendizaje
   forms.js              Piezas de formulario compartidas
+  habits.js             Lógica de hábitos: rachas, cumplimiento, mapa de calor
+  sport.js              Lógica de deporte: récords, fútbol, sueño y ánimo
   views/                Una vista por pantalla (resumen, finanzas, trabajo, hábitos, agenda, ajustes)
                         y sus formularios (p. ej. finanzas-forms.js)
 ```
