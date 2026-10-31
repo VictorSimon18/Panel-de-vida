@@ -95,7 +95,7 @@ export function update(mutator) {
   mutator(state);
   listeners.forEach(fn => fn(state));
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(persist, 150);
+  saveTimer = setTimeout(() => persist().catch(console.error), 150);
 }
 
 export async function replaceState(next) {
@@ -106,5 +106,11 @@ export async function replaceState(next) {
 
 export async function persist() {
   clearTimeout(saveTimer);
+  saveTimer = null;
   await dbSet(KEY, state);
+}
+
+// Guarda ya si hay un cambio pendiente (al salir de la app o pasarla a segundo plano)
+export function flush() {
+  if (saveTimer) persist().catch(console.error);
 }

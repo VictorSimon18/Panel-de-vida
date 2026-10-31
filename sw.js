@@ -1,7 +1,7 @@
 // Service worker: guarda la app en caché para que funcione sin conexión.
 // IMPORTANTE: sube VERSION cada vez que publiques cambios, para que el iPhone descargue la nueva versión.
 
-const VERSION = "v0.3.0";
+const VERSION = "v0.3.1";
 const CACHE = `panel-de-vida-${VERSION}`;
 
 const FILES = [
@@ -39,7 +39,12 @@ const FILES = [
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: "reload" evita copiar archivos viejos de la caché HTTP del navegador
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(c => c.addAll(FILES.map(f => new Request(f, { cache: "reload" }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", event => {
@@ -50,14 +55,28 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Primero la caché; si no está, red (y se guarda para la próxima vez)
+// Primero la red (para tener siempre la última versión) y, sin conexión, la copia guardada.
+// Si la red tarda más de 3 s, se usa la copia para no dejar la app en blanco.
 self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
-  event.respondWith(
-    caches.match(req, { ignoreSearch: true }).then(hit => hit || fetch(req).then(res => {
-      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
-      return res;
-    }).catch(() => req.mode === "navigate" ? caches.match("index.html") : Response.error()))
-  );
+  event.respondWith(networkFirst(event, req));
 });
+
+async function networkFirst(event, req) {
+  const cache = await caches.open(CACHE);
+  const network = fetch(req, { cache: "no-cache" }).then(res => {
+    if (res.ok) cache.put(req, res.clone());
+    return res;
+  });
+  event.waitUntil(network.catch(() => {}));
+  const timeout = new Promise(resolve => setTimeout(resolve, 3000));
+  try {
+    const res = await Promise.race([network, timeout]);
+    if (res) return res;
+  } catch { /* sin conexión */ }
+  const hit = await cache.match(req, { ignoreSearch: true }) ||
+    (req.mode === "navigate" ? await cache.match("index.html") : null);
+  if (hit) return hit;
+  return network.catch(() => Response.error());
+}

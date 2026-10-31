@@ -1,6 +1,6 @@
 // Punto de entrada: carga los datos, enruta entre pantallas y registra el modo sin conexión.
 
-import { loadState, getState, subscribe, update } from "./state.js";
+import { loadState, getState, subscribe, update, flush } from "./state.js";
 import { ensureFinance } from "./finance.js";
 import { initQuickAdd } from "./quickadd.js";
 import { requestPersistence } from "./db.js";
@@ -66,6 +66,9 @@ async function start() {
   });
   render();
   requestPersistence();
+  // iOS congela la app al salir: guardar cualquier cambio pendiente antes
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
+  window.addEventListener("pagehide", flush);
 }
 
 start().catch(err => {

@@ -56,7 +56,9 @@ iOS puede borrar los datos de una web si pasa mucho tiempo sin abrirse. Para no 
 
 ### Al publicar cambios
 
-En `sw.js`, sube el número de `VERSION` (por ejemplo, de `v0.1.0` a `v0.1.1`). Si no lo haces, el iPhone seguirá usando la versión guardada en caché. Con el número cambiado, la app detecta la nueva versión al volver a abrirla, se recarga sola y muestra el aviso «App actualizada».
+Con conexión, la app siempre pide primero la última versión de cada archivo; sin conexión, usa la copia guardada. Así los cambios publicados se ven al volver a abrirla.
+
+Aun así, sube el número de `VERSION` en `sw.js` (por ejemplo, de `v0.3.1` a `v0.3.2`) cada vez que añadas o quites archivos, para que se renueve la copia que se usa sin conexión.
 
 ## Probarla en el ordenador
 
