@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Panel de Vida</title>
+  <meta name="description" content="Panel de vida personal: finanzas, trabajo y estudios, hábitos y deporte, y agenda.">
+
+  <!-- PWA / iOS -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#060a1c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Panel">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+  <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div class="app">
+    <main id="view" class="view" tabindex="-1" aria-live="polite"></main>
+
+    <nav class="tabbar" aria-label="Secciones">
+      <a class="tab" data-area="fin" href="#finanzas">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><circle cx="16" cy="15" r="1.2"/></svg>
+        <span>Finanzas</span>
+      </a>
+      <a class="tab" data-area="work" href="#trabajo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16v11H4z"/><path d="M9 8V5h6v3"/></svg>
+        <span>Trabajo</span>
+      </a>
+      <button class="plus" id="plus" type="button" aria-label="Apuntar algo rápido">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <a class="tab" data-area="hab" href="#habitos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14l4-4 4 4 8-8"/><path d="M14 6h6v6"/></svg>
+        <span>Hábitos</span>
+      </a>
+      <a class="tab" data-area="ag" href="#agenda">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+        <span>Agenda</span>
+      </a>
+    </nav>
+  </div>
+
+  <div id="sheet-root"></div>
+  <div id="toast-root" aria-live="assertive"></div>
+
+  <noscript>Esta app necesita JavaScript activado.</noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

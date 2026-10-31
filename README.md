@@ -1,1 +1,89 @@
-# Panel-de-vida
+# Panel de Vida
+
+Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y estudios**, **hábitos y deporte**, y **agenda y tareas**, más una pantalla de **resumen** con niveles y experiencia (XP).
+
+- Es una app web instalable (PWA): se añade a la pantalla de inicio y se abre a pantalla completa, como una app normal.
+- Funciona sin conexión.
+- **Tus datos se guardan solo en tu móvil** (IndexedDB). Nunca se suben a ningún servidor, ni siquiera a GitHub.
+- No tiene dependencias: HTML, CSS y JavaScript.
+
+## Estado del proyecto
+
+| Fase | Contenido | Estado |
+|---|---|---|
+| 0 | Mockups de la pantalla principal (elegida la variante A, HUD compacto) | ✅ |
+| 1 | Estructura: PWA, navegación, almacenamiento, copias de seguridad | ✅ |
+| 2 | Estilo completo y pantalla de resumen | ⏳ |
+| 3 | Finanzas | ⏳ |
+| 4 | Trabajo y estudios | ⏳ |
+| 5 | Hábitos y deporte | ⏳ |
+| 6 | Agenda y tareas | ⏳ |
+| 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ⏳ |
+
+## Instalarla en el iPhone
+
+1. Abre la dirección de la app en **Safari** (otros navegadores de iPhone no permiten instalarla).
+2. Pulsa **Compartir** (el cuadrado con una flecha hacia arriba).
+3. Elige **Añadir a pantalla de inicio** y confirma.
+4. Ábrela siempre desde ese icono. Los datos de la app instalada están separados de los de Safari.
+
+## Copias de seguridad (importante en iPhone)
+
+iOS puede borrar los datos de una web si pasa mucho tiempo sin abrirse. Para no perder nada:
+
+- **Exportar:** Ajustes (rueda dentada en el resumen) → **Exportar copia** → **Guardar en Archivos** (mejor en iCloud Drive). Se genera un archivo `panel-de-vida-AAAA-MM-DD.json`.
+- **Importar:** Ajustes → **Importar copia** → elige el archivo. Sustituye todos los datos actuales, y la app te pide confirmación antes.
+- Si llevas 7 días sin exportar, el resumen muestra un aviso.
+
+## Publicarla con GitHub Pages
+
+1. En GitHub, abre el repositorio → **Settings** → **General**. Comprueba que es **público**.
+2. **Settings** → **Pages** → en *Build and deployment*, elige **Deploy from a branch**, rama `main` y carpeta `/ (root)` → **Save**.
+3. En un par de minutos la app estará en `https://<tu-usuario>.github.io/panel-de-vida/`.
+
+### Al publicar cambios
+
+En `sw.js`, sube el número de `VERSION` (por ejemplo, de `v0.1.0` a `v0.1.1`). Si no lo haces, el iPhone seguirá usando la versión guardada en caché. Tras publicar, cierra la app del todo y ábrela dos veces para que cargue la nueva versión.
+
+## Probarla en el ordenador
+
+Los módulos de JavaScript no funcionan abriendo `index.html` con doble clic: hace falta un pequeño servidor local.
+
+```bash
+cd panel-de-vida
+python3 -m http.server 8000
+# y abre http://localhost:8000
+```
+
+En Chrome o Safari, activa la vista de móvil de las herramientas de desarrollo para verla a tamaño iPhone.
+
+## Estructura del código
+
+```
+index.html              Página única: contenedor de vistas y barra inferior
+manifest.webmanifest    Datos de la app instalable (nombre, icono, colores)
+sw.js                   Service worker: modo sin conexión
+css/
+  tokens.css            Colores, tipografía y medidas (cambia aquí el estilo)
+  base.css              Reset, fondo azul noche y estructura
+  components.css        Tarjetas, barras de XP, barra inferior, hojas, botones…
+fonts/inter-latin.woff2 Tipografía Inter (incluida para funcionar sin conexión)
+icons/                  Icono de la app (SVG y PNG)
+js/
+  app.js                Arranque y navegación entre pantallas (#resumen, #finanzas…)
+  db.js                 Acceso a IndexedDB
+  state.js              Estructura de los datos, guardado y migraciones de versión
+  game.js               Niveles, XP y títulos
+  backup.js             Exportar e importar copias
+  quickadd.js           Menú del botón +
+  ui.js                 Utilidades: formatos, hoja inferior, avisos, iconos
+  views/                Una vista por pantalla (resumen, finanzas, trabajo, hábitos, agenda, ajustes)
+```
+
+### Cómo se guardan los datos
+
+Todo el estado es un único objeto JSON (ver `defaultState()` en `js/state.js`) guardado en IndexedDB. Ese mismo objeto es el que se exporta como copia. Cada cambio de formato sube `SCHEMA_VERSION` y añade una migración, para que las copias antiguas sigan funcionando.
+
+### Niveles
+
+Pasar del nivel *n* al *n+1* cuesta `100 + 50·(n−1)` XP. Hay un nivel global y otro por área. Los títulos cambian con el nivel global: Novato (1), Iniciado (3), Runner (5), Netrunner (10), Operador (15), Ciberninja (20), Arquitecto (30) y Leyenda neón (40). Cuánta XP da cada acción se definirá en la fase 7.
