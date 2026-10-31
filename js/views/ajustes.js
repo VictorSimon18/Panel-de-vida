@@ -2,8 +2,11 @@
 
 import { update, getState, replaceState, defaultState } from "../state.js";
 import { exportBackup, readBackupFile, applyBackup } from "../backup.js";
-import { esc, toast, confirmSheet, daysSince, icon } from "../ui.js";
+import { esc, toast, confirmSheet, daysSince } from "../ui.js";
+import { icon } from "../icons.js";
 import { requestPersistence } from "../db.js";
+import { buildDemo } from "../demo.js";
+import { hasAnyData } from "../stats.js";
 
 const fmt = iso => iso ? new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso)) : "Nunca";
 const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -55,6 +58,8 @@ export function render(state) {
       </div>
     </section>
 
+    ${demoCard(state)}
+
     <section class="card">
       <h2 class="card-h">Almacenamiento</h2>
       <div class="list">
@@ -68,7 +73,37 @@ export function render(state) {
     </section>`;
 }
 
+function demoCard(state) {
+  if (state.settings.demo) return `
+    <section class="card">
+      <h2 class="card-h">Datos de ejemplo</h2>
+      <p class="muted" style="font-size:13px;line-height:1.5;margin:10px 0 12px">Ahora mismo ves datos inventados. Quítalos para empezar con los tuyos (tu alias se mantiene).</p>
+      <button class="btn danger" type="button" id="demo-off">Quitar datos de ejemplo</button>
+    </section>`;
+  if (hasAnyData(state)) return "";
+  return `
+    <section class="card">
+      <h2 class="card-h">Datos de ejemplo</h2>
+      <p class="muted" style="font-size:13px;line-height:1.5;margin:10px 0 12px">Carga cuentas, hábitos, tareas y horas inventadas para ver cómo queda el panel con datos. Podrás quitarlos con un toque.</p>
+      <button class="btn" type="button" id="demo-on">Cargar datos de ejemplo</button>
+    </section>`;
+}
+
 export function mount(root) {
+  root.querySelector("#demo-on")?.addEventListener("click", async () => {
+    await replaceState(buildDemo(getState().profile.alias));
+    toast("Datos de ejemplo cargados");
+    location.hash = "#resumen";
+  });
+  root.querySelector("#demo-off")?.addEventListener("click", async () => {
+    const ok = await confirmSheet({ title: "¿Quitar los datos de ejemplo?", text: "El panel quedará vacío para que empieces con tus datos reales.", ok: "Quitar" });
+    if (!ok) return;
+    const fresh = defaultState();
+    fresh.profile.alias = getState().profile.alias;
+    await replaceState(fresh);
+    toast("Datos de ejemplo quitados");
+  });
+
   root.querySelector("#profile-form").addEventListener("submit", e => {
     e.preventDefault();
     const alias = root.querySelector("#alias").value.trim();

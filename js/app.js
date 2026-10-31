@@ -3,6 +3,7 @@
 import { loadState, getState, subscribe } from "./state.js";
 import { initQuickAdd } from "./quickadd.js";
 import { requestPersistence } from "./db.js";
+import { toast } from "./ui.js";
 import * as resumen from "./views/resumen.js";
 import * as finanzas from "./views/finanzas.js";
 import * as trabajo from "./views/trabajo.js";
@@ -21,6 +22,7 @@ const ROUTES = {
 
 const viewEl = document.getElementById("view");
 let currentRoute = null;
+let mountCtl = null;
 
 const routeName = () => {
   const r = location.hash.replace("#", "");
@@ -35,7 +37,9 @@ function render({ scrollTop = false } = {}) {
 
   viewEl.classList.toggle("enter", changed);
   viewEl.innerHTML = route.view.render(getState());
-  route.view.mount?.(viewEl, getState());
+  mountCtl?.abort();
+  mountCtl = new AbortController();
+  route.view.mount?.(viewEl, getState(), mountCtl.signal);
   document.title = name === "resumen" ? "Panel de Vida" : `${route.title} · Panel de Vida`;
 
   document.querySelectorAll(".tab").forEach(t => {
@@ -64,7 +68,27 @@ start().catch(err => {
   viewEl.innerHTML = `<div class="card"><h2 class="card-h">No se pudo abrir la app</h2><p class="muted">${String(err.message || err)}</p></div>`;
 });
 
-// Modo sin conexión
+// Modo sin conexión y actualizaciones automáticas
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(console.error));
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  // Cuando se publica una versión nueva, el service worker la instala y la app se recarga sola
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    try { sessionStorage.setItem("pv-updated", "1"); } catch { /* sin almacenamiento */ }
+    location.reload();
+  });
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").then(reg => {
+      // Comprobar si hay versión nueva cada vez que la app vuelve a primer plano
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+    }).catch(console.error);
+  });
+  try {
+    if (sessionStorage.getItem("pv-updated")) {
+      sessionStorage.removeItem("pv-updated");
+      setTimeout(() => toast("App actualizada a la última versión"), 600);
+    }
+  } catch { /* sin almacenamiento */ }
 }

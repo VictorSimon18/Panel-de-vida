@@ -1,7 +1,8 @@
 // Botón "+": menú para apuntar algo rápido desde cualquier pantalla.
 // Cada opción abrirá su formulario cuando se construya su sección.
 
-import { openSheet, closeSheet, toast, icon } from "./ui.js";
+import { openSheet, closeSheet, toast } from "./ui.js";
+import { icon } from "./icons.js";
 
 const OPTIONS = [
   { id: "money",  c: "var(--fin)",    icon: icon.money,    title: "Gasto o ingreso",       sub: "Movimiento o transferencia", phase: "Finanzas" },

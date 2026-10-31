@@ -13,7 +13,7 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 |---|---|---|
 | 0 | Mockups de la pantalla principal (elegida la variante A, HUD compacto) | ✅ |
 | 1 | Estructura: PWA, navegación, almacenamiento, copias de seguridad | ✅ |
-| 2 | Estilo completo y pantalla de resumen | ⏳ |
+| 2 | Estilo completo y pantalla de resumen | ✅ |
 | 3 | Finanzas | ⏳ |
 | 4 | Trabajo y estudios | ⏳ |
 | 5 | Hábitos y deporte | ⏳ |
@@ -26,6 +26,10 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 2. Pulsa **Compartir** (el cuadrado con una flecha hacia arriba).
 3. Elige **Añadir a pantalla de inicio** y confirma.
 4. Ábrela siempre desde ese icono. Los datos de la app instalada están separados de los de Safari.
+
+## Datos de ejemplo
+
+Para ver cómo queda el panel con datos antes de apuntar los tuyos: **Ajustes → Cargar datos de ejemplo**. Esta opción solo aparece si el panel está vacío. Con **Quitar datos de ejemplo** vuelve a quedar vacío y se mantiene tu alias.
 
 ## Copias de seguridad (importante en iPhone)
 
@@ -43,7 +47,7 @@ iOS puede borrar los datos de una web si pasa mucho tiempo sin abrirse. Para no 
 
 ### Al publicar cambios
 
-En `sw.js`, sube el número de `VERSION` (por ejemplo, de `v0.1.0` a `v0.1.1`). Si no lo haces, el iPhone seguirá usando la versión guardada en caché. Tras publicar, cierra la app del todo y ábrela dos veces para que cargue la nueva versión.
+En `sw.js`, sube el número de `VERSION` (por ejemplo, de `v0.1.0` a `v0.1.1`). Si no lo haces, el iPhone seguirá usando la versión guardada en caché. Con el número cambiado, la app detecta la nueva versión al volver a abrirla, se recarga sola y muestra el aviso «App actualizada».
 
 ## Probarla en el ordenador
 
@@ -76,7 +80,11 @@ js/
   game.js               Niveles, XP y títulos
   backup.js             Exportar e importar copias
   quickadd.js           Menú del botón +
-  ui.js                 Utilidades: formatos, hoja inferior, avisos, iconos
+  stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
+  charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
+  icons.js              Juego de iconos
+  demo.js               Datos de ejemplo (se cargan y se quitan desde Ajustes)
+  ui.js                 Utilidades: formatos, hoja inferior, avisos
   views/                Una vista por pantalla (resumen, finanzas, trabajo, hábitos, agenda, ajustes)
 ```
 

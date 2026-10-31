@@ -2,9 +2,14 @@
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-const eur = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
-export const money = n => eur.format(n || 0);
-export const int = n => new Intl.NumberFormat("es-ES").format(n || 0);
+// Formato español con punto de miles siempre (Intl no agrupa números de 4 cifras en es-ES)
+const group = s => s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+export const money = n => {
+  const v = Math.round((n || 0) * 100) / 100;
+  const [i, d] = Math.abs(v).toFixed(2).split(".");
+  return `${v < 0 ? "−" : ""}${group(i)},${d} €`;
+};
+export const int = n => `${n < 0 ? "−" : ""}${group(String(Math.round(Math.abs(n || 0))))}`;
 
 export const todayISO = () => {
   const d = new Date();
@@ -72,12 +77,3 @@ export function confirmSheet({ title, text, ok = "Confirmar", danger = false }) 
     });
   });
 }
-
-export const icon = {
-  gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
-  back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
-  money: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v12H3z"/><path d="M3 11h18"/><circle cx="16" cy="15" r="1.2"/></svg>',
-  habit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>',
-  task: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
-  dumbbell: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>'
-};
