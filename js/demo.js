@@ -134,16 +134,30 @@ export function buildDemo(alias) {
   s.habits.body = [0, 1, 2, 3, 4, 5, 6, 7].map(k => ({ id: nid("bd"), date: d(-7 * (7 - k)), weight: Math.round((78.2 - k * 0.32 + r() * .4) * 10) / 10, fat: Math.round((19 - k * .2) * 10) / 10, waist: k % 2 ? null : 86 - k * .4 }));
 
   // ---- Agenda
+  const ts = new Date().toISOString();
+  const task = (title, due, extra = {}) => ({ id: nid("tk"), title, due, time: null, priority: "media", tags: [], note: "", repeat: null, done: false, doneAt: null, createdAt: d(-10), updatedAt: ts, ...extra });
   s.agenda.tasks = [
-    { id: "tk1", title: "Entregar informe trimestral", due: today, time: "18:00", priority: "alta", tags: ["trabajo"], done: false },
-    { id: "tk2", title: "Lección 13 del curso de SQL", due: today, priority: "media", tags: ["estudio"], done: false },
-    { id: "tk3", title: "Pagar la cuota del equipo", due: d(-1), priority: "media", tags: ["fútbol"], done: false },
-    { id: "tk4", title: "Comprar proteína", due: today, priority: "baja", tags: [], done: true, doneAt: new Date().toISOString() },
-    { id: "tk5", title: "Revisar presupuesto de noviembre", due: d(2), priority: "media", tags: ["finanzas"], done: false }
+    task("Entregar informe trimestral", today, { time: "18:00", priority: "alta", tags: ["trabajo"] }),
+    task("Lección 13 del curso de SQL", today, { tags: ["estudio"] }),
+    task("Pagar la cuota del equipo", d(-1), { tags: ["fútbol"] }),
+    task("Comprar proteína", today, { priority: "baja", done: true, doneAt: ts }),
+    task("Revisar el presupuesto de noviembre", d(2), { tags: ["finanzas"] }),
+    task("Regar las plantas", d(1), { priority: "baja", repeat: "week", tags: ["casa"] }),
+    task("Repasar tema 5 de Estadística", d(3), { priority: "alta", tags: ["estudio"] }),
+    task("Pedir cita para la ITV", d(9), { tags: ["coche"] }),
+    task("Llamar a la abuela", d(4), { repeat: "week" }),
+    task("Ordenar el trastero", null, { priority: "baja", tags: ["casa"] }),
+    task("Mirar vuelos para Japón", null, { tags: ["viaje"] })
   ];
+  const ev = (title, date, start, end, extra = {}) => ({ id: nid("ev"), title, date, allDay: !start, start: `${date}T${start || "00:00"}`, end: end ? `${date}T${end}` : null, place: "", note: "", alarm: 30, createdAt: d(-10), updatedAt: ts, ...extra });
   s.agenda.events = [
-    { id: "ev1", title: "Fútbol 7 con el equipo", start: `${today}T20:30`, end: `${today}T22:00`, place: "Polideportivo" },
-    { id: "ev2", title: "Cena con amigos", start: `${d(1)}T21:00`, place: "" }
+    ev("Fútbol 7 con el equipo", today, "20:30", "22:00", { place: "Polideportivo" }),
+    ev("Cena con amigos", d(1), "21:00", null),
+    ev("Dentista", d(3), "17:30", "18:00", { place: "Clínica Sonrisa", alarm: 60 }),
+    ev("Reunión de seguimiento", d(5), "10:00", "11:00", { place: "Sala 2" }),
+    ev("Cumpleaños de Laura", d(8), null, null, { alarm: 1440 }),
+    ev("Partido de liga", d(7), "12:00", "13:30", { place: "Campo municipal" }),
+    ev("Examen de SQL (simulacro)", d(12), "09:00", "11:00", { alarm: 1440 })
   ];
 
   // ---- Juego (XP de ejemplo)

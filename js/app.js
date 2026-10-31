@@ -2,6 +2,7 @@
 
 import { loadState, getState, subscribe, update, flush } from "./state.js";
 import { ensureFinance } from "./finance.js";
+import { ensureAgenda } from "./agenda.js";
 import { initQuickAdd } from "./quickadd.js";
 import { requestPersistence } from "./db.js";
 import { toast } from "./ui.js";
@@ -53,7 +54,7 @@ function render({ scrollTop = false } = {}) {
 async function start() {
   await loadState();
   // Categorías por defecto y gastos fijos que hayan vencido desde la última vez
-  update(s => { ensureFinance(s); });
+  update(s => { ensureFinance(s); ensureAgenda(s); });
   initQuickAdd();
   // Las vistas pueden pedir repintarse al cambiar su estado interno (pestaña, mes…)
   window.addEventListener("pv:render", () => { const y = window.scrollY; render(); window.scrollTo(0, y); });

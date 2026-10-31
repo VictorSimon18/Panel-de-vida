@@ -17,7 +17,7 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 | 3 | Finanzas | ✅ |
 | 4 | Trabajo y estudios | ✅ |
 | 5 | Hábitos y deporte | ✅ |
-| 6 | Agenda y tareas | ⏳ |
+| 6 | Agenda y tareas | ✅ |
 | 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ⏳ |
 
 ## Instalarla en el iPhone
@@ -55,6 +55,25 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 - **Cuerpo:** peso, % de grasa y cintura, con gráfico.
 - **Bienestar:** horas y calidad del sueño, y estado de ánimo (de Fatal a Genial) de los últimos 14 días.
 - **Botón +:** *Hábito, sueño o ánimo* abre el registro rápido del día, y *Entreno o tiempo* incluye Gimnasio y Fútbol.
+
+## Agenda y tareas
+
+- **Tareas:** fecha y hora opcionales, prioridad, etiquetas y nota. Se agrupan en Atrasadas, Hoy, Mañana, Esta semana, Más adelante y Sin fecha. Se pueden filtrar por pendientes o completadas y por etiqueta.
+- **Repetición:** cada día, entre semana, cada semana, cada 2 semanas, cada mes o cada año. Al completar una tarea recurrente se crea la siguiente. Si la desmarcas, la siguiente desaparece.
+- **Eventos:** todo el día o con hora de inicio y fin, lugar, nota y aviso previo.
+- **Calendario:** vista mensual con puntos de colores (eventos, tareas, atrasadas). Al tocar un día ves lo que tiene y puedes añadir algo en esa fecha.
+
+### Avisos en el iPhone (Calendario)
+
+Una web no puede enviar notificaciones programadas por sí sola, así que los avisos los da el Calendario de iOS:
+
+1. **Agenda → Exportar al Calendario del iPhone → Abrir en Calendario.**
+2. El iPhone muestra los eventos del archivo. Pulsa **Añadir todo** y elige un calendario.
+3. Los eventos se exportan con el aviso que elegiste. Las tareas con hora avisan a esa hora y las de todo el día, a las 9:00. Las tareas recurrentes se exportan con su repetición.
+
+La opción **Solo lo nuevo** exporta únicamente lo creado o cambiado desde la última exportación, para no duplicar. Si cambias o borras algo que ya habías exportado, cámbialo también en el Calendario.
+
+Si **Abrir en Calendario** no muestra el botón *Añadir todo*, usa **Compartir archivo** → *Guardar en Archivos*. Después, en la app Archivos, toca el `.ics` para importarlo.
 
 ## Navegación
 
@@ -125,6 +144,7 @@ js/
   forms.js              Piezas de formulario compartidas
   habits.js             Lógica de hábitos: rachas, cumplimiento, mapa de calor
   sport.js              Lógica de deporte: récords, fútbol, sueño y ánimo
+  agenda.js             Lógica de agenda: repeticiones, agrupación, calendario, exportación .ics
   views/                Una vista por pantalla (resumen, finanzas, trabajo, hábitos, agenda, ajustes)
                         y sus formularios (p. ej. finanzas-forms.js)
 ```

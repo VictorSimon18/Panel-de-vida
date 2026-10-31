@@ -528,3 +528,42 @@ input[type="date"].input { -webkit-appearance: none; appearance: none; display: 
 .body-now { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 .body-now small { display: block; color: var(--muted); font-size: var(--fs-sm); }
 .body-now b { font-size: var(--fs-xxl); font-weight: 800; color: var(--hab); text-shadow: 0 0 16px rgba(255, 61, 154, .35); }
+
+/* =========================================================
+   Agenda y tareas (fase 6)
+   ========================================================= */
+.kind-switch { margin-top: 2px; }
+.ag-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.ag-stats b { display: block; font-size: var(--fs-xl); font-weight: 800; }
+.ag-stats small { font-size: var(--fs-xs); color: var(--muted); }
+
+.seg-row, .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag-row { margin-top: 8px; }
+.chip.small { padding: 5px 10px; font-size: 12px; }
+.chip[aria-pressed="true"] { color: var(--agenda); border-color: rgba(255, 176, 32, .55); background: rgba(255, 176, 32, .1); }
+.day-h.late { color: var(--danger); border-bottom-color: rgba(255, 90, 90, .35); }
+
+.item.task { padding: 8px 0; }
+.task-main { flex: 1; min-width: 0; background: none; border: 0; padding: 4px 0; text-align: left; color: inherit; cursor: pointer; font: inherit; }
+.task-main small { display: block; color: var(--muted); font-size: var(--fs-sm); margin-top: 1px; }
+.task-main small .late { color: var(--danger); font-weight: 600; }
+.ev-time { width: 46px; flex: none; text-align: center; font-size: 13px; font-weight: 700; color: var(--hab); line-height: 1.2; }
+.ev-time small { color: var(--muted); font-weight: 500; font-size: 11px; }
+.bell { color: var(--agenda); flex: none; }
+.bell .ico { width: 16px; height: 16px; filter: drop-shadow(0 0 3px rgba(255, 176, 32, .6)); }
+
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-top: 12px; }
+.cal-h { text-align: center; font-size: var(--fs-xs); color: var(--muted); font-weight: 600; padding-bottom: 2px; }
+.cal-d {
+  display: grid; justify-items: center; align-content: start; gap: 3px; padding: 7px 0 6px; min-height: 46px;
+  border-radius: 8px; border: 1px solid transparent; background: var(--surface-2); color: var(--fg); cursor: pointer; font: inherit; font-size: 13px; font-weight: 600;
+}
+.cal-d.out { opacity: .35; }
+.cal-d.today { border-color: rgba(255, 176, 32, .55); color: var(--agenda); }
+.cal-d.sel { background: rgba(255, 176, 32, .16); border-color: var(--agenda); box-shadow: 0 0 12px rgba(255, 176, 32, .3); }
+.cal-dots { display: flex; gap: 3px; height: 6px; }
+.cal-dots i { width: 6px; height: 6px; border-radius: 50%; }
+.cal-dots .ev { background: var(--hab); box-shadow: 0 0 4px var(--hab); }
+.cal-dots .tk { background: var(--agenda); box-shadow: 0 0 4px var(--agenda); }
+.cal-dots .late { background: var(--danger); box-shadow: 0 0 4px var(--danger); }
+input[type="time"].input { -webkit-appearance: none; appearance: none; display: flex; align-items: center; }

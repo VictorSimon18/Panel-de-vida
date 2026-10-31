@@ -25,7 +25,7 @@ export function todayItems(state, now = new Date()) {
     .map(t => ({ kind: "task", id: t.id, title: t.title, time: t.time || "", done: true, priority: t.priority || "media" }));
   const events = state.agenda.events
     .filter(e => e.start?.slice(0, 10) === today)
-    .map(e => ({ kind: "event", id: e.id, title: e.title, time: e.start.slice(11, 16), place: e.place || "" }));
+    .map(e => ({ kind: "event", id: e.id, title: e.title, time: e.allDay ? "Todo el día" : e.start.slice(11, 16), place: e.place || "" }));
 
   const pending = [...tasks, ...events].sort((a, b) =>
     (a.overdue === b.overdue ? 0 : a.overdue ? -1 : 1) ||

@@ -7,6 +7,7 @@ import { backupDue } from "../backup.js";
 import { update } from "../state.js";
 import { todayItems, money, week, streak, iso, parseISO } from "../stats.js";
 import { habitsToday, habitValue, setHabitValue, AUTO_LABEL } from "../habits.js";
+import { toggleTask } from "../agenda.js";
 import { weekChart, ring } from "../charts.js";
 
 const PRI = { alta: ["Alta", "var(--danger)"], media: ["Media", "var(--agenda)"], baja: ["Baja", "var(--muted)"] };
@@ -130,12 +131,9 @@ export function mount(root, _state, signal) {
   root.addEventListener("click", e => {
     const t = e.target.closest("[data-task]");
     if (t) {
-      update(s => {
-        const task = s.agenda.tasks.find(x => x.id === t.dataset.task);
-        if (!task) return;
-        task.done = !task.done;
-        task.doneAt = task.done ? new Date().toISOString() : null;
-      });
+      let r = null;
+      update(s => { r = toggleTask(s, t.dataset.task); });
+      if (r?.next) toast(`Hecha · la siguiente es el ${parseISO(r.next).toLocaleDateString("es-ES", { day: "numeric", month: "short" })}`);
       return;
     }
     const h = e.target.closest("[data-habit]");
