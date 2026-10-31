@@ -14,7 +14,7 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 | 0 | Mockups de la pantalla principal (elegida la variante A, HUD compacto) | ✅ |
 | 1 | Estructura: PWA, navegación, almacenamiento, copias de seguridad | ✅ |
 | 2 | Estilo completo y pantalla de resumen | ✅ |
-| 3 | Finanzas | ⏳ |
+| 3 | Finanzas | ✅ |
 | 4 | Trabajo y estudios | ⏳ |
 | 5 | Hábitos y deporte | ⏳ |
 | 6 | Agenda y tareas | ⏳ |
@@ -26,6 +26,15 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 2. Pulsa **Compartir** (el cuadrado con una flecha hacia arriba).
 3. Elige **Añadir a pantalla de inicio** y confirma.
 4. Ábrela siempre desde ese icono. Los datos de la app instalada están separados de los de Safari.
+
+## Finanzas
+
+- **Cuentas:** banco, efectivo, ahorro, inversión, tarjeta… cada una con su saldo inicial. El saldo actual es el inicial más todos sus movimientos.
+- **Movimientos:** gastos, ingresos y transferencias entre cuentas. Se pueden apuntar con el botón **+**. Tocar un movimiento lo abre para editarlo o borrarlo.
+- **Importes:** valen `12,50`, `1.234,56` o `12.5`.
+- **Categorías:** hay una lista inicial con subcategorías y se puede cambiar en *Gastos → Categorías*. Al borrar una subcategoría, sus movimientos pasan a la categoría principal.
+- **Fijos:** se repiten cada mes, semana o año y se apuntan solos el día que toca, aunque la app lleve días sin abrirse.
+- **Metas de ahorro:** objetivo, aportaciones y, si les pones fecha límite, cuánto tienes que ahorrar al mes para llegar.
 
 ## Datos de ejemplo
 
@@ -85,7 +94,9 @@ js/
   icons.js              Juego de iconos
   demo.js               Datos de ejemplo (se cargan y se quitan desde Ajustes)
   ui.js                 Utilidades: formatos, hoja inferior, avisos
+  finance.js            Lógica de finanzas: categorías, saldos, fijos automáticos
   views/                Una vista por pantalla (resumen, finanzas, trabajo, hábitos, agenda, ajustes)
+                        y sus formularios (p. ej. finanzas-forms.js)
 ```
 
 ### Cómo se guardan los datos

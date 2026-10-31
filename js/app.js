@@ -1,6 +1,7 @@
 // Punto de entrada: carga los datos, enruta entre pantallas y registra el modo sin conexión.
 
-import { loadState, getState, subscribe } from "./state.js";
+import { loadState, getState, subscribe, update } from "./state.js";
+import { ensureFinance } from "./finance.js";
 import { initQuickAdd } from "./quickadd.js";
 import { requestPersistence } from "./db.js";
 import { toast } from "./ui.js";
@@ -51,7 +52,11 @@ function render({ scrollTop = false } = {}) {
 
 async function start() {
   await loadState();
+  // Categorías por defecto y gastos fijos que hayan vencido desde la última vez
+  update(s => { ensureFinance(s); });
   initQuickAdd();
+  // Las vistas pueden pedir repintarse al cambiar su estado interno (pestaña, mes…)
+  window.addEventListener("pv:render", () => { const y = window.scrollY; render(); window.scrollTo(0, y); });
   window.addEventListener("hashchange", () => render({ scrollTop: true }));
   // Al cambiar los datos, se vuelve a pintar la pantalla actual sin mover el scroll
   subscribe(() => {

@@ -3,6 +3,7 @@
 
 import { defaultState } from "./state.js";
 import { iso, addDays, weekStart } from "./stats.js";
+import { defaultCategories } from "./finance.js";
 
 // Aleatorio reproducible: siempre salen los mismos datos
 function rng(seed = 7) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
@@ -22,40 +23,42 @@ export function buildDemo(alias) {
 
   // ---- Finanzas
   s.finance.accounts = [
-    { id: "acc-banco", name: "Banco", type: "banco", initial: 2950 },
+    { id: "acc-banco", name: "Banco", type: "banco", initial: 980 },
     { id: "acc-efectivo", name: "Efectivo", type: "efectivo", initial: 120 },
     { id: "acc-ahorro", name: "Ahorro", type: "ahorro", initial: 1400 }
   ];
-  s.finance.categories = [
-    { id: "cat-nomina", name: "Nómina", kind: "income", parentId: null },
-    { id: "cat-comida", name: "Comida", kind: "expense", parentId: null },
-    { id: "cat-super", name: "Supermercado", kind: "expense", parentId: "cat-comida" },
-    { id: "cat-rest", name: "Restaurantes", kind: "expense", parentId: "cat-comida" },
-    { id: "cat-casa", name: "Casa", kind: "expense", parentId: null },
-    { id: "cat-ocio", name: "Ocio", kind: "expense", parentId: null },
-    { id: "cat-transp", name: "Transporte", kind: "expense", parentId: null },
-    { id: "cat-subs", name: "Suscripciones", kind: "expense", parentId: null }
-  ];
+  s.finance.categories = defaultCategories();
   const tx = (date, amount, categoryId, note, accountId = "acc-banco") =>
     s.finance.transactions.push({ id: nid("tx"), date, amount, accountId, categoryId, note });
-  tx(`${month}-01`, 1850, "cat-nomina", "Nómina");
-  tx(`${month}-01`, -650, "cat-casa", "Alquiler");
+  for (let k = 5; k >= 1; k--) {
+    const m0 = iso(new Date(now.getFullYear(), now.getMonth() - k, 1)).slice(0, 7);
+    tx(`${m0}-01`, 1850, "c-nomina", "Nómina");
+    tx(`${m0}-01`, -650, "c-casa-alquiler-o-hipoteca", "Alquiler");
+    tx(`${m0}-12`, -Math.round((520 + r() * 420) * 100) / 100, "c-comida-supermercado", "Compras del mes");
+    tx(`${m0}-20`, -Math.round((80 + r() * 160) * 100) / 100, "c-ocio-salidas", "Ocio");
+  }
+  tx(`${month}-01`, 1850, "c-nomina", "Nómina");
+  tx(`${month}-01`, -650, "c-casa-alquiler-o-hipoteca", "Alquiler");
   for (let i = 0; i < 14; i++) {
     const day = d(-Math.floor(r() * Math.min(now.getDate() - 1, 27)));
     const pick = r();
-    if (pick < .45) tx(day, -Math.round((18 + r() * 55) * 100) / 100, "cat-super", "Supermercado");
-    else if (pick < .7) tx(day, -Math.round((9 + r() * 30) * 100) / 100, "cat-rest", "Cena fuera", "acc-efectivo");
-    else if (pick < .85) tx(day, -Math.round((5 + r() * 20) * 100) / 100, "cat-transp", "Gasolina");
-    else tx(day, -Math.round((10 + r() * 40) * 100) / 100, "cat-ocio", "Ocio");
+    if (pick < .45) tx(day, -Math.round((18 + r() * 55) * 100) / 100, "c-comida-supermercado", "Supermercado");
+    else if (pick < .7) tx(day, -Math.round((9 + r() * 30) * 100) / 100, "c-comida-restaurantes", "Cena fuera", "acc-efectivo");
+    else if (pick < .85) tx(day, -Math.round((5 + r() * 20) * 100) / 100, "c-transporte-combustible", "Gasolina");
+    else tx(day, -Math.round((10 + r() * 40) * 100) / 100, "c-ocio-salidas", "Ocio");
   }
   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const nm = (day) => iso(new Date(nextMonth.getFullYear(), nextMonth.getMonth(), day));
   s.finance.recurring = [
-    { id: "rec-alquiler", name: "Alquiler", amount: -650, accountId: "acc-banco", categoryId: "cat-casa", every: "month", nextDate: nm(1) },
-    { id: "rec-netflix", name: "Netflix", amount: -12.99, accountId: "acc-banco", categoryId: "cat-subs", every: "month", nextDate: nm(3) },
-    { id: "rec-gym", name: "Gimnasio", amount: -39.9, accountId: "acc-banco", categoryId: "cat-subs", every: "month", nextDate: nm(5) }
+    { id: "rec-alquiler", name: "Alquiler", amount: -650, accountId: "acc-banco", categoryId: "c-casa-alquiler-o-hipoteca", every: "month", nextDate: nm(1), day: 1 },
+    { id: "rec-netflix", name: "Netflix", amount: -12.99, accountId: "acc-banco", categoryId: "c-subs-streaming", every: "month", nextDate: nm(3), day: 3 },
+    { id: "rec-gym", name: "Gimnasio", amount: -39.9, accountId: "acc-banco", categoryId: "c-deporte-gimnasio", every: "month", nextDate: nm(5), day: 5 }
   ];
-  s.finance.goals = [{ id: "goal-viaje", name: "Viaje a Japón", target: 3000, saved: 1400, deadline: null }];
+  s.finance.transactions.push(
+    { id: nid("tx"), date: d(-3), amount: -200, accountId: "acc-banco", categoryId: null, note: "Ahorro del mes", transferId: "trf1" },
+    { id: nid("tx"), date: d(-3), amount: 200, accountId: "acc-ahorro", categoryId: null, note: "Ahorro del mes", transferId: "trf1" });
+  s.finance.goals = [{ id: "goal-viaje", name: "Viaje a Japón", target: 3000, saved: 1400, deadline: iso(new Date(now.getFullYear() + 1, 6, 1)), history: [] },
+    { id: "goal-colchon", name: "Fondo de emergencia", target: 2000, saved: 650, deadline: null, history: [] }];
 
   // ---- Trabajo y estudios (últimos 13 días)
   s.work.projects = [

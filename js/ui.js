@@ -43,7 +43,7 @@ export function openSheet(html, { onOpen, onClose } = {}) {
     <div class="sheet" role="dialog" aria-modal="true"><div class="grabber"></div>${html}</div>`;
   const sheet = root.querySelector(".sheet");
   const onKey = e => { if (e.key === "Escape") closeSheet(); };
-  root.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeSheet(); });
+  root.onclick = e => { if (e.target.closest("[data-close]")) closeSheet(); };
   document.addEventListener("keydown", onKey);
   closeCurrent = () => {
     document.removeEventListener("keydown", onKey);

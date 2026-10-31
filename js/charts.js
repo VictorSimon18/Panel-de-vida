@@ -57,3 +57,29 @@ export function ring(pct, color, { size = 44, stroke = 5, label = "" } = {}) {
     ${label ? `<text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="${size * .26}" font-weight="700" fill="#e8f1ff">${label}</text>` : ""}
   </svg>`;
 }
+
+/** Gráfico de área con puntos [{ label, value }]. El eje Y se ajusta al rango de los datos. */
+export function areaChart(points, { color = "#39ff9c", format = v => v, id = "ac" } = {}) {
+  const w = 330, h = 136, pad = { l: 8, r: 8, t: 24, b: 22 };
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  const vals = points.map(p => p.value);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi === lo) { hi += 1; lo -= 1; }
+  const span = hi - lo; lo -= span * .15; hi += span * .1;
+  const x = i => pad.l + (points.length === 1 ? iw / 2 : (iw * i) / (points.length - 1));
+  const y = v => pad.t + ih - ((v - lo) / (hi - lo)) * ih;
+  const line = points.map((p, i) => `${i ? "L" : "M"}${r1(x(i))} ${r1(y(p.value))}`).join(" ");
+  const area = `${line} L${r1(x(points.length - 1))} ${pad.t + ih} L${r1(x(0))} ${pad.t + ih} Z`;
+  const last = points.length - 1;
+  let g = `<line x1="${pad.l}" x2="${w - pad.r}" y1="${pad.t + ih}" y2="${pad.t + ih}" stroke="rgba(120,170,255,.12)"/>`;
+  g += `<path d="${area}" fill="url(#${id}-fill)"/>`;
+  g += `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 4px ${color})"/>`;
+  points.forEach((p, i) => {
+    g += `<circle cx="${r1(x(i))}" cy="${r1(y(p.value))}" r="${i === last ? 3.5 : 2}" fill="${color}"><title>${p.label}: ${format(p.value)}</title></circle>`;
+    g += `<text x="${r1(x(i))}" y="${h - 6}" font-size="10" text-anchor="${i === 0 ? "start" : i === last ? "end" : "middle"}" fill="${i === last ? "#e8f1ff" : "#8a9cc4"}" font-weight="${i === last ? 700 : 500}">${p.label}</text>`;
+  });
+  // valor actual siempre arriba a la derecha, sin pisar la línea
+  g += `<text x="${w - pad.r}" y="10" font-size="11" font-weight="700" text-anchor="end" fill="${color}">${format(points[last].value)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolución">
+    <defs><linearGradient id="${id}-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>${g}</svg>`;
+}
