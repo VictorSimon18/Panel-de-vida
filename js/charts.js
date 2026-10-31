@@ -83,3 +83,41 @@ export function areaChart(points, { color = "#39ff9c", format = v => v, id = "ac
   return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolución">
     <defs><linearGradient id="${id}-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>${g}</svg>`;
 }
+
+/**
+ * Barras apiladas. points: [{ label, values: [a, b, …] | null, highlight }]
+ * (null = día futuro, sin barra). colors: un color por serie, de abajo arriba.
+ */
+export function stackChart(points, { colors = ["#4d8bff", "#22e5ff"], unit = "h", id = "sc", labelEvery = 1 } = {}) {
+  const w = 330, h = 140, pad = { l: 24, r: 6, t: 12, b: 22 };
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  const totals = points.map(p => p.values ? p.values.reduce((s, v) => s + (v || 0), 0) : 0);
+  const top = Math.max(4, Math.ceil(Math.max(0, ...totals) / 2) * 2);
+  const y = v => pad.t + ih - (v / top) * ih;
+  const slot = iw / points.length, bw = Math.min(26, slot * .56);
+  const cx = i => pad.l + slot * i + slot / 2;
+  let g = "";
+  [0, top / 2, top].forEach(v => {
+    g += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${r1(y(v))}" y2="${r1(y(v))}" stroke="rgba(120,170,255,.1)"/>`;
+    g += `<text x="${pad.l - 6}" y="${r1(y(v) + 3)}" font-size="9" fill="#56668f" text-anchor="end">${r1(v)}</text>`;
+  });
+  points.forEach((p, i) => {
+    const x0 = r1(cx(i) - bw / 2);
+    if (p.values && totals[i] > 0) {
+      let acc = 0;
+      const n = p.values.length;
+      p.values.forEach((v, k) => {
+        if (!v) return;
+        const y1 = y(acc + v), y0 = y(acc);
+        const isTop = p.values.slice(k + 1).every(x => !x);
+        g += `<rect x="${x0}" y="${r1(y1)}" width="${r1(bw)}" height="${r1(Math.max(1, y0 - y1))}" rx="${isTop ? 3 : 0}" fill="${colors[k % colors.length]}" fill-opacity="${k === 0 ? .85 : .9}"${p.highlight ? ` style="filter:drop-shadow(0 0 5px ${colors[k % colors.length]})"` : ""}/>`;
+        acc += v;
+      });
+      g += `<rect x="${x0}" y="${r1(y(totals[i]))}" width="${r1(bw)}" height="${r1(y(0) - y(totals[i]))}" fill="transparent"><title>${p.label}: ${r1(totals[i])} ${unit}</title></rect>`;
+    } else if (p.values) {
+      g += `<rect x="${x0}" y="${r1(y(0) - 2)}" width="${r1(bw)}" height="2" rx="1" fill="rgba(120,170,255,.18)"/>`;
+    }
+    if (i % labelEvery === 0 || p.highlight) g += `<text x="${r1(cx(i))}" y="${h - 6}" font-size="10" text-anchor="middle" fill="${p.highlight ? "#e8f1ff" : "#8a9cc4"}" font-weight="${p.highlight ? 700 : 500}">${p.label}</text>`;
+  });
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de horas">${g}</svg>`;
+}

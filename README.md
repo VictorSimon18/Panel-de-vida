@@ -15,7 +15,7 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 | 1 | Estructura: PWA, navegación, almacenamiento, copias de seguridad | ✅ |
 | 2 | Estilo completo y pantalla de resumen | ✅ |
 | 3 | Finanzas | ✅ |
-| 4 | Trabajo y estudios | ⏳ |
+| 4 | Trabajo y estudios | ✅ |
 | 5 | Hábitos y deporte | ⏳ |
 | 6 | Agenda y tareas | ⏳ |
 | 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ⏳ |
@@ -35,6 +35,16 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 - **Categorías:** hay una lista inicial con subcategorías y se puede cambiar en *Gastos → Categorías*. Al borrar una subcategoría, sus movimientos pasan a la categoría principal.
 - **Fijos:** se repiten cada mes, semana o año y se apuntan solos el día que toca, aunque la app lleve días sin abrirse.
 - **Metas de ahorro:** objetivo, aportaciones y, si les pones fecha límite, cuánto tienes que ahorrar al mes para llegar.
+
+## Trabajo y estudios
+
+- **Tiempo:** apuntas a mano las horas de trabajo o de estudio, con botones rápidos de +15 min, +30 min, +1 h y +2 h y un proyecto opcional. Arriba ves la semana día a día y puedes ir a semanas anteriores. Debajo, las horas de las últimas 8 semanas.
+- **Proyectos y objetivos:** se dividen en hitos. El porcentaje de avance sale de los hitos completados. Cada proyecto puede tener fecha límite y muestra las horas que le has dedicado. Los terminados se pueden archivar.
+- **Aprendizaje:** cursos, libros y habilidades con su progreso (p. ej. 12/40 lecciones). Con **+1** avanzas una unidad.
+
+## Navegación
+
+En cualquier pantalla que no sea el resumen, el botón de la casita (arriba a la izquierda) te devuelve al inicio.
 
 ## Datos de ejemplo
 
@@ -97,6 +107,8 @@ js/
   demo.js               Datos de ejemplo (se cargan y se quitan desde Ajustes)
   ui.js                 Utilidades: formatos, hoja inferior, avisos
   finance.js            Lógica de finanzas: categorías, saldos, fijos automáticos
+  work.js               Lógica de trabajo y estudios: horas por semana, proyectos, aprendizaje
+  forms.js              Piezas de formulario compartidas
   views/                Una vista por pantalla (resumen, finanzas, trabajo, hábitos, agenda, ajustes)
                         y sus formularios (p. ej. finanzas-forms.js)
 ```

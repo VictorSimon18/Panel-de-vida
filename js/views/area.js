@@ -2,6 +2,9 @@
 
 import { AREAS, levelFromXp } from "../game.js";
 import { int } from "../ui.js";
+import { icon } from "../icons.js";
+
+export const homeBtn = () => `<a class="icon-btn home-btn" href="#resumen" aria-label="Volver al inicio">${icon.home}</a>`;
 
 export function areaHeader(state, key) {
   const a = AREAS[key];
@@ -9,7 +12,7 @@ export function areaHeader(state, key) {
   return `
     <header class="area-head" style="--c:${a.color}">
       <div class="row">
-        <a class="logo" href="#resumen" aria-label="Volver al resumen">PV</a>
+        ${homeBtn()}
         <h1>${a.name}</h1>
         <span class="lv">Nv. ${lv.level}</span>
       </div>

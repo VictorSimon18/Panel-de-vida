@@ -3,6 +3,7 @@
 import { getState, update } from "../state.js";
 import { openSheet, closeSheet, toast, confirmSheet, esc, uid, money } from "../ui.js";
 import { iso } from "../stats.js";
+import { seg, field } from "../forms.js";
 import { ACCOUNT_TYPES, FREQS, parseAmount, amountInput, applyRecurring, accountBalance, catById } from "../finance.js";
 
 // ---------- Piezas comunes
@@ -19,10 +20,6 @@ const accountOptions = (state, selected, exclude) => state.finance.accounts
   .filter(a => a.id !== exclude)
   .map(a => `<option value="${a.id}"${a.id === selected ? " selected" : ""}>${esc(a.name)}</option>`).join("");
 
-const seg = (name, options, value) => `<div class="seg-toggle" role="radiogroup">${Object.entries(options).map(([v, l]) =>
-  `<label><input type="radio" name="${name}" value="${v}"${v === value ? " checked" : ""}><span>${l}</span></label>`).join("")}</div>`;
-
-const field = (label, id, inner) => `<div class="field"><label for="${id}">${label}</label>${inner}</div>`;
 
 function needAccounts() {
   if (getState().finance.accounts.length) return false;

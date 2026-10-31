@@ -61,16 +61,26 @@ export function buildDemo(alias) {
     { id: "goal-colchon", name: "Fondo de emergencia", target: 2000, saved: 650, deadline: null, history: [] }];
 
   // ---- Trabajo y estudios (últimos 13 días)
+  const ms = (names, doneN) => names.map((name, i) => ({ id: nid("ms"), name, done: i < doneN, doneAt: i < doneN ? d(-(names.length - i) * 2) : null }));
   s.work.projects = [
-    { id: "prj-informe", name: "Informe trimestral", kind: "trabajo", milestones: [] },
-    { id: "prj-sql", name: "Curso de SQL", kind: "estudio", milestones: [] }
+    { id: "prj-informe", name: "Informe trimestral", kind: "trabajo", deadline: d(4), archived: false,
+      milestones: ms(["Recopilar datos de ventas", "Análisis por región", "Primer borrador", "Revisión con el equipo", "Entrega final"], 3) },
+    { id: "prj-sql", name: "Aprobar el certificado de SQL", kind: "estudio", deadline: d(45), archived: false,
+      milestones: ms(["Consultas básicas", "JOINs", "Subconsultas", "Índices y rendimiento", "Examen de prueba", "Examen oficial"], 2) },
+    { id: "prj-web", name: "Rediseño de la intranet", kind: "trabajo", deadline: null, archived: true,
+      milestones: ms(["Maqueta", "Desarrollo", "Publicación"], 3) }
   ];
-  for (let i = 13; i >= 0; i--) {
+  for (let i = 55; i >= 0; i--) {
     const day = addDays(now, -i), wd = (day.getDay() + 6) % 7;
     if (wd < 5) s.work.entries.push({ id: nid("w"), date: iso(day), minutes: Math.round((300 + r() * 180) / 15) * 15, projectId: "prj-informe", kind: "trabajo" });
     if (r() < .6) s.work.entries.push({ id: nid("w"), date: iso(day), minutes: Math.round((30 + r() * 90) / 15) * 15, projectId: "prj-sql", kind: "estudio" });
   }
-  s.work.learning = [{ id: "lrn-sql", name: "Curso de SQL", type: "curso", done: 12, total: 40, unit: "lecciones" }];
+  s.work.learning = [
+    { id: "lrn-sql", name: "Curso de SQL", type: "curso", done: 12, total: 40, unit: "lecciones", startedAt: d(-30) },
+    { id: "lrn-libro", name: "Hábitos atómicos", type: "libro", done: 184, total: 320, unit: "páginas", startedAt: d(-20) },
+    { id: "lrn-ingles", name: "Inglés (conversación)", type: "habilidad", done: 34, total: 100, unit: "horas", startedAt: d(-90) },
+    { id: "lrn-excel", name: "Excel avanzado", type: "curso", done: 24, total: 24, unit: "lecciones", startedAt: d(-60), finishedAt: d(-10) }
+  ];
 
   // ---- Hábitos (últimos 21 días; hoy a medias)
   s.habits.habits = [

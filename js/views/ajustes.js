@@ -6,6 +6,7 @@ import { esc, toast, confirmSheet, daysSince } from "../ui.js";
 import { icon } from "../icons.js";
 import { requestPersistence } from "../db.js";
 import { buildDemo } from "../demo.js";
+import { homeBtn } from "./area.js";
 import { hasAnyData } from "../stats.js";
 
 const fmt = iso => iso ? new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso)) : "Nunca";
@@ -16,7 +17,7 @@ export function render(state) {
   const ago = daysSince(last);
   return `
     <header class="topbar">
-      <a class="icon-btn" href="#resumen" aria-label="Volver al resumen">${icon.back}</a>
+      ${homeBtn()}
       <h1 class="page-h">Ajustes</h1>
     </header>
 
