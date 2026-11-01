@@ -7,6 +7,8 @@ import { ensureFinance } from "./finance.js";
 import { ensureAgenda } from "./agenda.js";
 import { initQuickAdd, openQuickAdd } from "./quickadd.js";
 import { renderSidebar, SHORTCUT_ROUTES } from "./sidebar.js";
+import { initSync, noteLocalChange, onSyncStatus } from "./sync.js";
+import { paintSyncStatus, askConflict } from "./views/sync-ui.js";
 import { requestPersistence } from "./db.js";
 import { toast, closeSheet } from "./ui.js";
 import * as resumen from "./views/resumen.js";
@@ -49,6 +51,7 @@ function render({ scrollTop = false } = {}) {
   mountCtl?.abort();
   mountCtl = new AbortController();
   route.view.mount?.(viewEl, getState(), mountCtl.signal);
+  paintSyncStatus();
   document.title = name === "resumen" ? "Panel de Vida" : `${route.title} · Panel de Vida`;
 
   document.querySelectorAll(".tab").forEach(t => {
@@ -70,6 +73,7 @@ async function start() {
   // y se recalcula la XP: si sube de nivel o desbloquea un logro, se celebra
   subscribe(state => {
     const silent = consumeReplaced();
+    noteLocalChange();
     const { events, gained } = syncGame(state, { silent });
     const y = window.scrollY;
     render();
@@ -79,6 +83,9 @@ async function start() {
   render();
   requestPersistence();
   initShortcuts();
+  // Sincronización cifrada con GitHub (si está configurada en este dispositivo)
+  onSyncStatus(paintSyncStatus);
+  initSync({ onConflict: askConflict });
   // iOS congela la app al salir: guardar cualquier cambio pendiente antes
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
   window.addEventListener("pagehide", flush);

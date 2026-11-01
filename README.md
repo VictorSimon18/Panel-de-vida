@@ -29,7 +29,26 @@ Panel personal minimalista (estilo «Grafito», oscuro) para el iPhone: **finanz
    - Los formularios se abren en una ventana central.
    - Atajos de teclado: **N** para apuntar algo, **1–5** para cambiar de sección (Resumen, Finanzas, Trabajo, Hábitos, Agenda) y **Esc** para cerrar.
 
-Los datos de cada dispositivo son independientes hasta que se active la sincronización (próxima fase).
+Para tener los mismos datos que en el iPhone, activa la sincronización (ver abajo).
+
+## Sincronización entre dispositivos (cifrada, con GitHub)
+
+Los datos se guardan **cifrados** en un Gist secreto de tu cuenta de GitHub. Se cifran en el propio dispositivo con AES-256-GCM, usando una clave derivada de tu contraseña con PBKDF2 (310.000 iteraciones). GitHub solo guarda texto ilegible.
+
+**Configurarla (en cada dispositivo):**
+
+1. **Ajustes → Sincronización entre dispositivos → Configurar sincronización.**
+2. Crea un token en GitHub desde el enlace que aparece (ya viene marcado solo el permiso `gist`). Elige la caducidad y pulsa *Generate token*. Copia el código `ghp_…`.
+3. Pega el token y elige una **contraseña de cifrado**. En el segundo dispositivo usa **la misma contraseña**; el token puede ser el mismo u otro.
+
+**Cómo funciona:**
+
+- **Cuándo sincroniza:** sola, al abrir la app, al volver a ella, cada 2 minutos mientras está abierta y unos segundos después de cada cambio. Sin conexión, los cambios quedan pendientes y se suben al volver.
+- **Dónde ver el estado:** en Ajustes y, en el ordenador, en el menú lateral.
+- **Conflictos:** si cambias datos en los dos dispositivos antes de que se sincronicen, la app pregunta cuál conservar. La versión descartada se guarda aparte y se puede exportar desde Ajustes.
+- **Seguridad:** el token y la contraseña se quedan en cada dispositivo. Nunca se suben ni se incluyen en las copias de seguridad.
+- **Si olvidas la contraseña:** los datos de GitHub no se pueden descifrar. Los de tus dispositivos y tus copias siguen intactos. Para empezar de nuevo, borra el Gist «Panel de Vida» en gist.github.com y vuelve a configurar.
+- **Desconectar:** en Ajustes deja de sincronizar este dispositivo. No borra nada.
 
 ## Instalarla en el iPhone
 
@@ -148,6 +167,7 @@ js/
   backup.js             Exportar e importar copias
   quickadd.js           Menú del botón +
   sidebar.js            Menú lateral del escritorio y atajos 1-5
+  sync.js               Sincronización cifrada con un Gist de GitHub (cifrado, versiones, conflictos)
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
   icons.js              Juego de iconos

@@ -644,3 +644,21 @@ input[type="time"].input { -webkit-appearance: none; appearance: none; display: 
 .ach.on .t b { color: var(--fg); }
 .ach .ach-date { color: var(--c) !important; opacity: .85; }
 .ach:not(.on) .t b { color: var(--muted); }
+
+/* =========================================================
+   Sincronización
+   ========================================================= */
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 10px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.steps b { color: var(--fg); }
+.steps a { color: var(--cyan); }
+code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; color: var(--fg); }
+.choice-list { display: grid; gap: 10px; }
+.choice { display: grid; gap: 3px; text-align: left; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); cursor: pointer; font: inherit; }
+.choice small { color: var(--muted); font-size: var(--fs-sm); }
+.choice:hover { border-color: #3a3c42; }
+.sync-st.error, .sync-st.conflict { color: var(--danger); }
+.sync-st.syncing { color: var(--cyan); }
+.sync-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; background: var(--fin); vertical-align: 1px; }
+.sync-dot.syncing { background: var(--cyan); }
+.sync-dot.offline { background: var(--dim); }
+.sync-dot.error, .sync-dot.conflict { background: var(--danger); }

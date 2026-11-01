@@ -1,7 +1,7 @@
 // Service worker: guarda la app en caché para que funcione sin conexión.
 // IMPORTANTE: sube VERSION cada vez que publiques cambios, para que el iPhone descargue la nueva versión.
 
-const VERSION = "v0.9.0";
+const VERSION = "v0.10.0";
 const CACHE = `panel-de-vida-${VERSION}`;
 
 const FILES = [
@@ -25,6 +25,7 @@ const FILES = [
   "js/backup.js",
   "js/quickadd.js",
   "js/sidebar.js",
+  "js/sync.js",
   "js/icons.js",
   "js/charts.js",
   "js/stats.js",
@@ -48,7 +49,8 @@ const FILES = [
   "js/views/agenda.js",
   "js/views/agenda-forms.js",
   "js/views/ajustes.js",
-  "js/views/logros.js"
+  "js/views/logros.js",
+  "js/views/sync-ui.js"
 ];
 
 self.addEventListener("install", event => {

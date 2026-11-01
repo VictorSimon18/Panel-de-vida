@@ -7,6 +7,8 @@ import { icon } from "../icons.js";
 import { requestPersistence } from "../db.js";
 import { buildDemo } from "../demo.js";
 import { homeBtn } from "./area.js";
+import { syncCard, mountSyncCard } from "./sync-ui.js";
+import { syncConfigured } from "../sync.js";
 import { hasAnyData } from "../stats.js";
 
 const fmt = iso => iso ? new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso)) : "Nunca";
@@ -59,12 +61,14 @@ export function render(state) {
       </div>
     </section>
 
+    ${syncCard()}
+
     ${demoCard(state)}
 
     <section class="card">
       <h2 class="card-h">Almacenamiento</h2>
       <div class="list">
-        <div class="kv"><span>Dónde están tus datos</span><span>Solo en este dispositivo</span></div>
+        <div class="kv"><span>Dónde están tus datos</span><span>${syncConfigured() ? "Aquí y cifrados en GitHub" : "Solo en este dispositivo"}</span></div>
         <div class="kv"><span>Protección frente a borrado</span><span id="persist-state">Comprobando…</span></div>
         <div class="kv"><span>Versión de datos</span><span class="num">v${state.version}</span></div>
       </div>
@@ -91,6 +95,7 @@ function demoCard(state) {
 }
 
 export function mount(root) {
+  mountSyncCard(root);
   root.querySelector("#demo-on")?.addEventListener("click", async () => {
     await replaceState(buildDemo(getState().profile.alias));
     toast("Datos de ejemplo cargados");
