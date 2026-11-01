@@ -309,7 +309,7 @@ export function openCategories(kind = "expense") {
       <h2>Categorías</h2>
       ${seg("cat-kind", { expense: "Gastos", income: "Ingresos" }, kind)}
       <div class="cat-list">${cats.filter(c => !c.parentId).map(p => `
-        <div class="cat-block" style="--c:${p.color || "#8a9cc4"}">
+        <div class="cat-block" style="--c:${p.color || "#8b9099"}">
           <div class="cat-row top"><span class="h-dot"></span><b>${esc(p.name)}</b>
             <button class="btn small" type="button" data-rename="${p.id}">Renombrar</button>
             <button class="btn small" type="button" data-addsub="${p.id}" aria-label="Añadir subcategoría a ${esc(p.name)}">+ Sub</button></div>
@@ -348,7 +348,7 @@ export function openCategories(kind = "expense") {
       e.preventDefault();
       const name = el.querySelector("#cat-new-name").value.trim();
       if (!name) return;
-      update(st => st.finance.categories.push({ id: uid(), name, kind, parentId: null, color: kind === "income" ? "#39ff9c" : "#22e5ff" }));
+      update(st => st.finance.categories.push({ id: uid(), name, kind, parentId: null, color: kind === "income" ? "#7fcf9b" : "#7cc4e4" }));
       rerender();
     });
   }

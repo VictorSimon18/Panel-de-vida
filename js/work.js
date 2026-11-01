@@ -6,7 +6,7 @@
 import { iso, addDays, weekStart, parseISO } from "./stats.js";
 
 export const KINDS = { trabajo: "Trabajo", estudio: "Estudio" };
-export const KIND_COLOR = { trabajo: "#4d8bff", estudio: "#22e5ff" };
+export const KIND_COLOR = { trabajo: "#7ea6f0", estudio: "#8fd3bf" };
 export const LEARN_TYPES = { curso: "Curso", libro: "Libro", habilidad: "Habilidad" };
 export const LEARN_UNITS = { curso: "lecciones", libro: "páginas", habilidad: "horas" };
 

@@ -6,7 +6,7 @@ import { icon } from "../icons.js";
 import { homeBtn } from "./area.js";
 
 const AREA_LABEL = { all: "General", ...Object.fromEntries(Object.values(AREAS).map(a => [a.key, a.name])) };
-const AREA_COLOR = { all: "#22e5ff", ...Object.fromEntries(Object.values(AREAS).map(a => [a.key, a.hex])) };
+const AREA_COLOR = { all: "#7cc4e4", ...Object.fromEntries(Object.values(AREAS).map(a => [a.key, a.hex])) };
 const fmtDate = d => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" }).format(new Date(d));
 
 export function render(state) {

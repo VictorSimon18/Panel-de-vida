@@ -8,10 +8,10 @@
 import { iso, addDays, parseISO, streak as globalStreak } from "./stats.js";
 
 export const AREAS = {
-  fin:  { key: "fin",  name: "Finanzas",           short: "Finanzas", color: "var(--fin)",    hex: "#39ff9c", route: "finanzas" },
-  work: { key: "work", name: "Trabajo y estudios", short: "Trabajo",  color: "var(--work)",   hex: "#4d8bff", route: "trabajo" },
-  hab:  { key: "hab",  name: "Hábitos y deporte",  short: "Hábitos",  color: "var(--hab)",    hex: "#ff3d9a", route: "habitos" },
-  ag:   { key: "ag",   name: "Agenda y tareas",    short: "Agenda",   color: "var(--agenda)", hex: "#ffb020", route: "agenda" }
+  fin:  { key: "fin",  name: "Finanzas",           short: "Finanzas", color: "var(--fin)",    hex: "#7fcf9b", route: "finanzas" },
+  work: { key: "work", name: "Trabajo y estudios", short: "Trabajo",  color: "var(--work)",   hex: "#7ea6f0", route: "trabajo" },
+  hab:  { key: "hab",  name: "Hábitos y deporte",  short: "Hábitos",  color: "var(--hab)",    hex: "#e88fb4", route: "habitos" },
+  ag:   { key: "ag",   name: "Agenda y tareas",    short: "Agenda",   color: "var(--agenda)", hex: "#e0b467", route: "agenda" }
 };
 
 // ---------- Niveles y títulos

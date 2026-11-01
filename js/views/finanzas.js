@@ -58,7 +58,7 @@ export function render(state) {
         <div><small>Gastos</small><b class="num neg">${money(sum.expense)}</b></div>
         <div><small>Balance</small><b class="num ${sum.net >= 0 ? "pos" : "neg"}">${signed(sum.net)}</b></div>
       </div>
-      ${areaChart(hist, { color: "#39ff9c", format: v => money(v).replace(/,\d\d €$/, " €"), id: "bal" })}
+      ${areaChart(hist, { color: "#7fcf9b", format: v => money(v).replace(/,\d\d €$/, " €"), id: "bal" })}
       <div class="legend"><span style="--c:var(--fin)">Saldo total a final de cada mes</span></div>
     </section>
 
@@ -153,7 +153,7 @@ function metasTab(state) {
       plan = end < now ? `<span style="color:var(--danger)">Fecha superada</span>` : `${money(left / months)}/mes hasta ${shortDate(g.deadline)}`;
     }
     return `<div class="goal${pct >= 100 ? " reached" : ""}">
-      ${ring(pct, "#39ff9c", { size: 58, stroke: 6, label: `${pct}%` })}
+      ${ring(pct, "#7fcf9b", { size: 58, stroke: 6, label: `${pct}%` })}
       <div class="t"><b>${esc(g.name)}</b>
         <small class="num">${money(g.saved)} de ${money(g.target)}</small>
         <small>${pct >= 100 ? "¡Conseguida!" : `Faltan ${money(left)}`}${plan ? ` · ${plan}` : ""}</small>

@@ -57,11 +57,11 @@ export function render(state) {
       </div>
       <div class="week-stats">
         <div><b class="num" style="color:var(--work)">${fmtHours(wk.minTrabajo)}</b><small>trabajo</small></div>
-        <div><b class="num" style="color:var(--cyan)">${fmtHours(wk.minEstudio)}</b><small>estudio</small></div>
+        <div><b class="num" style="color:#8fd3bf">${fmtHours(wk.minEstudio)}</b><small>estudio</small></div>
         <div><b class="num">${fmtHours(total)}</b><small>${diff == null ? "total" : `${diff >= 0 ? "▲" : "▼"} ${Math.abs(diff)} % vs. anterior`}</small></div>
       </div>
       ${stackChart(wk.days.map((d, i) => ({ label: DAYS[i], values: wk.trabajo[i] == null ? null : [wk.trabajo[i], wk.estudio[i]], highlight: i === wk.todayIdx })), { colors: [KIND_COLOR.trabajo, KIND_COLOR.estudio] })}
-      <div class="legend"><span style="--c:var(--work)">Trabajo</span><span style="--c:var(--cyan)">Estudio</span></div>
+      <div class="legend"><span style="--c:var(--work)">Trabajo</span><span style="--c:#8fd3bf">Estudio</span></div>
     </section>
 
     <div class="chips" role="tablist">${Object.entries(TABS).map(([k, l]) =>
@@ -95,7 +95,7 @@ function tiempoTab(state, wk) {
     ${anyHist ? `<section class="card">
       <h2 class="card-h">Últimas 8 semanas</h2>
       ${stackChart(hist.map((w, i) => ({ label: w.label, values: [w.trabajo / 60, w.estudio / 60], highlight: i === hist.length - 1 })), { colors: [KIND_COLOR.trabajo, KIND_COLOR.estudio], labelEvery: 2 })}
-      <div class="legend"><span style="--c:var(--work)">Trabajo</span><span style="--c:var(--cyan)">Estudio</span></div>
+      <div class="legend"><span style="--c:var(--work)">Trabajo</span><span style="--c:#8fd3bf">Estudio</span></div>
     </section>` : ""}`;
 }
 

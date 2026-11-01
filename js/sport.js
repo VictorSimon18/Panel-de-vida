@@ -8,7 +8,7 @@
 import { iso, addDays, weekStart, parseISO } from "./stats.js";
 
 export const MOODS = { 1: "Fatal", 2: "Mal", 3: "Normal", 4: "Bien", 5: "Genial" };
-export const MOOD_COLOR = { 1: "#ff5a5a", 2: "#ff7a45", 3: "#ffb020", 4: "#5cf2c6", 5: "#39ff9c" };
+export const MOOD_COLOR = { 1: "#e5736b", 2: "#e39a72", 3: "#e0b467", 4: "#8fd3bf", 5: "#7fcf9b" };
 export const QUALITY = { 1: "Muy mala", 2: "Mala", 3: "Normal", 4: "Buena", 5: "Muy buena" };
 export const FUTBOL_KINDS = { entrenamiento: "Entrenamiento", partido: "Partido" };
 

@@ -99,7 +99,7 @@ export function openHabitDetail(id) {
       <div><b class="num" style="color:var(--hab)">${st.best}</b><small>mejor racha</small></div>
       <div><b class="num">${pct == null ? "—" : pct + " %"}</b><small>cumplido (30 días)</small></div>
     </div>
-    ${heatmap(days, { color: "#ff3d9a", today })}
+    ${heatmap(days, { color: "#e88fb4", today })}
     <div class="btn-row"><button class="btn" type="button" id="hd-edit">Editar</button><button class="btn primary" type="button" data-close>Cerrar</button></div>`);
   sheet.querySelector("#hd-edit").addEventListener("click", () => openHabitForm(id));
 }

@@ -138,7 +138,7 @@ export function openProjectDetail(id) {
     const p = s.work.projects.find(x => x.id === id);
     if (!p) return null;
     const st = projectStats(s, p);
-    const color = p.kind === "estudio" ? "#22e5ff" : "#4d8bff";
+    const color = p.kind === "estudio" ? "#7cc4e4" : "#7ea6f0";
     return `
       <div class="proj-head">
         ${ring(st.pct, color, { size: 60, stroke: 6, label: `${st.pct}%` })}

@@ -303,7 +303,7 @@ export function openRecordDetail(name) {
       <div><b class="num">${kg(rec.bestE1rm)}</b><small>1RM estimado</small></div>
       <div><b class="num">${rec.sessions}</b><small>sesiones</small></div>
     </div>
-    ${hist.length > 1 ? areaChart(hist.map(h => ({ label: shortDate(h.date), value: h.w })), { color: "#ff3d9a", format: kg, id: "rec" }) : ""}
+    ${hist.length > 1 ? areaChart(hist.map(h => ({ label: shortDate(h.date), value: h.w })), { color: "#e88fb4", format: kg, id: "rec" }) : ""}
     <div class="legend"><span style="--c:var(--hab)">Peso máximo de cada sesión</span></div>
     <div class="list">${rec.history.slice(-5).reverse().map(h => `<div class="kv"><span>${shortDate(h.date)}</span><span class="num">${kg(h.w)} × ${h.r}${h.w === rec.best.w && h.r === rec.best.r ? " · récord" : ""}</span></div>`).join("")}</div>
     <p class="hint">El 1RM estimado es el peso que podrías levantar una sola vez, calculado con la fórmula de Epley a partir de tus series.</p>

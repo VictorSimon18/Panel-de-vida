@@ -89,7 +89,7 @@ function habitsCard(state) {
 
   return `<section class="card">${header}<div class="list">${list.map(h => `
     <button class="item tap${h.done ? " is-done" : ""}" type="button" data-habit="${h.id}"${h.auto ? ` data-auto="${h.auto}"` : ""} aria-pressed="${h.done}">
-      ${ring(h.pct, "#ff3d9a", { size: 34, stroke: 4 })}
+      ${ring(h.pct, "#e88fb4", { size: 34, stroke: 4 })}
       <span class="t">${esc(h.name)}<small class="num">${num1(h.value)} / ${num1(h.target)} ${esc(h.unit)}${h.weekly ? ` · ${h.weekly.done}/${h.weekly.goal} esta semana` : ""}</small></span>
       <span class="tick" style="--c:var(--hab)">${icon.check}</span>
     </button>`).join("")}</div></section>`;

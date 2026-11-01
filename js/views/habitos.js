@@ -35,7 +35,7 @@ export function render(state) {
     <section class="card">
       <h2 class="card-h"><span class="h-dot" style="--c:var(--hab)"></span>Hoy<span class="spacer"></span></h2>
       <div class="today-hab">
-        ${ring(ht.length ? doneN / ht.length * 100 : 0, "#ff3d9a", { size: 64, stroke: 6, label: `${doneN}/${ht.length}` })}
+        ${ring(ht.length ? doneN / ht.length * 100 : 0, "#e88fb4", { size: 64, stroke: 6, label: `${doneN}/${ht.length}` })}
         <div class="today-stats">
           <div><b class="num">${sp.weekGym}</b><small>gimnasio esta semana</small></div>
           <div><b class="num">${sp.weekFutbol}</b><small>fútbol esta semana</small></div>
@@ -81,7 +81,7 @@ function habitosTab(state) {
   return `
     ${all.length ? `<section class="card">
       <h2 class="card-h">Constancia · últimas 17 semanas</h2>
-      ${heatmap(days, { color: "#ff3d9a", today })}
+      ${heatmap(days, { color: "#e88fb4", today })}
       <div class="legend"><span style="--c:rgba(255,61,154,.3)">Algún hábito</span><span style="--c:var(--hab)">Todos los del día</span></div>
     </section>` : ""}
     <section class="card">
@@ -166,7 +166,7 @@ function cuerpoTab(state) {
         <div><small>Peso actual</small><b class="num">${kg(last.weight)}</b></div>
         ${delta != null ? `<span class="tag" style="--c:${delta <= 0 ? "var(--fin)" : "var(--agenda)"}">${delta > 0 ? "+" : delta < 0 ? "−" : "±"}${kg(Math.abs(delta))} desde el ${shortDate(prev.date)}</span>` : ""}
       </div>
-      ${series.length > 1 ? areaChart(series.map(b => ({ label: shortDate(b.date), value: b.weight })), { color: "#ff3d9a", format: kg, id: "wt" }) : ""}` : ""}
+      ${series.length > 1 ? areaChart(series.map(b => ({ label: shortDate(b.date), value: b.weight })), { color: "#e88fb4", format: kg, id: "wt" }) : ""}` : ""}
     ${list.length ? `<div class="list">${list.slice(0, 12).map(b => `
       <button class="item tap" type="button" data-act="edit-body" data-id="${b.id}">
         <span class="t">${dayName(b.date)}<small>${[b.fat != null ? `${num(b.fat)} % grasa` : "", b.waist != null ? `${num(b.waist)} cm cintura` : ""].filter(Boolean).join(" · ") || "Solo peso"}</small></span>
@@ -190,9 +190,9 @@ function bienestarTab(state) {
         <div><b class="num" style="${aMood ? `color:${MOOD_COLOR[Math.round(aMood)]}` : ""}">${aMood != null ? MOODS[Math.round(aMood)] : "—"}</b><small>ánimo medio</small></div>
       </div>
       <h3 class="card-h" style="margin-top:14px">Sueño · últimos 14 días</h3>
-      ${stackChart(days.map((d, i) => ({ label: d.label, values: [d.sleep || 0], highlight: i === days.length - 1 })), { colors: ["#22e5ff"], labelEvery: 2 })}
+      ${stackChart(days.map((d, i) => ({ label: d.label, values: [d.sleep || 0], highlight: i === days.length - 1 })), { colors: ["#7cc4e4"], labelEvery: 2 })}
       <h3 class="card-h" style="margin-top:10px">Ánimo</h3>
-      <div class="mood-strip">${days.map(d => `<span title="${d.date}"><i style="${d.mood ? `background:${MOOD_COLOR[d.mood]};box-shadow:0 0 6px ${MOOD_COLOR[d.mood]}` : ""}"></i><small>${d.label}</small></span>`).join("")}</div>
+      <div class="mood-strip">${days.map(d => `<span title="${d.date}"><i style="${d.mood ? `background:${MOOD_COLOR[d.mood]}` : ""}"></i><small>${d.label}</small></span>`).join("")}</div>
       <div class="list">${recent.map(d => `
         <button class="item tap" type="button" data-act="edit-wb" data-date="${d.date}">
           <span class="t">${dayName(d.date)}<small>${d.sleep != null ? `${num(d.sleep)} h · ${QUALITY[d.quality] || ""}` : "Sin sueño apuntado"}</small></span>

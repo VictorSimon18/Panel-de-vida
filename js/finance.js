@@ -7,9 +7,9 @@ import { uid } from "./ui.js";
 
 // ---------- Categorías por defecto (con subcategorías)
 const PALETTE = {
-  comida: "#39ff9c", casa: "#22e5ff", transporte: "#4d8bff", ocio: "#ff3d9a", deporte: "#ff7a45",
-  salud: "#5cf2c6", compras: "#ffb020", subs: "#7fb6ff", formacion: "#c6f432", otros: "#8a9cc4",
-  nomina: "#39ff9c", extras: "#22e5ff", regalos: "#ff3d9a", reemb: "#ffb020", otrosing: "#8a9cc4"
+  comida: "#7fcf9b", casa: "#7cc4e4", transporte: "#7ea6f0", ocio: "#e88fb4", deporte: "#e39a72",
+  salud: "#8fd3bf", compras: "#e0b467", subs: "#9db9e8", formacion: "#c3d48a", otros: "#8b9099",
+  nomina: "#7fcf9b", extras: "#7cc4e4", regalos: "#e88fb4", reemb: "#e0b467", otrosing: "#8b9099"
 };
 
 const DEFAULTS = [
@@ -48,7 +48,7 @@ export const FREQS = { month: "Mensual", week: "Semanal", year: "Anual" };
 // ---------- Consultas
 export const catById = (state, id) => state.finance.categories.find(c => c.id === id);
 export const topCat = (state, id) => { const c = catById(state, id); return c?.parentId ? catById(state, c.parentId) : c; };
-export const catColor = (state, id) => topCat(state, id)?.color || "#8a9cc4";
+export const catColor = (state, id) => topCat(state, id)?.color || "#8b9099";
 export function catLabel(state, id) {
   const c = catById(state, id);
   if (!c) return "Sin categoría";
@@ -78,7 +78,7 @@ export function monthSummary(state, ym) {
     expense += t.amount;
     const top = topCat(state, t.categoryId);
     const key = top?.id || "none";
-    if (!byCat.has(key)) byCat.set(key, { id: key, name: top?.name || "Sin categoría", color: top?.color || "#8a9cc4", total: 0, subs: new Map() });
+    if (!byCat.has(key)) byCat.set(key, { id: key, name: top?.name || "Sin categoría", color: top?.color || "#8b9099", total: 0, subs: new Map() });
     const e = byCat.get(key);
     e.total += -t.amount;
     const sub = catById(state, t.categoryId);

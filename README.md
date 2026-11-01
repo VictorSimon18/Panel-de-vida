@@ -1,6 +1,6 @@
 # Panel de Vida
 
-Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y estudios**, **hábitos y deporte**, y **agenda y tareas**, más una pantalla de **resumen** con niveles y experiencia (XP).
+Panel personal minimalista (estilo «Grafito», oscuro) para el iPhone: **finanzas**, **trabajo y estudios**, **hábitos y deporte**, y **agenda y tareas**, más una pantalla de **resumen** con niveles y experiencia (XP).
 
 - Es una app web instalable (PWA): se añade a la pantalla de inicio y se abre a pantalla completa, como una app normal.
 - Funciona sin conexión.
@@ -123,7 +123,7 @@ manifest.webmanifest    Datos de la app instalable (nombre, icono, colores)
 sw.js                   Service worker: modo sin conexión
 css/
   tokens.css            Colores, tipografía y medidas (cambia aquí el estilo)
-  base.css              Reset, fondo azul noche y estructura
+  base.css              Reset, fondo grafito y estructura
   components.css        Tarjetas, barras de XP, barra inferior, hojas, botones…
 fonts/inter-latin.woff2 Tipografía Inter (incluida para funcionar sin conexión)
 icons/                  Icono de la app (SVG y PNG)
@@ -132,7 +132,7 @@ js/
   db.js                 Acceso a IndexedDB
   state.js              Estructura de los datos, guardado y migraciones de versión
   game.js               XP calculada, niveles, títulos y logros
-  celebrate.js          Celebraciones: +XP, subida de nivel con confeti, avisos de logro
+  celebrate.js          Celebraciones: +XP, aviso de subida de nivel, avisos de logro
   backup.js             Exportar e importar copias
   quickadd.js           Menú del botón +
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
@@ -163,7 +163,7 @@ Todo el estado es un único objeto JSON (ver `defaultState()` en `js/state.js`) 
 - **Logros:** 35, en `ACHIEVEMENTS` de `js/game.js`. Los bloqueados muestran su progreso.
 - **Celebraciones:**
   - Al ganar XP aparece una burbuja "+XP".
-  - Al subir de nivel global, una pantalla con confeti y el nuevo título.
+  - Al subir de nivel global, una tarjeta centrada con el nuevo nivel y el título.
   - Al subir de nivel en un área o desbloquear un logro, un aviso arriba.
   - Si el iPhone tiene activado *Reducir movimiento*, se muestran sin animación.
   - Importar una copia o cargar los datos de ejemplo no lanza celebraciones.

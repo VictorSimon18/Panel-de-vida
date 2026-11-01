@@ -19,19 +19,8 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Fondo azul noche con brillos difusos (fijo, no se mueve al hacer scroll) */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(420px 300px at 0% 0%, rgba(34, 229, 255, .16), transparent 65%),
-    radial-gradient(360px 320px at 100% 45%, rgba(255, 61, 154, .12), transparent 65%),
-    radial-gradient(400px 300px at 20% 100%, rgba(77, 139, 255, .16), transparent 65%),
-    var(--night-2);
-}
+/* Fondo grafito liso */
+body::before { content: none; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 /* 16px en campos evita que iOS haga zoom al tocarlos */
