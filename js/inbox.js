@@ -31,7 +31,12 @@ export function parseMessage(text) {
   return out;
 }
 
-const num = v => { const n = parseAmount(v); return Number.isFinite(n) ? n : NaN; };
+// Acepta números con texto alrededor ("7.512 pasos", "12,50 €", "1,5 h"), como los que genera Atajos
+const num = v => {
+  const m = String(v ?? "").match(/-?\d[\d.,]*/);
+  const n = m ? parseAmount(m[0]) : NaN;
+  return Number.isFinite(n) ? n : NaN;
+};
 
 function parseDay(v, today) {
   const s = norm(v);
