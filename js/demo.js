@@ -160,8 +160,5 @@ export function buildDemo(alias) {
     ev("Examen de SQL (simulacro)", d(12), "09:00", "11:00", { alarm: 1440 })
   ];
 
-  // ---- Juego (XP de ejemplo)
-  s.game.areaXp = { fin: 520, work: 860, hab: 1240, ag: 380 };
-  s.game.xp = 2340;
   return s;
 }

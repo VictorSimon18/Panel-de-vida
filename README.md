@@ -18,7 +18,7 @@ Panel personal con estética cyberpunk para el iPhone: **finanzas**, **trabajo y
 | 4 | Trabajo y estudios | ✅ |
 | 5 | Hábitos y deporte | ✅ |
 | 6 | Agenda y tareas | ✅ |
-| 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ⏳ |
+| 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ✅ |
 
 ## Instalarla en el iPhone
 
@@ -131,7 +131,8 @@ js/
   app.js                Arranque y navegación entre pantallas (#resumen, #finanzas…)
   db.js                 Acceso a IndexedDB
   state.js              Estructura de los datos, guardado y migraciones de versión
-  game.js               Niveles, XP y títulos
+  game.js               XP calculada, niveles, títulos y logros
+  celebrate.js          Celebraciones: +XP, subida de nivel con confeti, avisos de logro
   backup.js             Exportar e importar copias
   quickadd.js           Menú del botón +
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
@@ -153,6 +154,16 @@ js/
 
 Todo el estado es un único objeto JSON (ver `defaultState()` en `js/state.js`) guardado en IndexedDB. Ese mismo objeto es el que se exporta como copia. Cada cambio de formato sube `SCHEMA_VERSION` y añade una migración, para que las copias antiguas sigan funcionando.
 
-### Niveles
+### Gamificación
 
-Pasar del nivel *n* al *n+1* cuesta `100 + 50·(n−1)` XP. Hay un nivel global y otro por área. Los títulos cambian con el nivel global: Novato (1), Iniciado (3), Runner (5), Netrunner (10), Operador (15), Ciberninja (20), Arquitecto (30) y Leyenda neón (40). Cuánta XP da cada acción se definirá en la fase 7.
+- **La XP se calcula a partir de tus datos** (ver `computeXP()` en `js/game.js`) en vez de sumarse en cada acción. Si borras algo o desmarcas una tarea, la XP se ajusta sola, y marcar y desmarcar no la infla. Solo se guardan los logros desbloqueados, con su fecha, y el último nivel celebrado.
+- **Tabla de XP:** está en la pantalla **Logros** (toca la tarjeta de XP del resumen) y en `XP` / `XP_RULES` de `js/game.js`. Cambia ahí los valores si quieres otro ritmo.
+- **Niveles:** pasar del nivel *n* al *n+1* cuesta `100 + 50·(n−1)` XP. Hay un nivel global (la suma) y uno por área.
+- **Títulos según el nivel global:** Novato (1), Iniciado (3), Runner (5), Netrunner (10), Operador (15), Ciberninja (20), Arquitecto (30) y Leyenda neón (40).
+- **Logros:** 35, en `ACHIEVEMENTS` de `js/game.js`. Los bloqueados muestran su progreso.
+- **Celebraciones:**
+  - Al ganar XP aparece una burbuja "+XP".
+  - Al subir de nivel global, una pantalla con confeti y el nuevo título.
+  - Al subir de nivel en un área o desbloquear un logro, un aviso arriba.
+  - Si el iPhone tiene activado *Reducir movimiento*, se muestran sin animación.
+  - Importar una copia o cargar los datos de ejemplo no lanza celebraciones.

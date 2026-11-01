@@ -1,6 +1,8 @@
 // Punto de entrada: carga los datos, enruta entre pantallas y registra el modo sin conexión.
 
-import { loadState, getState, subscribe, update, flush } from "./state.js";
+import { loadState, getState, subscribe, update, flush, consumeReplaced } from "./state.js";
+import { syncGame } from "./game.js";
+import { celebrate, xpPop } from "./celebrate.js";
 import { ensureFinance } from "./finance.js";
 import { ensureAgenda } from "./agenda.js";
 import { initQuickAdd } from "./quickadd.js";
@@ -12,6 +14,7 @@ import * as trabajo from "./views/trabajo.js";
 import * as habitos from "./views/habitos.js";
 import * as agenda from "./views/agenda.js";
 import * as ajustes from "./views/ajustes.js";
+import * as logros from "./views/logros.js";
 
 const ROUTES = {
   resumen:  { view: resumen,  title: "Resumen" },
@@ -19,7 +22,8 @@ const ROUTES = {
   trabajo:  { view: trabajo,  title: "Trabajo y estudios", area: "work" },
   habitos:  { view: habitos,  title: "Hábitos y deporte",  area: "hab" },
   agenda:   { view: agenda,   title: "Agenda",             area: "ag" },
-  ajustes:  { view: ajustes,  title: "Ajustes" }
+  ajustes:  { view: ajustes,  title: "Ajustes" },
+  logros:   { view: logros,   title: "Logros" }
 };
 
 const viewEl = document.getElementById("view");
@@ -54,16 +58,20 @@ function render({ scrollTop = false } = {}) {
 async function start() {
   await loadState();
   // Categorías por defecto y gastos fijos que hayan vencido desde la última vez
-  update(s => { ensureFinance(s); ensureAgenda(s); });
+  update(s => { ensureFinance(s); ensureAgenda(s); syncGame(s, { silent: true }); });
   initQuickAdd();
   // Las vistas pueden pedir repintarse al cambiar su estado interno (pestaña, mes…)
   window.addEventListener("pv:render", () => { const y = window.scrollY; render(); window.scrollTo(0, y); });
   window.addEventListener("hashchange", () => render({ scrollTop: true }));
   // Al cambiar los datos, se vuelve a pintar la pantalla actual sin mover el scroll
-  subscribe(() => {
+  // y se recalcula la XP: si sube de nivel o desbloquea un logro, se celebra
+  subscribe(state => {
+    const silent = consumeReplaced();
+    const { events, gained } = syncGame(state, { silent });
     const y = window.scrollY;
     render();
     window.scrollTo(0, y);
+    if (!silent) { xpPop(gained); celebrate(events); }
   });
   render();
   requestPersistence();

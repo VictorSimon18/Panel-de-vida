@@ -98,7 +98,12 @@ export function update(mutator) {
   saveTimer = setTimeout(() => persist().catch(console.error), 150);
 }
 
+let replaced = false;
+/** true una sola vez tras sustituir el estado entero (importar o datos de ejemplo) */
+export const consumeReplaced = () => { const r = replaced; replaced = false; return r; };
+
 export async function replaceState(next) {
+  replaced = true;
   state = migrate(next);
   await persist();
   listeners.forEach(fn => fn(state));

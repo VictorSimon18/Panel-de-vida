@@ -30,7 +30,7 @@ export function render(state) {
     ${banners(state)}
 
     <section class="card hud" aria-label="Experiencia">
-      <div class="xpmeta"><span>XP global</span><span class="num">${int(lv.into)} / ${int(lv.need)}</span></div>
+      <a class="xpmeta xp-link" href="#logros"><span>XP global · <b class="num">${(g.achievements || []).length}</b> logros</span><span class="num">${int(lv.into)} / ${int(lv.need)} ${icon.chevron}</span></a>
       <div class="xpbar"><i style="width:${lv.pct}%"></i></div>
       <div class="area-levels">${Object.values(AREAS).map(a => {
         const al = levelFromXp(g.areaXp[a.key] || 0);

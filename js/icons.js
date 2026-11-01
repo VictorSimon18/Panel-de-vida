@@ -18,6 +18,8 @@ export const icon = {
   chevron: svg('<path d="M9 6l6 6-6 6"/>'),
   flame: svg('<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.3 2.4-5.3 3.6-8.3.4 1.8 1.4 3 2.6 3.6C11.6 7.4 13 4.6 15.2 3c-.3 3 1.1 5 2.2 6.6 1 1.4 1.6 3 1.6 5.1 0 3.7-3 6.3-7 6.3z"/>'),
   bell: svg('<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'),
+  trophy: svg('<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a2.5 2.5 0 0 0 3 4M16 6h3a2.5 2.5 0 0 1-3 4"/><path d="M12 13v4M8.5 20.5h7M9.5 17.5h5v3h-5z"/>'),
+  lock: svg('<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>'),
   check: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
   clock: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
   bolt: svg('<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>'),
