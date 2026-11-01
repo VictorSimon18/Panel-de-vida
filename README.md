@@ -50,6 +50,17 @@ Los datos se guardan **cifrados** en un Gist secreto de tu cuenta de GitHub. Se 
 - **Si olvidas la contraseña:** los datos de GitHub no se pueden descifrar. Los de tus dispositivos y tus copias siguen intactos. Para empezar de nuevo, borra el Gist «Panel de Vida» en gist.github.com y vuelve a configurar.
 - **Desconectar:** en Ajustes deja de sincronizar este dispositivo. No borra nada.
 
+## Siri y Salud (Atajos del iPhone)
+
+Requiere tener activada la sincronización. Los Atajos del iPhone no pueden abrir la app instalada, así que **dejan mensajes en tu Gist** (el «buzón»). La app los recoge en la siguiente sincronización, los apunta y los borra del Gist. Si dos dispositivos recogen el mismo mensaje, no se duplica.
+
+- **Siri:** «Apunta un gasto», «Nueva tarea», «He bebido agua» (o cualquier hábito), «Apunta estudio», «He ido al gimnasio»…
+- **Salud:** una automatización diaria a las 23:45 envía los **pasos** del día al hábito «Pasos» (se crea solo, con objetivo de 10.000).
+- **Cómo montarlo:** en **Ajustes → Siri y Salud → Cómo crear los Atajos** está la guía paso a paso, con botones para copiar la dirección y la cabecera. El botón **Enviar mensaje de prueba** comprueba el circuito completo.
+- **Privacidad:** los Atajos no pueden cifrar, así que los mensajes del buzón están **sin cifrar** en tu Gist secreto desde que se envían hasta que la app los recoge. El resto de tus datos sigue cifrado.
+
+Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `tiempo` (clase: estudio o trabajo, horas o minutos, proyecto), `gimnasio` / `futbol` (minutos, partido: sí) y `pasos` (fecha, valor).
+
 ## Instalarla en el iPhone
 
 1. Abre la dirección de la app en **Safari** (otros navegadores de iPhone no permiten instalarla).
@@ -168,6 +179,7 @@ js/
   quickadd.js           Menú del botón +
   sidebar.js            Menú lateral del escritorio y atajos 1-5
   sync.js               Sincronización cifrada con un Gist de GitHub (cifrado, versiones, conflictos)
+  inbox.js              Buzón de Atajos: convierte los mensajes de Siri y Salud en datos
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
   icons.js              Juego de iconos

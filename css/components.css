@@ -662,3 +662,18 @@ code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .sync-dot.syncing { background: var(--cyan); }
 .sync-dot.offline { background: var(--dim); }
 .sync-dot.error, .sync-dot.conflict { background: var(--danger); }
+
+/* Guía de Atajos (Siri y Salud) */
+.copy-box { display: grid; gap: 8px; padding: 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.copy-row { display: flex; gap: 10px; align-items: center; }
+.copy-row .t { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.copy-row small { color: var(--muted); font-size: var(--fs-xs); }
+.copy-row code { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sc { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.sc summary { display: grid; gap: 2px; padding: 12px 14px; cursor: pointer; list-style: none; }
+.sc summary::-webkit-details-marker { display: none; }
+.sc summary small { color: var(--muted); font-size: var(--fs-sm); }
+.sc[open] summary { border-bottom: 1px solid var(--line); }
+.sc ol { margin: 0; padding: 12px 14px 14px 32px; display: grid; gap: 10px; font-size: 13px; line-height: 1.55; color: var(--muted); }
+.sc ol b { color: var(--fg); }
+.sc-text { margin: 6px 0; padding: 8px 10px; border-radius: 8px; background: var(--night); border: 1px solid var(--line); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--fg); white-space: pre-wrap; }

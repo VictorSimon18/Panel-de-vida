@@ -10,6 +10,7 @@
 import { dbGet, dbSet, dbDelete } from "./db.js";
 import { getState, replaceState } from "./state.js";
 import { hasAnyData } from "./stats.js";
+import { INBOX_PREFIX } from "./inbox.js";
 
 const API = "https://api.github.com";
 const FILE = "panel-de-vida.sync.json";
@@ -26,6 +27,7 @@ let pushTimer = null;
 let applyingRemote = false;
 let localSeq = 0;
 let conflictHandler = null;
+let inboxHandler = null;
 const listeners = new Set();
 
 export class SyncError extends Error {}
@@ -114,23 +116,30 @@ async function gh(token, path, { method = "GET", body } = {}) {
   return res.json();
 }
 
+const fileText = async f => f.truncated ? (await fetch(f.raw_url, { cache: "no-store" })).text() : f.content;
+
+/** Lee el Gist: los datos cifrados (env) y los mensajes pendientes del buzón de Atajos */
 async function readGist(token, gistId) {
   const g = await gh(token, `/gists/${gistId}`);
   const f = g.files?.[FILE];
   if (!f) return null;
-  const text = f.truncated ? await (await fetch(f.raw_url, { cache: "no-store" })).text() : f.content;
-  const env = JSON.parse(text);
+  const env = JSON.parse(await fileText(f));
   if (env.app !== "panel-de-vida") throw new SyncError("El archivo de GitHub no es de Panel de Vida.");
-  return env;
+  const inbox = [];
+  for (const [name, file] of Object.entries(g.files)) {
+    if (name.startsWith(INBOX_PREFIX)) inbox.push({ name, text: await fileText(file) });
+  }
+  inbox.sort((a, b) => a.name.localeCompare(b.name));
+  return { env, inbox };
 }
 
 const deviceName = () => /iPhone|iPad|Android/i.test(navigator.userAgent) ? (/iPhone/.test(navigator.userAgent) ? "iPhone" : "Móvil") : /Windows/.test(navigator.userAgent) ? "Ordenador (Windows)" : "Ordenador";
 
-async function writeGist(rev) {
+async function writeGist(rev, extraFiles = {}) {
   const seq = localSeq;
   const sealed = await seal(key, getState());
   const env = { app: "panel-de-vida", format: 1, rev, updatedAt: new Date().toISOString(), device: cfg.device, salt: cfg.salt, ...sealed };
-  await gh(cfg.token, `/gists/${cfg.gistId}`, { method: "PATCH", body: { files: { [FILE]: { content: JSON.stringify(env) } } } });
+  await gh(cfg.token, `/gists/${cfg.gistId}`, { method: "PATCH", body: { files: { [FILE]: { content: JSON.stringify(env) }, ...extraFiles } } });
   cfg.baseRev = rev;
   if (localSeq === seq) cfg.dirty = false;   // si hubo cambios durante la subida, quedan pendientes
   cfg.lastSyncAt = new Date().toISOString();
@@ -152,8 +161,9 @@ const saveCfg = () => dbSet(CFG_KEY, cfg);
 // ---------- API pública
 
 /** Carga la configuración guardada y sincroniza. Se llama al arrancar la app. */
-export async function initSync({ onConflict }) {
+export async function initSync({ onConflict, onInbox }) {
   conflictHandler = onConflict;
+  inboxHandler = onInbox;
   // estos avisos no hacen nada mientras la sincronización no esté configurada
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") syncNow(); });
   addEventListener("online", () => syncNow());
@@ -185,8 +195,9 @@ export function syncNow() {
   busy = (async () => {
     setStatus("syncing");
     try {
-      const remote = await readGist(cfg.token, cfg.gistId);
-      if (!remote) throw new SyncError("No se encuentra el archivo de sincronización en GitHub.");
+      const got = await readGist(cfg.token, cfg.gistId);
+      if (!got) throw new SyncError("No se encuentra el archivo de sincronización en GitHub.");
+      const { env: remote, inbox } = got;
       if (remote.rev === cfg.baseRev) {
         if (cfg.dirty) await writeGist(remote.rev + 1);
         else { cfg.lastSyncAt = new Date().toISOString(); await saveCfg(); }
@@ -195,6 +206,12 @@ export function syncNow() {
         else await resolveConflict(remote);
       } else {
         await writeGist(cfg.baseRev + 1);
+      }
+      // Buzón de Atajos: se aplica y se borra del Gist en la misma subida
+      if (inbox.length && status.state !== "conflict" && inboxHandler) {
+        inboxHandler(inbox);
+        clearTimeout(pushTimer);
+        await writeGist(cfg.baseRev + 1, Object.fromEntries(inbox.map(m => [m.name, null])));
       }
       if (status.state !== "conflict") setStatus("ok");
     } catch (e) {
@@ -242,7 +259,7 @@ export async function connect(token, pass) {
     return "created";
   }
 
-  const remote = await readGist(token, found.id);
+  const remote = (await readGist(token, found.id))?.env;
   if (!remote?.salt) throw new SyncError("El archivo de GitHub está incompleto. Bórralo en gist.github.com y vuelve a intentarlo.");
   const k = await deriveKey(pass, remote.salt);
   const data = await unseal(k, remote);           // falla si la contraseña no es la correcta
@@ -266,3 +283,16 @@ export async function disconnect() {
 
 export const getDiscarded = () => dbGet(DISCARDED_KEY).catch(() => null);
 export const clearDiscarded = () => dbDelete(DISCARDED_KEY);
+
+// ---------- Buzón de Atajos
+/** Datos para configurar los Atajos (solo se muestran en este dispositivo) */
+export const shortcutConfig = () => cfg ? { url: `${API}/gists/${cfg.gistId}`, auth: `Bearer ${cfg.token}` } : null;
+
+/** Deja un mensaje en el buzón, igual que haría un Atajo (para probar) */
+export async function sendInboxMessage(text) {
+  if (!cfg) throw new SyncError("Configura antes la sincronización.");
+  const stamp = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
+  const name = `${INBOX_PREFIX}${stamp}-${Math.random().toString(36).slice(2, 6)}.txt`;
+  await gh(cfg.token, `/gists/${cfg.gistId}`, { method: "PATCH", body: { files: { [name]: { content: text } } } });
+  return name;
+}

@@ -43,6 +43,7 @@ export function defaultState() {
       tasks: [],             // { id, title, due, priority, tags, done, repeat }
       events: []             // { id, title, start, end, place }
     },
+    inboxSeen: [],           // mensajes de Atajos ya procesados (para no duplicar)
     game: {
       xp: 0,
       areaXp: { fin: 0, work: 0, hab: 0, ag: 0 },

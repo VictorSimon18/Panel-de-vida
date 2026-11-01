@@ -8,6 +8,7 @@ import { ensureAgenda } from "./agenda.js";
 import { initQuickAdd, openQuickAdd } from "./quickadd.js";
 import { renderSidebar, SHORTCUT_ROUTES } from "./sidebar.js";
 import { initSync, noteLocalChange, onSyncStatus } from "./sync.js";
+import { applyInbox } from "./inbox.js";
 import { paintSyncStatus, askConflict } from "./views/sync-ui.js";
 import { requestPersistence } from "./db.js";
 import { toast, closeSheet } from "./ui.js";
@@ -85,10 +86,18 @@ async function start() {
   initShortcuts();
   // Sincronización cifrada con GitHub (si está configurada en este dispositivo)
   onSyncStatus(paintSyncStatus);
-  initSync({ onConflict: askConflict });
+  initSync({ onConflict: askConflict, onInbox: receiveInbox });
   // iOS congela la app al salir: guardar cualquier cambio pendiente antes
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
   window.addEventListener("pagehide", flush);
+}
+
+// Mensajes de los Atajos del iPhone (Siri y Salud) recogidos al sincronizar
+function receiveInbox(messages) {
+  let res = null;
+  update(s => { res = applyInbox(s, messages); });
+  if (res.done.length) toast(`Recibido de Siri/Salud: ${res.done.join(" · ")}`, { ms: 5000 });
+  if (res.skipped.length) setTimeout(() => toast(`No se pudo apuntar: ${res.skipped.join(" · ")}`, { error: true, ms: 5000 }), res.done.length ? 5200 : 0);
 }
 
 // Atajos de teclado (ordenador): N = apuntar algo, 1-5 = secciones, Esc = cerrar
