@@ -51,7 +51,7 @@ a { color: var(--cyan); }
   gap: var(--gap);
   align-content: start;
   padding:
-    calc(var(--safe-top) + 14px)
+    calc(var(--safe-top) + 30px)
     max(16px, env(safe-area-inset-right, 0px))
     calc(var(--tabbar-h) + var(--safe-bottom) + 34px)
     max(16px, env(safe-area-inset-left, 0px));
