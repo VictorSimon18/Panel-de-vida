@@ -14,12 +14,18 @@ const PRI = { alta: ["Alta", "var(--danger)"], media: ["Media", "var(--agenda)"]
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s));
 const num1 = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(n);
 
+const greeting = () => { const h = new Date().getHours(); return h < 6 ? "Buenas noches" : h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches"; };
+
 export function render(state) {
   const g = state.game;
   const lv = levelFromXp(g.xp);
   const days = streak(state);
 
   return `
+    <header class="desk-greeting">
+      <h1>${greeting()}, ${esc(state.profile.alias)}<span>${longDate()}</span></h1>
+      <div class="streak${days ? "" : " off"}" title="Días seguidos apuntando algo">${icon.flame}<span class="num">${days} ${days === 1 ? "día" : "días"}</span></div>
+    </header>
     <header class="topbar">
       <a class="logo" href="#resumen" aria-label="Resumen">PV</a>
       <div class="who"><div class="alias">${esc(state.profile.alias)}</div><div class="title">${titleFor(lv.level)} · Nv. ${lv.level}</div></div>
@@ -29,6 +35,8 @@ export function render(state) {
 
     ${banners(state)}
 
+    <div class="cols">
+    <div class="col col-1">
     <section class="card hud" aria-label="Experiencia">
       <a class="xpmeta xp-link" href="#logros"><span>XP global · <b class="num">${(g.achievements || []).length}</b> logros</span><span class="num">${int(lv.into)} / ${int(lv.need)} ${icon.chevron}</span></a>
       <div class="xpbar"><i style="width:${lv.pct}%"></i></div>
@@ -39,9 +47,15 @@ export function render(state) {
     </section>
 
     ${todayCard(state)}
+    </div>
+    <div class="col col-2">
     ${habitsCard(state)}
+    ${weekCard(state)}
+    </div>
+    <div class="col col-3">
     ${moneyCard(state)}
-    ${weekCard(state)}`;
+    </div>
+    </div>`;
 }
 
 function banners(state) {

@@ -15,25 +15,29 @@ const OPTIONS = [
 const actions = {};
 export const registerQuickAction = (id, fn) => { actions[id] = fn; };
 
+/** Abre el menú "Apuntar rápido" */
+export function openQuickAdd() {
+  const btn = document.getElementById("plus");
+  btn.setAttribute("aria-expanded", "true");
+  openSheet(`
+    <h2>Apuntar rápido</h2>
+    <div class="quick-grid">
+      ${OPTIONS.map(o => `<button class="quick" type="button" data-q="${o.id}" style="--c:${o.c}">${o.icon}<b>${o.title}</b><small>${o.sub}</small></button>`).join("")}
+    </div>`, {
+    onOpen: sheet => sheet.addEventListener("click", e => {
+      const b = e.target.closest("[data-q]");
+      if (!b) return;
+      const opt = OPTIONS.find(o => o.id === b.dataset.q);
+      closeSheet();
+      if (actions[opt.id]) actions[opt.id]();
+      else toast(`Disponible cuando construyamos ${opt.phase}`);
+    }),
+    onClose: () => btn.setAttribute("aria-expanded", "false")
+  });
+}
+
 export function initQuickAdd() {
   const btn = document.getElementById("plus");
   btn.setAttribute("aria-expanded", "false");
-  btn.addEventListener("click", () => {
-    btn.setAttribute("aria-expanded", "true");
-    openSheet(`
-      <h2>Apuntar rápido</h2>
-      <div class="quick-grid">
-        ${OPTIONS.map(o => `<button class="quick" type="button" data-q="${o.id}" style="--c:${o.c}">${o.icon}<b>${o.title}</b><small>${o.sub}</small></button>`).join("")}
-      </div>`, {
-      onOpen: sheet => sheet.addEventListener("click", e => {
-        const b = e.target.closest("[data-q]");
-        if (!b) return;
-        const opt = OPTIONS.find(o => o.id === b.dataset.q);
-        closeSheet();
-        if (actions[opt.id]) actions[opt.id]();
-        else toast(`Disponible cuando construyamos ${opt.phase}`);
-      }),
-      onClose: () => btn.setAttribute("aria-expanded", "false")
-    });
-  });
+  btn.addEventListener("click", openQuickAdd);
 }

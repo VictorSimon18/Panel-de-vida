@@ -20,6 +20,17 @@ Panel personal minimalista (estilo «Grafito», oscuro) para el iPhone: **finanz
 | 6 | Agenda y tareas | ✅ |
 | 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ✅ |
 
+## Usarla en el ordenador (Windows)
+
+1. Abre la misma dirección en **Chrome** o **Edge**.
+2. Para tenerla como app, con su propia ventana y acceso directo, pulsa el icono de **Instalar** al final de la barra de direcciones. Si no aparece, ve a menú ⋮ → *Enviar, guardar y compartir* → *Instalar página como aplicación* en Chrome, o a menú … → *Aplicaciones* → *Instalar este sitio como aplicación* en Edge.
+3. Con la ventana ancha aparece el **diseño de escritorio**:
+   - Menú lateral y resumen en tres columnas.
+   - Los formularios se abren en una ventana central.
+   - Atajos de teclado: **N** para apuntar algo, **1–5** para cambiar de sección (Resumen, Finanzas, Trabajo, Hábitos, Agenda) y **Esc** para cerrar.
+
+Los datos de cada dispositivo son independientes hasta que se active la sincronización (próxima fase).
+
 ## Instalarla en el iPhone
 
 1. Abre la dirección de la app en **Safari** (otros navegadores de iPhone no permiten instalarla).
@@ -125,6 +136,7 @@ css/
   tokens.css            Colores, tipografía y medidas (cambia aquí el estilo)
   base.css              Reset, fondo grafito y estructura
   components.css        Tarjetas, barras de XP, barra inferior, hojas, botones…
+  desktop.css           Diseño de escritorio (≥ 1024 px): menú lateral, columnas, ventanas centrales
 fonts/inter-latin.woff2 Tipografía Inter (incluida para funcionar sin conexión)
 icons/                  Icono de la app (SVG y PNG)
 js/
@@ -135,6 +147,7 @@ js/
   celebrate.js          Celebraciones: +XP, aviso de subida de nivel, avisos de logro
   backup.js             Exportar e importar copias
   quickadd.js           Menú del botón +
+  sidebar.js            Menú lateral del escritorio y atajos 1-5
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
   icons.js              Juego de iconos

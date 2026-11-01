@@ -5,9 +5,10 @@ import { syncGame } from "./game.js";
 import { celebrate, xpPop } from "./celebrate.js";
 import { ensureFinance } from "./finance.js";
 import { ensureAgenda } from "./agenda.js";
-import { initQuickAdd } from "./quickadd.js";
+import { initQuickAdd, openQuickAdd } from "./quickadd.js";
+import { renderSidebar, SHORTCUT_ROUTES } from "./sidebar.js";
 import { requestPersistence } from "./db.js";
-import { toast } from "./ui.js";
+import { toast, closeSheet } from "./ui.js";
 import * as resumen from "./views/resumen.js";
 import * as finanzas from "./views/finanzas.js";
 import * as trabajo from "./views/trabajo.js";
@@ -42,6 +43,8 @@ function render({ scrollTop = false } = {}) {
   currentRoute = name;
 
   viewEl.classList.toggle("enter", changed);
+  viewEl.dataset.route = name;
+  renderSidebar(getState(), name);
   viewEl.innerHTML = route.view.render(getState());
   mountCtl?.abort();
   mountCtl = new AbortController();
@@ -75,9 +78,23 @@ async function start() {
   });
   render();
   requestPersistence();
+  initShortcuts();
   // iOS congela la app al salir: guardar cualquier cambio pendiente antes
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
   window.addEventListener("pagehide", flush);
+}
+
+// Atajos de teclado (ordenador): N = apuntar algo, 1-5 = secciones, Esc = cerrar
+function initShortcuts() {
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    if (t.closest?.("input, textarea, select, [contenteditable]")) return;
+    const sheetOpen = !!document.querySelector("#sheet-root .sheet, .levelup");
+    if ((e.key === "n" || e.key === "N") && !sheetOpen) { e.preventDefault(); openQuickAdd(); }
+    else if (/^[1-5]$/.test(e.key) && !sheetOpen) { location.hash = "#" + SHORTCUT_ROUTES[Number(e.key) - 1]; }
+    else if (e.key === "Escape") closeSheet();
+  });
 }
 
 start().catch(err => {
