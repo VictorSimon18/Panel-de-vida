@@ -91,11 +91,14 @@ export function areaChart(points, { color = "#7fcf9b", format = v => v, id = "ac
  * Barras apiladas. points: [{ label, values: [a, b, …] | null, highlight }]
  * (null = día futuro, sin barra). colors: un color por serie, de abajo arriba.
  */
-export function stackChart(points, { colors = ["#7ea6f0", "#7cc4e4"], unit = "h", id = "sc", labelEvery = 1 } = {}) {
-  const w = 330, h = 140, pad = { l: 24, r: 6, t: 12, b: 22 };
-  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+export function stackChart(points, { colors = ["#7ea6f0", "#7cc4e4"], unit = "h", id = "sc", labelEvery = 1, goal = null } = {}) {
   const totals = points.map(p => p.values ? p.values.reduce((s, v) => s + (v || 0), 0) : 0);
-  const top = Math.max(4, Math.ceil(Math.max(0, ...totals) / 2) * 2);
+  const peak = Math.max(0, ...totals, goal ? goal * 1.08 : 0);
+  // escala «redonda»: 4, 6, 8… para horas; 500, 1000… para cifras grandes como calorías
+  const stepR = peak > 100 ? 500 : 2;
+  const top = Math.max(stepR === 2 ? 4 : 1000, Math.ceil(peak / stepR) * stepR);
+  const w = 330, h = 140, pad = { l: top >= 1000 ? 32 : 24, r: 6, t: 12, b: 22 };
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
   const y = v => pad.t + ih - (v / top) * ih;
   const slot = iw / points.length, bw = Math.min(26, slot * .56);
   const cx = i => pad.l + slot * i + slot / 2;
@@ -122,7 +125,11 @@ export function stackChart(points, { colors = ["#7ea6f0", "#7cc4e4"], unit = "h"
     }
     if (i % labelEvery === 0 || p.highlight) g += `<text x="${r1(cx(i))}" y="${h - 6}" font-size="10" text-anchor="middle" fill="${p.highlight ? "#ececee" : "#8b9099"}" font-weight="${p.highlight ? 700 : 500}">${p.label}</text>`;
   });
-  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de horas">${g}</svg>`;
+  if (goal) {
+    g += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${r1(y(goal))}" y2="${r1(y(goal))}" stroke="#ececee" stroke-opacity=".55" stroke-dasharray="4 4"/>`;
+    g += `<text x="${w - pad.r}" y="${r1(y(goal) - 4)}" font-size="9" fill="#8b9099" text-anchor="end">objetivo</text>`;
+  }
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico de barras">${g}</svg>`;
 }
 
 /**

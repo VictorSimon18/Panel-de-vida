@@ -10,6 +10,7 @@
 //   tipo: futbol       minutos: 90        partido: sí
 //   tipo: pasos        fecha: 2026-11-01  valor: 8.423
 //   tipo: cuerpo       peso: 75,4         grasa: 18,5   cintura: 84
+//   tipo: nutricion    calorias: 1.850 kcal   proteinas: 120 g   carbohidratos: 210   grasas: 60   peso: 75,4
 
 import { iso, addDays } from "./stats.js";
 import { parseAmount } from "./finance.js";
@@ -115,6 +116,26 @@ export function applyInbox(s, messages, today = iso()) {
       if (prev) Object.assign(prev, data);
       else s.habits.body.push({ id, date, weight: null, fat: null, waist: null, ...data, source: "siri" });
       done.push([data.weight && `${String(data.weight).replace(".", ",")} kg`, data.fat && `${String(data.fat).replace(".", ",")} % grasa`, data.waist && `${String(data.waist).replace(".", ",")} cm cintura`].filter(Boolean).join(", "));
+    } else if (tipo === "nutricion") {
+      // Totales del día leídos de Salud (Foodvisor): cada envío sustituye al anterior del mismo día
+      const date = parseDay(m.fecha, today) || today;
+      const v = { kcal: num(m.calorias ?? m.energia), protein: num(m.proteinas), carbs: num(m.carbohidratos), fat: num(m.grasas), fiber: num(m.fibra), sugar: num(m.azucar) };
+      Object.keys(v).forEach(k => { v[k] = v[k] >= 0 ? Math.round(v[k] * 10) / 10 : null; });
+      s.habits.nutrition ||= [];
+      const hasNutri = v.kcal > 0 || v.protein > 0 || v.carbs > 0 || v.fat > 0;
+      if (hasNutri) {
+        const prev = s.habits.nutrition.find(n => n.date === date);
+        const entry = { ...v, kcal: Math.round(v.kcal || 0), source: "foodvisor", at: new Date().toISOString() };
+        if (prev) Object.assign(prev, entry); else s.habits.nutrition.push({ id, date, ...entry });
+      }
+      const w = num(m.peso);
+      if (w > 0) {
+        const b = s.habits.body.find(x => x.date === date);
+        if (b) b.weight = Math.round(w * 10) / 10;
+        else s.habits.body.push({ id: id + "-peso", date, weight: Math.round(w * 10) / 10, fat: null, waist: null, source: "foodvisor" });
+      }
+      if (!hasNutri && !(w > 0)) { skipped.push("nutrición sin datos"); continue; }
+      done.push([hasNutri && `${int(v.kcal || 0)} kcal`, v.protein > 0 && `${int(v.protein)} g proteína`, w > 0 && `${String(Math.round(w * 10) / 10).replace(".", ",")} kg`].filter(Boolean).join(" · "));
     } else if (tipo === "pasos") {
       const value = Math.round(num(m.valor ?? m.pasos));
       if (!(value >= 0)) { skipped.push("pasos sin valor"); continue; }

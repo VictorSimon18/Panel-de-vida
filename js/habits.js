@@ -8,15 +8,28 @@ import { uid } from "./ui.js";
 
 export const FREQ_LABEL = { daily: "Todos los días", days: "Días concretos", weekly: "Veces por semana" };
 export const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
-export const AUTO_LABEL = { gym: "gimnasio", futbol: "fútbol", any: "cualquier entreno" };
+export const AUTO_LABEL = { gym: "gimnasio", futbol: "fútbol", any: "cualquier entreno", kcal: "las calorías de Foodvisor", protein: "la proteína de Foodvisor" };
+/** Los que dependen de entrenos (los de nutrición se crean desde la pestaña Nutrición) */
+export const WORKOUT_AUTO = ["gym", "futbol", "any"];
+const NUTRI_FIELD = { kcal: "kcal", protein: "protein" };
 
 export function habitValue(state, h, date) {
+  if (NUTRI_FIELD[h.auto]) return (state.habits.nutrition || []).find(n => n.date === date)?.[NUTRI_FIELD[h.auto]] || 0;
   if (h.auto) return state.habits.workouts.filter(w => w.date === date && (h.auto === "any" || w.type === h.auto)).length;
   return state.habits.logs.filter(l => l.habitId === h.id && l.date === date).reduce((s, l) => s + (l.value || 0), 0);
 }
 
 const target = h => h.target || 1;
-export const isDone = (state, h, date) => habitValue(state, h, date) >= target(h);
+/**
+ * ¿Se cumple el hábito con este valor? Normalmente valor ≥ objetivo.
+ * Calorías en modo «no pasarse» (mode: "max"): hay registro y no supera el objetivo; el día de
+ * hoy no cuenta hasta que termina, porque aún puedes comer más.
+ */
+export function meets(h, value, date, today = iso()) {
+  if (h.mode === "max") return date < today && value > 0 && value <= target(h);
+  return value >= target(h);
+}
+export const isDone = (state, h, date) => meets(h, habitValue(state, h, date), date);
 export const isScheduled = (h, date) => {
   const f = h.frequency || { type: "daily" };
   return f.type !== "days" || (f.days || []).includes(isoWeekday(parseISO(date)));
@@ -144,6 +157,6 @@ export function habitsToday(state, now = new Date()) {
     const t = target(h);
     const weekly = f.type === "weekly" ? { done: weekDone(state, h, ws), goal: f.times || 1 } : null;
     const due = f.type === "daily" || (f.type === "days" && isScheduled(h, today)) || (weekly && weekly.done < weekly.goal);
-    return { id: h.id, name: h.name, unit: h.unit || "", value, target: t, pct: Math.min(100, Math.round(value / t * 100)), done: value >= t, due, weekly, auto: h.auto || null };
+    return { id: h.id, name: h.name, unit: h.unit || "", value, target: t, pct: Math.min(100, Math.round(value / t * 100)), done: meets(h, value, today), due, weekly, auto: h.auto || null, mode: h.mode || null };
   }).filter(h => h.due || h.done);
 }

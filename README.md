@@ -63,6 +63,16 @@ Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gast
 
 **Aviso diario de peso:** una automatización de Atajos a las 6:00 con *Ejecutar tras confirmar* envía una notificación. Al tocarla, el atajo «Apunta mi peso» pregunta el peso y lo envía al panel (Hábitos → Cuerpo).
 
+## Nutrición (Foodvisor)
+
+Foodvisor escribe en Apple Salud las calorías, los macros y el peso, pero **no el agua**. El atajo **Nutrición al Panel** lee de Salud los totales del día y el último peso, y los envía por el buzón. Una automatización lo ejecuta a las **14:00, 18:00 y 23:45**, y cada envío sustituye el total del día. La guía está en Ajustes → Siri y Salud, apartado 9.
+
+- **Hábitos → Nutrición:**
+  - Hoy: calorías frente al objetivo con lo que te queda, barra de proteína y reparto de macros.
+  - Últimos 14 días: gráfico con la línea del objetivo y medias de 7 días.
+- **Objetivos:** calorías ("no pasarme" o "llegar") y proteína. Cada uno es un hábito automático con racha y XP. En modo "no pasarme", el día cuenta cuando termina.
+- **Peso:** el que registras en Foodvisor llega solo a Cuerpo.
+
 ## Hevy (entrenos de gimnasio)
 
 Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus ejercicios, series, pesos y repeticiones, a partir del CSV que exporta Hevy. Funciona con la versión gratuita.
@@ -198,6 +208,7 @@ js/
   sync.js               Sincronización cifrada con un Gist de GitHub (cifrado, versiones, conflictos)
   inbox.js              Buzón de Atajos: convierte los mensajes de Siri y Salud en datos
   hevy.js               Importación de entrenos desde el CSV de Hevy
+  views/nutricion.js    Pestaña Nutrición y objetivos (datos de Foodvisor vía Salud)
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
   icons.js              Juego de iconos

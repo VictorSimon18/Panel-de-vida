@@ -37,7 +37,8 @@ export function defaultState() {
       workouts: [],          // { id, date, type: "gym"|"futbol", routineId, minutes, sets: [] }
       body: [],              // { id, date, weight, fat, measures }
       sleep: [],             // { id, date, hours, quality }
-      mood: []               // { id, date, value }
+      mood: [],              // { id, date, value }
+      nutrition: []          // { id, date, kcal, protein, carbs, fat, fiber, sugar, source, at }
     },
     agenda: {
       tasks: [],             // { id, title, due, priority, tags, done, repeat }

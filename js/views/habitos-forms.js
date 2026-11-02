@@ -5,7 +5,7 @@ import { openSheet, closeSheet, toast, confirmSheet, esc, uid } from "../ui.js";
 import { iso } from "../stats.js";
 import { seg, field } from "../forms.js";
 import { heatmap } from "../charts.js";
-import { WEEKDAYS, FREQ_LABEL, AUTO_LABEL, freqText, habitValue, setHabitValue, streaks, completion, habitLevel, heatDays, habitsToday } from "../habits.js";
+import { WEEKDAYS, FREQ_LABEL, AUTO_LABEL, WORKOUT_AUTO, freqText, habitValue, setHabitValue, streaks, completion, habitLevel, heatDays, habitsToday } from "../habits.js";
 import { MOODS, MOOD_COLOR, QUALITY } from "../sport.js";
 
 const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(n);
@@ -21,7 +21,7 @@ export function openHabitForm(id = null) {
       ${field("Nombre", "hb-name", `<input class="input" id="hb-name" maxlength="40" autocomplete="off" value="${esc(h?.name || "")}" placeholder="p. ej. Beber agua, Leer, Meditar">`)}
       ${field("Se marca solo al apuntar…", "hb-auto", `<select class="input" id="hb-auto">
         <option value="">Nada: lo apunto yo</option>
-        ${Object.entries(AUTO_LABEL).map(([v, l]) => `<option value="${v}"${h?.auto === v ? " selected" : ""}>Un entreno de ${l}</option>`).join("")}
+        ${Object.entries(AUTO_LABEL).filter(([v]) => WORKOUT_AUTO.includes(v)).map(([v, l]) => `<option value="${v}"${h?.auto === v ? " selected" : ""}>Un entreno de ${l}</option>`).join("")}
       </select>`)}
       <div class="row2" data-show="manual">
         ${field("Objetivo diario", "hb-target", `<input class="input" id="hb-target" inputmode="decimal" autocomplete="off" value="${h ? num(h.target) : ""}" placeholder="2">`)}
@@ -93,7 +93,7 @@ export function openHabitDetail(id) {
   const days = heatDays(17, today).map(date => ({ date, level: habitLevel(s, h, date) }));
   const sheet = openSheet(`
     <h2>${esc(h.name)}</h2>
-    <p>${h.auto ? `Se marca solo al apuntar ${AUTO_LABEL[h.auto]}` : `Objetivo: ${num(h.target)} ${esc(h.unit)}`} · ${freqText(h)}</p>
+    <p>${h.auto === "kcal" || h.auto === "protein" ? `Se marca solo con ${AUTO_LABEL[h.auto]} · objetivo ${num(h.target)} ${esc(h.unit)}${h.mode === "max" ? " como máximo" : ""}` : h.auto ? `Se marca solo al apuntar ${AUTO_LABEL[h.auto]}` : `Objetivo: ${num(h.target)} ${esc(h.unit)}`} · ${freqText(h)}</p>
     <div class="week-stats">
       <div><b class="num" style="color:var(--agenda)">${st.current}</b><small>racha (${st.unit})</small></div>
       <div><b class="num" style="color:var(--hab)">${st.best}</b><small>mejor racha</small></div>
