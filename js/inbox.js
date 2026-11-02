@@ -9,6 +9,7 @@
 //   tipo: gimnasio     minutos: 60
 //   tipo: futbol       minutos: 90        partido: sí
 //   tipo: pasos        fecha: 2026-11-01  valor: 8.423
+//   tipo: cuerpo       peso: 75,4         grasa: 18,5   cintura: 84
 
 import { iso, addDays } from "./stats.js";
 import { parseAmount } from "./finance.js";
@@ -105,6 +106,15 @@ export function applyInbox(s, messages, today = iso()) {
       if (tipo === "gimnasio") s.habits.workouts.push({ id, date, type: "gym", routineId: null, minutes, exercises: [], note: "Desde Siri", source: "siri" });
       else s.habits.workouts.push({ id, date, type: "futbol", kind: ["si", "sí", "partido"].includes(norm(m.partido)) ? "partido" : "entrenamiento", minutes, note: "", source: "siri" });
       done.push(`${tipo === "gimnasio" ? "gimnasio" : "fútbol"} ${minutes} min`);
+    } else if (tipo === "cuerpo") {
+      const data = { weight: num(m.peso), fat: num(m.grasa), waist: num(m.cintura) };
+      Object.keys(data).forEach(k => { if (!(data[k] > 0)) delete data[k]; });
+      if (!Object.keys(data).length) { skipped.push("medición sin datos"); continue; }
+      const date = parseDay(m.fecha, today) || today;
+      const prev = s.habits.body.find(b => b.date === date);   // una medición por día: se completa
+      if (prev) Object.assign(prev, data);
+      else s.habits.body.push({ id, date, weight: null, fat: null, waist: null, ...data, source: "siri" });
+      done.push([data.weight && `${String(data.weight).replace(".", ",")} kg`, data.fat && `${String(data.fat).replace(".", ",")} % grasa`, data.waist && `${String(data.waist).replace(".", ",")} cm cintura`].filter(Boolean).join(", "));
     } else if (tipo === "pasos") {
       const value = Math.round(num(m.valor ?? m.pasos));
       if (!(value >= 0)) { skipped.push("pasos sin valor"); continue; }

@@ -119,6 +119,14 @@ function openGuide() {
       `En la app aparecerá el hábito <b>Pasos</b> (objetivo 10.000; puedes cambiarlo en Hábitos).`
     ])}
 
+    ${shortcut("8 · Peso cada mañana (con aviso)", "apunta mi peso", [
+      `Crea un atajo <b>Apunta mi peso</b>: <b>Solicitar entrada</b> de tipo <b>Número</b> con la pregunta «¿Cuánto pesas hoy?».`,
+      `Acción <b>Texto</b>:` + txt("tipo: cuerpo\npeso: [Entrada solicitada]") + `Si algún día quieres más datos, añade líneas <code>grasa: …</code> o <code>cintura: …</code>.`,
+      send,
+      `Pestaña <b>Automatización</b> → <b>+</b> → <b>Hora del día</b> → <b>06:00</b>, <b>Diariamente</b> → marca <b>Ejecutar tras confirmar</b> (no «inmediatamente»: así te llega la notificación) → elige <b>Apunta mi peso</b>.`,
+      `Cada mañana a las 6:00 te llegará la notificación; tócala, escribe el peso y listo. Aparecerá en <b>Hábitos → Cuerpo</b>.`
+    ])}
+
     <p class="hint">Para comprobar que todo funciona, usa <b>Enviar mensaje de prueba</b> en Ajustes, o ejecuta un atajo y luego abre la app: verás un aviso con lo recibido.</p>
     <button class="btn primary" type="button" data-close>Entendido</button>`);
 

@@ -59,7 +59,9 @@ Requiere tener activada la sincronización. Los Atajos del iPhone no pueden abri
 - **Cómo montarlo:** en **Ajustes → Siri y Salud → Cómo crear los Atajos** está la guía paso a paso, con botones para copiar la dirección y la cabecera. El botón **Enviar mensaje de prueba** comprueba el circuito completo.
 - **Privacidad:** los Atajos no pueden cifrar, así que los mensajes del buzón están **sin cifrar** en tu Gist secreto desde que se envían hasta que la app los recoge. El resto de tus datos sigue cifrado.
 
-Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `tiempo` (clase: estudio o trabajo, horas o minutos, proyecto), `gimnasio` / `futbol` (minutos, partido: sí) y `pasos` (fecha, valor).
+Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `tiempo` (clase: estudio o trabajo, horas o minutos, proyecto), `gimnasio` / `futbol` (minutos, partido: sí), `pasos` (fecha, valor) y `cuerpo` (peso, grasa, cintura).
+
+**Aviso diario de peso:** una automatización de Atajos a las 6:00 con *Ejecutar tras confirmar* envía una notificación. Al tocarla, el atajo «Apunta mi peso» pregunta el peso y lo envía al panel (Hábitos → Cuerpo).
 
 ## Hevy (entrenos de gimnasio)
 
