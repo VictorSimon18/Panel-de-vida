@@ -2,7 +2,6 @@
 
 import { areaHeader } from "./area.js";
 import { esc, openSheet, toast } from "../ui.js";
-import { parseHevy, applyHevy } from "../hevy.js";
 import { icon } from "../icons.js";
 import { iso, addDays, parseISO } from "../stats.js";
 import { heatmap, areaChart, stackChart, ring } from "../charts.js";
@@ -13,7 +12,7 @@ import { records, sportSummary, wellbeingDays, workoutVolume, avg, kg, MOODS, MO
 import { openHabitForm, openHabitDetail, openDayLog } from "./habitos-forms.js";
 import { openWorkoutForm, openRoutineForm, openFutbolForm, openBodyForm, openWellbeingForm, openRecordDetail } from "./deporte-forms.js";
 
-const ui = { tab: "habitos", archived: false };
+const ui = { tab: "habitos", archived: false, gymView: "entrenos", gymMonths: 3, recQuery: "" };
 const TABS = { habitos: "Hábitos", gym: "Gimnasio", futbol: "Fútbol", cuerpo: "Cuerpo", bienestar: "Bienestar" };
 const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(n);
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s)).replace(".", "");
@@ -96,21 +95,9 @@ function habitosTab(state) {
 function gymTab(state) {
   const routines = state.habits.routines;
   const hevy = state.settings.gymSource === "hevy";
-  const sessions = state.habits.workouts.filter(w => w.type === "gym").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 15);
-  const recs = records(state);
-  const wname = w => w.title || routines.find(r => r.id === w.routineId)?.name || "Entreno libre";
-  const lastImport = state.settings.lastHevyImport;
+  const all = state.habits.workouts.filter(w => w.type === "gym").sort((a, b) => b.date.localeCompare(a.date));
+  const recs = records(state);   // ya vienen ordenados por los más recientes
   return `
-    <section class="card">
-      <h2 class="card-h">${hevy ? "Tus entrenos vienen de Hevy" : "Hevy"}<span class="spacer"></span></h2>
-      <p class="hint" style="margin:8px 0 12px">${lastImport ? `Última importación: ${new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date(lastImport))}. ` : ""}Exporta tus entrenos desde Hevy y súbelos aquí: se añaden los nuevos y se actualizan los que cambiaste, sin duplicar.</p>
-      <div class="btn-row">
-        <label class="btn primary" for="hevy-file">${icon.upload} Importar CSV de Hevy</label>
-        <input class="sr-only" type="file" id="hevy-file" accept=".csv,text/csv">
-        <button class="btn" type="button" data-act="hevy-help">Cómo exportar</button>
-      </div>
-      ${hevy ? `<button class="btn small link-btn" type="button" data-act="gym-source" data-v="panel">Prefiero apuntar también en el panel</button>` : ""}
-    </section>
     ${hevy ? "" : `<section class="card">
       <h2 class="card-h">Entrenar</h2>
       <div class="routine-picks">
@@ -118,32 +105,63 @@ function gymTab(state) {
         <button class="quick" type="button" data-act="start-free" style="--c:var(--cyan)">${icon.plus}<b>Entreno libre</b><small>Sin rutina</small></button>
       </div>
     </section>`}
-    <section class="card">
-      <h2 class="card-h">Últimos entrenos<span class="spacer"></span></h2>
-      ${sessions.length ? `<div class="list">${sessions.map(w => `
-        <button class="item tap" type="button" data-act="${w.source === "hevy" ? "view-workout" : "edit-workout"}" data-id="${w.id}">
-          <span class="cat-ico" style="--c:var(--hab)"></span>
-          <span class="t">${esc(wname(w))}${w.source === "hevy" ? ` <span class="tag" style="--c:var(--cyan)">Hevy</span>` : ""}<small>${dayName(w.date)} · ${(w.exercises || []).length} ${(w.exercises || []).length === 1 ? "ejercicio" : "ejercicios"}${w.minutes ? ` · ${w.minutes} min` : ""}</small></span>
-          <b class="num">${num(workoutVolume(w) / 1000)} t</b>
-        </button>`).join("")}</div><p class="hint">t = toneladas movidas (peso × repeticiones).</p>` : `<div class="empty">${hevy ? "Importa el CSV de Hevy para ver aquí tus entrenos." : "Aún no hay entrenos. Elige una rutina arriba o importa tus entrenos de Hevy."}</div>`}
-    </section>
-    ${hevy ? "" : `<section class="card">
+    <div class="gym-switch" role="tablist">
+      <button type="button" role="tab" data-act="gym-view" data-v="entrenos" aria-selected="${ui.gymView === "entrenos"}"><b>Últimos entrenos</b><small class="num">${all.length} ${all.length === 1 ? "entreno" : "entrenos"}</small></button>
+      <button type="button" role="tab" data-act="gym-view" data-v="records" aria-selected="${ui.gymView === "records"}"><b>Récords</b><small class="num">${recs.length} ${recs.length === 1 ? "ejercicio" : "ejercicios"}</small></button>
+    </div>
+    ${ui.gymView === "records" ? recordsZone(recs) : entrenosZone(state, all, hevy)}
+    ${hevy || ui.gymView === "records" ? "" : `<section class="card">
       <h2 class="card-h">Rutinas<span class="spacer"></span><button class="btn small" type="button" data-act="new-routine">+ Nueva</button></h2>
       ${routines.length ? `<div class="list">${routines.map(r => `
         <button class="item tap" type="button" data-act="edit-routine" data-id="${r.id}">
           <span class="t">${esc(r.name)}<small>${r.exercises.map(e => esc(e.name)).join(" · ")}</small></span>
           ${icon.chevron}
         </button>`).join("")}</div>` : `<div class="empty">Crea rutinas (Torso, Pierna…) con sus ejercicios, series y repeticiones.</div>`}
-    </section>`}
-    ${recs.length ? `<section class="card">
-      <h2 class="card-h">Récords<span class="spacer"></span><span class="count num">${recs.length} ejercicios</span></h2>
-      <div class="list">${recs.map(r => `
-        <button class="item tap" type="button" data-act="record" data-name="${esc(r.name)}">
-          <span class="t">${esc(r.name)}<small>${r.best.r} reps · ${shortDate(r.best.date)}</small></span>
-          <b class="num" style="color:var(--hab)">${kg(r.best.w)}</b>
-        </button>`).join("")}</div>
-    </section>` : ""}`;
+    </section>`}`;
 }
+
+// Entrenos agrupados por mes, de más reciente a más antiguo
+function entrenosZone(state, all, hevy) {
+  if (!all.length) return `<section class="card"><div class="empty">${hevy ? "Aún no hay entrenos." : "Aún no hay entrenos. Elige una rutina arriba para empezar."}<br>Si usas Hevy, importa tus entrenos en <a href="#ajustes">Ajustes → Hevy</a>.</div></section>`;
+  const routines = state.habits.routines;
+  const wname = w => w.title || routines.find(r => r.id === w.routineId)?.name || "Entreno libre";
+  const months = new Map();
+  all.forEach(w => { const m = w.date.slice(0, 7); if (!months.has(m)) months.set(m, []); months.get(m).push(w); });
+  const keys = [...months.keys()];
+  const shown = keys.slice(0, ui.gymMonths);
+  const mLabel = ym => { const t = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" }).format(parseISO(ym + "-01")); return t[0].toUpperCase() + t.slice(1); };
+  const exN = w => (w.exercises || []).length;
+  return `<section class="card">
+    ${shown.map(m => {
+      const list = months.get(m);
+      const vol = list.reduce((a, w) => a + workoutVolume(w), 0);
+      return `<div class="day-h"><span>${mLabel(m)}</span><span class="num">${list.length} ${list.length === 1 ? "entreno" : "entrenos"} · ${num(vol / 1000)} t</span></div>
+      <div class="list tight">${list.map(w => `
+        <button class="item tap" type="button" data-act="${w.source === "hevy" ? "view-workout" : "edit-workout"}" data-id="${w.id}">
+          <span class="cat-ico" style="--c:var(--hab)"></span>
+          <span class="t">${esc(wname(w))}${w.source === "hevy" ? ` <span class="tag" style="--c:var(--cyan)">Hevy</span>` : ""}<small>${dayName(w.date)} · ${exN(w)} ${exN(w) === 1 ? "ejercicio" : "ejercicios"}${w.minutes ? ` · ${w.minutes} min` : ""}</small></span>
+          <b class="num">${num(workoutVolume(w) / 1000)} t</b>
+        </button>`).join("")}</div>`;
+    }).join("")}
+    ${keys.length > shown.length ? `<button class="btn small link-btn" type="button" data-act="gym-more">Ver más (${keys.length - shown.length} ${keys.length - shown.length === 1 ? "mes" : "meses"} anteriores)</button>` : ""}
+    <p class="hint" style="margin-top:10px">t = toneladas movidas (peso × repeticiones).</p>
+  </section>`;
+}
+
+// Récords con buscador (el filtrado se hace sin repintar, para no perder el teclado)
+function recordsZone(recs) {
+  if (!recs.length) return `<section class="card"><div class="empty">Aún no hay récords. Aparecerán al apuntar o importar entrenos con peso.</div></section>`;
+  return `<section class="card">
+    <div class="search"><span>${icon.search}</span><input class="input" type="search" id="rec-search" placeholder="Buscar ejercicio…" autocomplete="off" value="${esc(ui.recQuery)}" aria-label="Buscar ejercicio"></div>
+    <div class="list" id="rec-list">${recs.map(r => `
+      <button class="item tap" type="button" data-act="record" data-name="${esc(r.name)}" data-search="${esc(searchKey(r.name))}">
+        <span class="t">${esc(r.name)}<small>${r.best.r} reps · ${shortDate(r.best.date)} · ${r.sessions} ${r.sessions === 1 ? "sesión" : "sesiones"}</small></span>
+        <b class="num" style="color:var(--hab)">${kg(r.best.w)}</b>
+      </button>`).join("")}</div>
+    <div class="empty" id="rec-none" hidden>Ningún ejercicio coincide con la búsqueda.</div>
+  </section>`;
+}
+const searchKey = t => String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 // Detalle de un entreno importado de Hevy (solo lectura: se edita en Hevy)
 function viewWorkout(state, id) {
@@ -159,19 +177,6 @@ function viewWorkout(state, id) {
     <button class="btn primary" type="button" data-close>Cerrar</button>`);
 }
 
-function hevyHelp() {
-  openSheet(`
-    <h2>Exportar tus entrenos de Hevy</h2>
-    <ol class="steps">
-      <li>Abre <b>Hevy</b> → pestaña <b>Perfil</b> → icono de <b>ajustes</b> (rueda, arriba a la derecha).</li>
-      <li>Entra en <b>Exportar e importar datos</b> (<i>Export &amp; Import Data</i>).</li>
-      <li>Pulsa <b>Exportar entrenamientos</b> (<i>Export Workouts</i>). Se genera un archivo <code>.csv</code> con todo tu historial.</li>
-      <li>En la hoja de compartir elige <b>Guardar en Archivos</b> (por ejemplo en iCloud Drive).</li>
-      <li>Vuelve aquí → <b>Importar CSV de Hevy</b> → elige ese archivo.</li>
-    </ol>
-    <p class="hint">Cada vez que quieras actualizar, repite la exportación e importa el archivo nuevo: solo se añaden los entrenos nuevos o cambiados. Las series de calentamiento se guardan pero no cuentan para los récords.</p>
-    <button class="btn primary" type="button" data-close>Entendido</button>`);
-}
 
 // ---------- Fútbol
 function futbolTab(state) {
@@ -265,7 +270,8 @@ export function mount(root, _state, signal) {
       case "start-free": openWorkoutForm({ routineId: "" }); break;
       case "edit-workout": openWorkoutForm({ id }); break;
       case "view-workout": viewWorkout(_state, id); break;
-      case "hevy-help": hevyHelp(); break;
+      case "gym-view": ui.gymView = b.dataset.v; rerender(); break;
+      case "gym-more": ui.gymMonths += 3; rerender(); break;
       case "gym-source": update(s => { s.settings.gymSource = b.dataset.v; }); break;
       case "new-routine": openRoutineForm(); break;
       case "edit-routine": openRoutineForm(id); break;
@@ -279,17 +285,15 @@ export function mount(root, _state, signal) {
     }
   }, { signal });
 
-  root.querySelector("#hevy-file")?.addEventListener("change", async e => {
-    const file = e.target.files[0];
-    e.target.value = "";
-    if (!file) return;
-    try {
-      const workouts = parseHevy(await file.text());
-      let r = null;
-      update(s => { r = applyHevy(s, workouts); });
-      toast(r.added || r.updated ? `Hevy: ${r.added} entrenos nuevos${r.updated ? `, ${r.updated} actualizados` : ""} (de ${r.total})` : `Todo al día: los ${r.total} entrenos ya estaban importados`, { ms: 4500 });
-    } catch (err) {
-      toast(err.message || "No se pudo leer el archivo", { error: true, ms: 4500 });
-    }
-  }, { signal });
+  // buscador de récords
+  const search = root.querySelector("#rec-search");
+  const filterRecords = () => {
+    const q = searchKey(search.value.trim());
+    ui.recQuery = search.value;
+    let n = 0;
+    root.querySelectorAll("#rec-list [data-search]").forEach(el => { const show = !q || el.dataset.search.includes(q); el.hidden = !show; if (show) n++; });
+    root.querySelector("#rec-none").hidden = n > 0;
+  };
+  search?.addEventListener("input", filterRecords, { signal });
+  if (search?.value) filterRecords();
 }

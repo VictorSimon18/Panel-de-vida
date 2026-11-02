@@ -66,11 +66,14 @@ Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gast
 Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus ejercicios, series, pesos y repeticiones, a partir del CSV que exporta Hevy. Funciona con la versión gratuita.
 
 1. En Hevy: **Perfil → Ajustes → Exportar e importar datos → Exportar entrenamientos** → *Guardar en Archivos*.
-2. En el panel: **Hábitos → Gimnasio → Importar CSV de Hevy** → elige el archivo.
+2. En el panel: **Ajustes → Hevy → Importar CSV de Hevy** → elige el archivo.
 
 - **Qué se importa:** los entrenos nuevos se añaden y los que editaste en Hevy se actualizan. Nunca se duplican, así que puedes importar el historial completo cada vez.
 - **Récords:** las series de calentamiento se guardan, pero no cuentan como récord. Los récords, la XP, el hábito de gimnasio y los logros se calculan con los entrenos importados.
-- **Rutinas:** tras importar, el panel deja de mostrar "Entrenar" y "Rutinas", porque se usa Hevy para eso. Para volver a apuntar en el panel, pulsa *Prefiero apuntar también en el panel*.
+- **Rutinas:** tras importar, el panel deja de mostrar "Entrenar" y "Rutinas", porque se usa Hevy para eso. Para volver a apuntar en el panel, desmarca *Apunto el gimnasio solo en Hevy* en Ajustes → Hevy.
+- **Hábitos → Gimnasio** tiene dos zonas:
+  - **Últimos entrenos:** agrupados por mes, con el total del mes y "Ver más" para ir hacia atrás.
+  - **Récords:** con buscador de ejercicios y ordenados por los más recientes.
 - **Formatos que reconoce:** fechas en inglés ("21 Oct 2026, 18:05"), en español o ISO, y peso en kg o libras (se convierte).
 
 ## Instalarla en el iPhone

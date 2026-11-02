@@ -9,6 +9,7 @@ import { buildDemo } from "../demo.js";
 import { homeBtn } from "./area.js";
 import { syncCard, mountSyncCard } from "./sync-ui.js";
 import { atajosCard, mountAtajosCard } from "./atajos.js";
+import { hevyCard, mountHevyCard } from "./hevy-ui.js";
 import { syncConfigured } from "../sync.js";
 import { hasAnyData } from "../stats.js";
 
@@ -66,6 +67,8 @@ export function render(state) {
 
     ${atajosCard(state)}
 
+    ${hevyCard(state)}
+
     ${demoCard(state)}
 
     <section class="card">
@@ -100,6 +103,7 @@ function demoCard(state) {
 export function mount(root) {
   mountSyncCard(root);
   mountAtajosCard(root);
+  mountHevyCard(root);
   root.querySelector("#demo-on")?.addEventListener("click", async () => {
     await replaceState(buildDemo(getState().profile.alias));
     toast("Datos de ejemplo cargados");

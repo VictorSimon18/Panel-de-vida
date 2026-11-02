@@ -47,6 +47,9 @@ a { color: var(--cyan); }
   outline: none;
 }
 
+/* Lo marcado como oculto no se ve nunca, aunque su componente defina display */
+[hidden] { display: none !important; }
+
 .num { font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
 .sr-only {
