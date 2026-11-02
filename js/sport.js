@@ -34,7 +34,7 @@ export function records(state) {
   const map = new Map();
   for (const w of gymSessions(state)) {
     for (const ex of w.exercises || []) {
-      const valid = (ex.sets || []).filter(s => s.w > 0 && s.r > 0);
+      const valid = (ex.sets || []).filter(s => s.w > 0 && s.r > 0 && s.t !== "warmup");
       if (!valid.length) continue;
       const key = norm(ex.name);
       if (!map.has(key)) map.set(key, { name: ex.name, best: null, bestE1rm: 0, history: [], sessions: 0 });
@@ -54,7 +54,7 @@ export function newRecords(state, workout) {
   const prev = new Map(records({ habits: { workouts: state.habits.workouts.filter(w => w.id !== workout.id) } }).map(r => [norm(r.name), r]));
   const out = [];
   for (const ex of workout.exercises || []) {
-    const valid = (ex.sets || []).filter(s => s.w > 0 && s.r > 0);
+    const valid = (ex.sets || []).filter(s => s.w > 0 && s.r > 0 && s.t !== "warmup");
     if (!valid.length) continue;
     const top = Math.max(...valid.map(s => s.w));
     const p = prev.get(norm(ex.name));

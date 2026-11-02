@@ -61,6 +61,18 @@ Requiere tener activada la sincronización. Los Atajos del iPhone no pueden abri
 
 Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `tiempo` (clase: estudio o trabajo, horas o minutos, proyecto), `gimnasio` / `futbol` (minutos, partido: sí) y `pasos` (fecha, valor).
 
+## Hevy (entrenos de gimnasio)
+
+Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus ejercicios, series, pesos y repeticiones, a partir del CSV que exporta Hevy. Funciona con la versión gratuita.
+
+1. En Hevy: **Perfil → Ajustes → Exportar e importar datos → Exportar entrenamientos** → *Guardar en Archivos*.
+2. En el panel: **Hábitos → Gimnasio → Importar CSV de Hevy** → elige el archivo.
+
+- **Qué se importa:** los entrenos nuevos se añaden y los que editaste en Hevy se actualizan. Nunca se duplican, así que puedes importar el historial completo cada vez.
+- **Récords:** las series de calentamiento se guardan, pero no cuentan como récord. Los récords, la XP, el hábito de gimnasio y los logros se calculan con los entrenos importados.
+- **Rutinas:** tras importar, el panel deja de mostrar "Entrenar" y "Rutinas", porque se usa Hevy para eso. Para volver a apuntar en el panel, pulsa *Prefiero apuntar también en el panel*.
+- **Formatos que reconoce:** fechas en inglés ("21 Oct 2026, 18:05"), en español o ISO, y peso en kg o libras (se convierte).
+
 ## Instalarla en el iPhone
 
 1. Abre la dirección de la app en **Safari** (otros navegadores de iPhone no permiten instalarla).
@@ -180,6 +192,7 @@ js/
   sidebar.js            Menú lateral del escritorio y atajos 1-5
   sync.js               Sincronización cifrada con un Gist de GitHub (cifrado, versiones, conflictos)
   inbox.js              Buzón de Atajos: convierte los mensajes de Siri y Salud en datos
+  hevy.js               Importación de entrenos desde el CSV de Hevy
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
   icons.js              Juego de iconos

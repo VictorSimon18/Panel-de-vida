@@ -1,7 +1,8 @@
 // Trabajo y estudios: horas por semana, proyectos con hitos y aprendizaje.
 
 import { areaHeader } from "./area.js";
-import { esc, openSheet, closeSheet } from "../ui.js";
+import { esc, openSheet, closeSheet, toast } from "../ui.js";
+import { getState } from "../state.js";
 import { icon } from "../icons.js";
 import { addDays, parseISO } from "../stats.js";
 import { stackChart, ring } from "../charts.js";
@@ -29,7 +30,10 @@ registerQuickAction("train", () => {
     if (!b) return;
     closeSheet();
     if (b.dataset.pick === "trabajo" || b.dataset.pick === "estudio") openTimeForm({ kind: b.dataset.pick });
-    else if (b.dataset.pick === "gym") openWorkoutForm();
+    else if (b.dataset.pick === "gym") {
+      if (getState().settings.gymSource === "hevy") toast("Apunta el entreno en Hevy y luego impórtalo en Hábitos → Gimnasio", { ms: 4000 });
+      else openWorkoutForm();
+    }
     else openFutbolForm();
   });
 });

@@ -1,7 +1,8 @@
 // Hábitos y deporte: hábitos con rachas, gimnasio, fútbol, cuerpo y bienestar.
 
 import { areaHeader } from "./area.js";
-import { esc } from "../ui.js";
+import { esc, openSheet, toast } from "../ui.js";
+import { parseHevy, applyHevy } from "../hevy.js";
 import { icon } from "../icons.js";
 import { iso, addDays, parseISO } from "../stats.js";
 import { heatmap, areaChart, stackChart, ring } from "../charts.js";
@@ -94,42 +95,82 @@ function habitosTab(state) {
 // ---------- Gimnasio
 function gymTab(state) {
   const routines = state.habits.routines;
-  const sessions = state.habits.workouts.filter(w => w.type === "gym").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
+  const hevy = state.settings.gymSource === "hevy";
+  const sessions = state.habits.workouts.filter(w => w.type === "gym").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 15);
   const recs = records(state);
-  const rname = id => routines.find(r => r.id === id)?.name || "Entreno libre";
+  const wname = w => w.title || routines.find(r => r.id === w.routineId)?.name || "Entreno libre";
+  const lastImport = state.settings.lastHevyImport;
   return `
     <section class="card">
+      <h2 class="card-h">${hevy ? "Tus entrenos vienen de Hevy" : "Hevy"}<span class="spacer"></span></h2>
+      <p class="hint" style="margin:8px 0 12px">${lastImport ? `Última importación: ${new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date(lastImport))}. ` : ""}Exporta tus entrenos desde Hevy y súbelos aquí: se añaden los nuevos y se actualizan los que cambiaste, sin duplicar.</p>
+      <div class="btn-row">
+        <label class="btn primary" for="hevy-file">${icon.upload} Importar CSV de Hevy</label>
+        <input class="sr-only" type="file" id="hevy-file" accept=".csv,text/csv">
+        <button class="btn" type="button" data-act="hevy-help">Cómo exportar</button>
+      </div>
+      ${hevy ? `<button class="btn small link-btn" type="button" data-act="gym-source" data-v="panel">Prefiero apuntar también en el panel</button>` : ""}
+    </section>
+    ${hevy ? "" : `<section class="card">
       <h2 class="card-h">Entrenar</h2>
       <div class="routine-picks">
         ${routines.map(r => `<button class="quick" type="button" data-act="start-routine" data-id="${r.id}" style="--c:var(--hab)">${icon.dumbbell}<b>${esc(r.name)}</b><small>${r.exercises.length} ejercicios</small></button>`).join("")}
         <button class="quick" type="button" data-act="start-free" style="--c:var(--cyan)">${icon.plus}<b>Entreno libre</b><small>Sin rutina</small></button>
       </div>
-    </section>
+    </section>`}
     <section class="card">
       <h2 class="card-h">Últimos entrenos<span class="spacer"></span></h2>
       ${sessions.length ? `<div class="list">${sessions.map(w => `
-        <button class="item tap" type="button" data-act="edit-workout" data-id="${w.id}">
+        <button class="item tap" type="button" data-act="${w.source === "hevy" ? "view-workout" : "edit-workout"}" data-id="${w.id}">
           <span class="cat-ico" style="--c:var(--hab)"></span>
-          <span class="t">${esc(rname(w.routineId))}<small>${dayName(w.date)} · ${(w.exercises || []).length} ejercicios${w.minutes ? ` · ${w.minutes} min` : ""}</small></span>
+          <span class="t">${esc(wname(w))}${w.source === "hevy" ? ` <span class="tag" style="--c:var(--cyan)">Hevy</span>` : ""}<small>${dayName(w.date)} · ${(w.exercises || []).length} ${(w.exercises || []).length === 1 ? "ejercicio" : "ejercicios"}${w.minutes ? ` · ${w.minutes} min` : ""}</small></span>
           <b class="num">${num(workoutVolume(w) / 1000)} t</b>
-        </button>`).join("")}</div><p class="hint">t = toneladas movidas (peso × repeticiones).</p>` : `<div class="empty">Aún no hay entrenos. Elige una rutina arriba para empezar.</div>`}
+        </button>`).join("")}</div><p class="hint">t = toneladas movidas (peso × repeticiones).</p>` : `<div class="empty">${hevy ? "Importa el CSV de Hevy para ver aquí tus entrenos." : "Aún no hay entrenos. Elige una rutina arriba o importa tus entrenos de Hevy."}</div>`}
     </section>
-    <section class="card">
+    ${hevy ? "" : `<section class="card">
       <h2 class="card-h">Rutinas<span class="spacer"></span><button class="btn small" type="button" data-act="new-routine">+ Nueva</button></h2>
       ${routines.length ? `<div class="list">${routines.map(r => `
         <button class="item tap" type="button" data-act="edit-routine" data-id="${r.id}">
           <span class="t">${esc(r.name)}<small>${r.exercises.map(e => esc(e.name)).join(" · ")}</small></span>
           ${icon.chevron}
         </button>`).join("")}</div>` : `<div class="empty">Crea rutinas (Torso, Pierna…) con sus ejercicios, series y repeticiones.</div>`}
-    </section>
+    </section>`}
     ${recs.length ? `<section class="card">
-      <h2 class="card-h">Récords</h2>
+      <h2 class="card-h">Récords<span class="spacer"></span><span class="count num">${recs.length} ejercicios</span></h2>
       <div class="list">${recs.map(r => `
         <button class="item tap" type="button" data-act="record" data-name="${esc(r.name)}">
           <span class="t">${esc(r.name)}<small>${r.best.r} reps · ${shortDate(r.best.date)}</small></span>
           <b class="num" style="color:var(--hab)">${kg(r.best.w)}</b>
         </button>`).join("")}</div>
     </section>` : ""}`;
+}
+
+// Detalle de un entreno importado de Hevy (solo lectura: se edita en Hevy)
+function viewWorkout(state, id) {
+  const w = state.habits.workouts.find(x => x.id === id);
+  if (!w) return;
+  const setTxt = st => `${num(st.w)} kg × ${st.r}${st.t === "warmup" ? " (calentamiento)" : st.t === "failure" ? " (al fallo)" : st.t === "dropset" ? " (drop set)" : ""}`;
+  openSheet(`
+    <h2>${esc(w.title || "Entreno")}</h2>
+    <p>${dayName(w.date)}${w.minutes ? ` · ${w.minutes} min` : ""} · ${num(workoutVolume(w) / 1000)} t · importado de Hevy</p>
+    <div class="wo-view">${w.exercises.map(ex => `
+      <div class="wo-ex"><b>${esc(ex.name)}</b><ol>${ex.sets.map(st => `<li class="num${st.t === "warmup" ? " warm" : ""}">${setTxt(st)}</li>`).join("")}</ol></div>`).join("")}</div>
+    <p class="hint">Para cambiarlo, edítalo en Hevy y vuelve a importar.</p>
+    <button class="btn primary" type="button" data-close>Cerrar</button>`);
+}
+
+function hevyHelp() {
+  openSheet(`
+    <h2>Exportar tus entrenos de Hevy</h2>
+    <ol class="steps">
+      <li>Abre <b>Hevy</b> → pestaña <b>Perfil</b> → icono de <b>ajustes</b> (rueda, arriba a la derecha).</li>
+      <li>Entra en <b>Exportar e importar datos</b> (<i>Export &amp; Import Data</i>).</li>
+      <li>Pulsa <b>Exportar entrenamientos</b> (<i>Export Workouts</i>). Se genera un archivo <code>.csv</code> con todo tu historial.</li>
+      <li>En la hoja de compartir elige <b>Guardar en Archivos</b> (por ejemplo en iCloud Drive).</li>
+      <li>Vuelve aquí → <b>Importar CSV de Hevy</b> → elige ese archivo.</li>
+    </ol>
+    <p class="hint">Cada vez que quieras actualizar, repite la exportación e importa el archivo nuevo: solo se añaden los entrenos nuevos o cambiados. Las series de calentamiento se guardan pero no cuentan para los récords.</p>
+    <button class="btn primary" type="button" data-close>Entendido</button>`);
 }
 
 // ---------- Fútbol
@@ -223,6 +264,9 @@ export function mount(root, _state, signal) {
       case "start-routine": openWorkoutForm({ routineId: id }); break;
       case "start-free": openWorkoutForm({ routineId: "" }); break;
       case "edit-workout": openWorkoutForm({ id }); break;
+      case "view-workout": viewWorkout(_state, id); break;
+      case "hevy-help": hevyHelp(); break;
+      case "gym-source": update(s => { s.settings.gymSource = b.dataset.v; }); break;
       case "new-routine": openRoutineForm(); break;
       case "edit-routine": openRoutineForm(id); break;
       case "record": openRecordDetail(b.dataset.name); break;
@@ -232,6 +276,20 @@ export function mount(root, _state, signal) {
       case "edit-body": openBodyForm(id); break;
       case "wellbeing": openWellbeingForm(); break;
       case "edit-wb": openWellbeingForm(b.dataset.date); break;
+    }
+  }, { signal });
+
+  root.querySelector("#hevy-file")?.addEventListener("change", async e => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const workouts = parseHevy(await file.text());
+      let r = null;
+      update(s => { r = applyHevy(s, workouts); });
+      toast(r.added || r.updated ? `Hevy: ${r.added} entrenos nuevos${r.updated ? `, ${r.updated} actualizados` : ""} (de ${r.total})` : `Todo al día: los ${r.total} entrenos ya estaban importados`, { ms: 4500 });
+    } catch (err) {
+      toast(err.message || "No se pudo leer el archivo", { error: true, ms: 4500 });
     }
   }, { signal });
 }

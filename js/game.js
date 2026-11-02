@@ -155,7 +155,7 @@ export function computeXP(state, today = iso()) {
   const best = new Map();
   for (const w of hb.workouts.filter(x => x.type === "gym").sort((a, b) => a.date.localeCompare(b.date))) {
     for (const ex of w.exercises || []) {
-      const top = Math.max(0, ...(ex.sets || []).filter(s => s.r > 0).map(s => s.w || 0));
+      const top = Math.max(0, ...(ex.sets || []).filter(s => s.r > 0 && s.t !== "warmup").map(s => s.w || 0));
       if (!top) continue;
       const k = ex.name.trim().toLowerCase();
       if (best.has(k) && top > best.get(k)) records++;
