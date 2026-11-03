@@ -714,3 +714,6 @@ code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .macro span:first-child { color: var(--muted); }
 .macro-split { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: var(--surface-2); margin-top: 14px; gap: 2px; }
 .macro-split i { display: block; height: 100%; }
+
+/* Selector de cuenta en la tarjeta de saldo (Finanzas) */
+.card .acc-chips { margin: 10px -16px 10px; padding: 0 16px; }

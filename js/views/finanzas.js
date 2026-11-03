@@ -10,7 +10,8 @@ import { ACCOUNT_TYPES, FREQS, accountBalance, totalBalance, monthSummary, balan
 import { openTxForm, openAccountForm, openRecurringForm, openGoalForm, openContribute, openCategories } from "./finanzas-forms.js";
 
 // Estado de la pantalla (no se guarda): pestaña, mes visible y categoría desplegada
-const ui = { tab: "movs", ym: iso().slice(0, 7), open: null };
+// acc: cuenta elegida en la tarjeta de saldo (null = saldo total)
+const ui = { tab: "movs", ym: iso().slice(0, 7), open: null, acc: null };
 const TABS = { movs: "Movimientos", gastos: "Gastos", fijos: "Fijos", metas: "Metas", cuentas: "Cuentas" };
 
 registerQuickAction("money", () => openTxForm());
@@ -39,27 +40,35 @@ export function render(state) {
 
   const sum = monthSummary(state, ui.ym);
   const isCurrent = ui.ym === iso().slice(0, 7);
-  const hist = balanceHistory(state, ui.ym, 6);
+  if (ui.acc && !fin.accounts.some(a => a.id === ui.acc)) ui.acc = null;   // cuenta borrada
+  const acc = ui.acc && fin.accounts.find(a => a.id === ui.acc);
+  const cardSum = acc ? monthSummary(state, ui.ym, acc.id) : sum;
+  const hist = balanceHistory(state, ui.ym, 6, acc?.id);
 
   return `
     ${areaHeader(state, "fin")}
 
     <section class="card">
-      <h2 class="card-h"><span class="h-dot" style="--c:var(--fin)"></span>Saldo total<span class="spacer"></span></h2>
-      <div class="money-big num">${money(totalBalance(state))}</div>
-      <div class="money-sub">${fin.accounts.length} cuenta${fin.accounts.length > 1 ? "s" : ""}</div>
+      <h2 class="card-h"><span class="h-dot" style="--c:var(--fin)"></span>${acc ? esc(acc.name) : "Saldo total"}<span class="spacer"></span></h2>
+      ${fin.accounts.length > 1 ? `<div class="chips acc-chips" role="tablist" aria-label="Ver saldo de">
+        <button type="button" role="tab" class="chip small" data-act="acc" data-id="" aria-selected="${!acc}">Total</button>
+        ${fin.accounts.map(a => `<button type="button" role="tab" class="chip small" data-act="acc" data-id="${a.id}" aria-selected="${acc?.id === a.id}">${esc(a.name)}</button>`).join("")}
+      </div>` : ""}
+      <div class="money-big num">${money(acc ? accountBalance(state, acc.id) : totalBalance(state))}</div>
+      <div class="money-sub">${acc ? ACCOUNT_TYPES[acc.type] || "Cuenta" : `${fin.accounts.length} cuenta${fin.accounts.length > 1 ? "s" : ""}`}</div>
       <div class="month-nav">
         <button class="icon-btn" type="button" data-act="month" data-n="-1" aria-label="Mes anterior">${icon.back}</button>
         <b>${monthLabel(ui.ym)}</b>
         <button class="icon-btn" type="button" data-act="month" data-n="1" aria-label="Mes siguiente"${isCurrent ? " disabled" : ""}>${icon.chevron}</button>
       </div>
       <div class="split three">
-        <div><small>Ingresos</small><b class="num pos">${signed(sum.income)}</b></div>
-        <div><small>Gastos</small><b class="num neg">${money(sum.expense)}</b></div>
-        <div><small>Balance</small><b class="num ${sum.net >= 0 ? "pos" : "neg"}">${signed(sum.net)}</b></div>
+        <div><small>Ingresos</small><b class="num pos">${signed(cardSum.income)}</b></div>
+        <div><small>Gastos</small><b class="num neg">${money(cardSum.expense)}</b></div>
+        <div><small>Balance</small><b class="num ${cardSum.net >= 0 ? "pos" : "neg"}">${signed(cardSum.net)}</b></div>
       </div>
+      ${cardSum.transfers ? `<div class="money-sub">Transferencias del mes: <b class="num">${signed(cardSum.transfers)}</b></div>` : ""}
       ${areaChart(hist, { color: "#7fcf9b", format: v => money(v).replace(/,\d\d €$/, " €"), id: "bal" })}
-      <div class="legend"><span style="--c:var(--fin)">Saldo total a final de cada mes</span></div>
+      <div class="legend"><span style="--c:var(--fin)">${acc ? `Saldo de ${esc(acc.name)}` : "Saldo total"} a final de cada mes</span></div>
     </section>
 
     <div class="chips" role="tablist">${Object.entries(TABS).map(([k, l]) =>
@@ -190,6 +199,7 @@ export function mount(root, _state, signal) {
     const rerender = () => window.dispatchEvent(new Event("pv:render"));
     switch (b.dataset.act) {
       case "tab": ui.tab = b.dataset.tab; ui.open = null; rerender(); break;
+      case "acc": ui.acc = id || null; rerender(); break;
       case "month": ui.ym = shiftMonth(ui.ym, Number(b.dataset.n)); rerender(); break;
       case "open-cat": ui.open = ui.open === id ? null : id; rerender(); break;
       case "new-tx": openTxForm(); break;

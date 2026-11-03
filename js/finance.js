@@ -68,12 +68,14 @@ export function totalBalance(state, upTo = null) {
     state.finance.transactions.filter(t => !upTo || t.date <= upTo).reduce((s, t) => s + t.amount, 0);
 }
 
-/** "AAAA-MM" → resumen del mes */
-export function monthSummary(state, ym) {
-  let income = 0, expense = 0;
+/** "AAAA-MM" → resumen del mes (de todas las cuentas o solo de accId).
+ *  Las transferencias no cuentan como ingreso ni gasto; con una cuenta se suman aparte en `transfers`. */
+export function monthSummary(state, ym, accId = null) {
+  let income = 0, expense = 0, transfers = 0;
   const byCat = new Map();
   for (const t of state.finance.transactions) {
-    if (t.transferId || !t.date.startsWith(ym)) continue;
+    if (!t.date.startsWith(ym) || (accId && t.accountId !== accId)) continue;
+    if (t.transferId) { transfers += t.amount; continue; }
     if (t.amount > 0) { income += t.amount; continue; }
     expense += t.amount;
     const top = topCat(state, t.categoryId);
@@ -87,16 +89,16 @@ export function monthSummary(state, ym) {
   }
   const cats = [...byCat.values()].sort((a, b) => b.total - a.total)
     .map(c => ({ ...c, subs: [...c.subs.entries()].sort((a, b) => b[1] - a[1]) }));
-  return { income, expense, net: income + expense, cats };
+  return { income, expense, net: income + expense, transfers: accId ? transfers : 0, cats };
 }
 
-/** Saldo total al final de cada uno de los últimos n meses (incluido el indicado) */
-export function balanceHistory(state, ym, n = 6) {
+/** Saldo (total, o de accId) al final de cada uno de los últimos n meses (incluido el indicado) */
+export function balanceHistory(state, ym, n = 6, accId = null) {
   const [y, m] = ym.split("-").map(Number);
   const out = [];
   for (let i = n - 1; i >= 0; i--) {
     const end = new Date(y, m - 1 - i + 1, 0);
-    out.push({ label: new Intl.DateTimeFormat("es-ES", { month: "short" }).format(end).replace(".", ""), value: totalBalance(state, iso(end)) });
+    out.push({ label: new Intl.DateTimeFormat("es-ES", { month: "short" }).format(end).replace(".", ""), value: accId ? accountBalance(state, accId, iso(end)) : totalBalance(state, iso(end)) });
   }
   return out;
 }

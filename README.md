@@ -98,6 +98,7 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 ## Finanzas
 
 - **Cuentas:** banco, efectivo, ahorro, inversión, tarjeta… cada una con su saldo inicial. El saldo actual es el inicial más todos sus movimientos.
+- **Tarjeta de saldo:** con el selector de arriba (*Total* o una cuenta) ves el saldo, los ingresos, gastos y balance del mes y la gráfica de los últimos 6 meses de todas las cuentas juntas o de una sola. Las transferencias no cuentan como ingreso ni gasto; en una cuenta aparecen aparte como «Transferencias del mes».
 - **Movimientos:** gastos, ingresos y transferencias entre cuentas. Se pueden apuntar con el botón **+**. Tocar un movimiento lo abre para editarlo o borrarlo.
 - **Importes:** valen `12,50`, `1.234,56` o `12.5`.
 - **Categorías:** hay una lista inicial con subcategorías y se puede cambiar en *Gastos → Categorías*. Al borrar una subcategoría, sus movimientos pasan a la categoría principal.

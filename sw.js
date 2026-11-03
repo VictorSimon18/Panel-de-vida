@@ -1,7 +1,7 @@
 // Service worker: guarda la app en caché para que funcione sin conexión.
 // IMPORTANTE: sube VERSION cada vez que publiques cambios, para que el iPhone descargue la nueva versión.
 
-const VERSION = "v0.14.2";
+const VERSION = "v0.15.0";
 const CACHE = `panel-de-vida-${VERSION}`;
 
 const FILES = [
