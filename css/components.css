@@ -717,3 +717,23 @@ code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 
 /* Selector de cuenta en la tarjeta de saldo (Finanzas) */
 .card .acc-chips { margin: 10px -16px 10px; padding: 0 16px; }
+
+/* Peso vs calorías (Cuerpo y Nutrición) */
+.nw-table { margin-top: 10px; font-size: 13px; }
+.nw-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line-soft); align-items: baseline; }
+.nw-row > span:not(:first-child) { text-align: right; }
+.nw-row.head { border-top: 0; padding-top: 0; font-size: var(--fs-xs); color: var(--muted); }
+.nw-row.cur > span:first-child { color: var(--muted); }
+.nw-row small { margin-left: 4px; font-size: 10px; color: var(--muted); }
+.legend .dot-faint::before { opacity: .45; background: var(--hab); border-radius: 50%; }
+.sheet .acc-chips { margin: 12px -16px 4px; padding: 0 16px; }
+
+/* Resumen semanal */
+.wk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.wk-tile { padding: 10px 12px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface-2); min-width: 0; }
+.wk-tile > small { display: block; font-size: var(--fs-xs); color: var(--muted); }
+.wk-tile b { display: block; margin-top: 2px; font-size: var(--fs-lg); font-weight: 800; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk-vs { display: block; margin-top: 2px; font-size: 11px; color: var(--muted); }
+.card.weekly { border-color: rgba(124, 196, 228, .3); }
+@media (min-width: 1024px) { .wk-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.legend .no-dot::before { display: none; }

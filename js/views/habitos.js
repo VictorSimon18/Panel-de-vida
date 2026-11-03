@@ -4,13 +4,14 @@ import { areaHeader } from "./area.js";
 import { esc, openSheet, toast } from "../ui.js";
 import { icon } from "../icons.js";
 import { iso, addDays, parseISO } from "../stats.js";
-import { heatmap, areaChart, stackChart, ring } from "../charts.js";
+import { heatmap, stackChart, ring } from "../charts.js";
 import { registerQuickAction } from "../quickadd.js";
 import { update } from "../state.js";
 import { freqText, habitValue, setHabitValue, streaks, dayLevel, heatDays, habitsToday, isScheduled, isDone, AUTO_LABEL } from "../habits.js";
 import { records, sportSummary, wellbeingDays, workoutVolume, avg, kg, MOODS, MOOD_COLOR, QUALITY, FUTBOL_KINDS } from "../sport.js";
 import { openHabitForm, openHabitDetail, openDayLog } from "./habitos-forms.js";
 import { nutricionTab, openNutritionGoals } from "./nutricion.js";
+import { weightTrendBlock, nutriWeightCard } from "./tendencia.js";
 import { openWorkoutForm, openRoutineForm, openFutbolForm, openBodyForm, openWellbeingForm, openRecordDetail } from "./deporte-forms.js";
 
 const ui = { tab: "habitos", archived: false, gymView: "entrenos", gymMonths: 3, recQuery: "" };
@@ -205,7 +206,6 @@ function cuerpoTab(state) {
   const withW = list.filter(b => b.weight != null);
   const last = withW[0], prev = withW[1];
   const delta = last && prev ? last.weight - prev.weight : null;
-  const series = withW.slice(0, 12).reverse();
   return `<section class="card">
     <div class="btn-row"><button class="btn primary" type="button" data-act="new-body">${icon.plus} Nueva medición</button></div>
     ${last ? `
@@ -213,13 +213,14 @@ function cuerpoTab(state) {
         <div><small>Peso actual</small><b class="num">${kg(last.weight)}</b></div>
         ${delta != null ? `<span class="tag" style="--c:${delta <= 0 ? "var(--fin)" : "var(--agenda)"}">${delta > 0 ? "+" : delta < 0 ? "−" : "±"}${kg(Math.abs(delta))} desde el ${shortDate(prev.date)}</span>` : ""}
       </div>
-      ${series.length > 1 ? areaChart(series.map(b => ({ label: shortDate(b.date), value: b.weight })), { color: "#e88fb4", format: kg, id: "wt" }) : ""}` : ""}
+      ${weightTrendBlock(state)}` : ""}
     ${list.length ? `<div class="list">${list.slice(0, 12).map(b => `
       <button class="item tap" type="button" data-act="edit-body" data-id="${b.id}">
         <span class="t">${dayName(b.date)}<small>${[b.fat != null ? `${num(b.fat)} % grasa` : "", b.waist != null ? `${num(b.waist)} cm cintura` : ""].filter(Boolean).join(" · ") || "Solo peso"}</small></span>
         <b class="num">${b.weight != null ? kg(b.weight) : "—"}</b>
       </button>`).join("")}</div>` : `<div class="empty">Apunta tu peso (y si quieres, % de grasa y cintura) para ver cómo evoluciona.</div>`}
-  </section>`;
+  </section>
+  ${nutriWeightCard(state)}`;
 }
 
 // ---------- Bienestar: sueño y ánimo

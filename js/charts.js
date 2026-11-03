@@ -163,3 +163,38 @@ export function heatmap(days, { color = "#e88fb4", today = null } = {}) {
   });
   return `<div class="heat-wrap"><svg class="heat" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Mapa de calor">${g}</svg></div>`;
 }
+
+/**
+ * Tendencia en el tiempo: puntos diarios suaves y una línea con la media.
+ * points: [{ date: "AAAA-MM-DD", value, avg }] en orden. El eje X es de fechas reales (los días sin dato quedan como hueco).
+ */
+export function trendChart(points, { color = "#e88fb4", format = v => v, from, to } = {}) {
+  const w = 330, h = 150, pad = { l: 34, r: 8, t: 12, b: 22 };
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  const t = s => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+  const t0 = t(from || points[0].date), t1 = Math.max(t(to || points.at(-1).date), t0 + 1);
+  const vals = points.flatMap(p => [p.value, p.avg]).filter(v => v != null);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi - lo < 1) { const c = (hi + lo) / 2; lo = c - .5; hi = c + .5; }
+  const span = hi - lo; lo -= span * .1; hi += span * .1;
+  const x = d => pad.l + ((t(d) - t0) / (t1 - t0)) * iw;
+  const y = v => pad.t + ih - ((v - lo) / (hi - lo)) * ih;
+  let g = "";
+  [lo + span * .1, (lo + hi) / 2, hi - span * .1].forEach(v => {
+    g += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${r1(y(v))}" y2="${r1(y(v))}" stroke="rgba(255,255,255,.06)"/>`;
+    g += `<text x="${pad.l - 6}" y="${r1(y(v) + 3)}" font-size="9" fill="#5d626b" text-anchor="end">${String(r1(v)).replace(".", ",")}</text>`;
+  });
+  points.forEach(p => { g += `<circle cx="${r1(x(p.date))}" cy="${r1(y(p.value))}" r="2" fill="${color}" fill-opacity=".35"><title>${p.date}: ${format(p.value)}</title></circle>`; });
+  const line = points.filter(p => p.avg != null).map((p, i) => `${i ? "L" : "M"}${r1(x(p.date))} ${r1(y(p.avg))}`).join(" ");
+  if (points.length > 1) g += `<path d="${line}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const lp = points.at(-1);
+  g += `<circle cx="${r1(x(lp.date))}" cy="${r1(y(lp.avg ?? lp.value))}" r="3.5" fill="${color}"/>`;
+  // ~5 etiquetas de fecha repartidas
+  const fmt = d => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(new Date(t(d) * 864e5 + 12 * 36e5)).replace(".", "");
+  const toISO = n => new Date(n * 864e5).toISOString().slice(0, 10);
+  for (let k = 0; k <= 4; k++) {
+    const d = toISO(Math.round(t0 + (t1 - t0) * k / 4));
+    g += `<text x="${r1(x(d))}" y="${h - 6}" font-size="10" text-anchor="${k === 0 ? "start" : k === 4 ? "end" : "middle"}" fill="${k === 4 ? "#ececee" : "#8b9099"}" font-weight="${k === 4 ? 700 : 500}">${fmt(d)}</text>`;
+  }
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Tendencia">${g}</svg>`;
+}

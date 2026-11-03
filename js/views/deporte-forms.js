@@ -1,7 +1,7 @@
 // Formularios de deporte y cuerpo: entreno de gimnasio, rutinas, fútbol, medidas, bienestar y récords.
 
 import { getState, update } from "../state.js";
-import { openSheet, closeSheet, toast, confirmSheet, esc, uid } from "../ui.js";
+import { openSheet, closeSheet, toast, confirmSheet, esc, uid, int } from "../ui.js";
 import { iso, parseISO } from "../stats.js";
 import { seg, field } from "../forms.js";
 import { areaChart } from "../charts.js";
@@ -291,21 +291,72 @@ export function openWellbeingForm(date = iso()) {
   });
 }
 
-// ---------- Récord de un ejercicio: evolución
+// ---------- Progreso de un ejercicio: gráfica (peso máximo, 1RM estimado o volumen) y sesiones
+const METRICS = {
+  w:   { label: "Peso máximo", legend: by => `Peso más alto de cada ${by}`, fmt: kg },
+  e1:  { label: "1RM estimado", legend: by => `Mejor 1RM estimado de cada ${by}`, fmt: v => kg(Math.round(v * 10) / 10) },
+  vol: { label: "Volumen", legend: by => by === "mes" ? "Mayor volumen de una sesión en cada mes" : "Volumen de cada sesión", fmt: v => `${int(v)} kg` }
+};
+let recMetric = "w";
+const monthShort = (ym, withYear) => {
+  const [y, m] = ym.split("-").map(Number);
+  const t = new Intl.DateTimeFormat("es-ES", { month: "short" }).format(new Date(y, m - 1, 1)).replace(".", "");
+  return withYear ? `${t} ${String(y).slice(2)}` : t;
+};
+
+/** Puntos de la gráfica: por mes (lo mejor de cada mes) si hay 3 meses o más; si no, por sesión */
+function progressPoints(hist, metric) {
+  const months = new Map();
+  for (const h of hist) { const ym = h.date.slice(0, 7); months.set(ym, Math.max(months.get(ym) || 0, h[metric])); }
+  if (months.size >= 3) {
+    const keys = [...months.keys()].slice(-18);
+    const withYear = keys[0].slice(0, 4) !== keys.at(-1).slice(0, 4);
+    return { by: "mes", points: keys.map(k => ({ label: monthShort(k, withYear), value: months.get(k) })) };
+  }
+  return { by: "sesión", points: hist.slice(-12).map(h => ({ label: shortDate(h.date), value: h[metric] })) };
+}
+
+function progressChart(rec) {
+  const m = METRICS[recMetric];
+  const { by, points } = progressPoints(rec.history, recMetric);
+  if (points.length < 2) return `<div class="empty">Con ${by === "mes" ? "un solo mes" : "una sola sesión"} aún no hay evolución que dibujar.</div>`;
+  const first = points[0].value, last = points.at(-1).value;
+  const diff = first ? Math.round((last - first) / first * 100) : 0;
+  return `${areaChart(points, { color: "#e88fb4", format: m.fmt, id: "rec" })}
+    <div class="legend"><span style="--c:var(--hab)">${m.legend(by)}</span>${diff ? `<span style="--c:${diff > 0 ? "var(--fin)" : "var(--agenda)"}">${diff > 0 ? "+" : "−"}${Math.abs(diff)} % desde ${points[0].label}</span>` : ""}</div>`;
+}
+
 export function openRecordDetail(name) {
   const rec = records(getState()).find(r => r.name.toLowerCase() === name.toLowerCase());
   if (!rec) return;
-  const hist = rec.history.slice(-10);
+  const bestVol = Math.max(...rec.history.map(h => h.vol));
+  const sessions = rec.history.slice().reverse();
+  const row = h => `<div class="kv"><span>${shortDate(h.date)}${h.date.slice(0, 4) !== iso().slice(0, 4) ? ` ${h.date.slice(0, 4)}` : ""}</span><span class="num">${kg(h.w)} × ${h.r} · ${h.sets} ${h.sets === 1 ? "serie" : "series"}${h.w === rec.best.w && h.r === rec.best.r ? " · <b style=\"color:var(--hab)\">récord</b>" : ""}</span></div>`;
   openSheet(`
     <h2>${esc(rec.name)}</h2>
     <div class="week-stats">
       <div><b class="num" style="color:var(--hab)">${kg(rec.best.w)}</b><small>récord × ${rec.best.r} reps</small></div>
-      <div><b class="num">${kg(rec.bestE1rm)}</b><small>1RM estimado</small></div>
-      <div><b class="num">${rec.sessions}</b><small>sesiones</small></div>
+      <div><b class="num">${kg(Math.round(rec.bestE1rm * 10) / 10)}</b><small>1RM estimado</small></div>
+      <div><b class="num">${METRICS.vol.fmt(bestVol)}</b><small>mejor volumen</small></div>
     </div>
-    ${hist.length > 1 ? areaChart(hist.map(h => ({ label: shortDate(h.date), value: h.w })), { color: "#e88fb4", format: kg, id: "rec" }) : ""}
-    <div class="legend"><span style="--c:var(--hab)">Peso máximo de cada sesión</span></div>
-    <div class="list">${rec.history.slice(-5).reverse().map(h => `<div class="kv"><span>${shortDate(h.date)}</span><span class="num">${kg(h.w)} × ${h.r}${h.w === rec.best.w && h.r === rec.best.r ? " · récord" : ""}</span></div>`).join("")}</div>
-    <p class="hint">El 1RM estimado es el peso que podrías levantar una sola vez, calculado con la fórmula de Epley a partir de tus series.</p>
-    <button class="btn primary" type="button" data-close>Cerrar</button>`);
+    <div class="chips acc-chips" role="tablist" aria-label="Qué mostrar">${Object.entries(METRICS).map(([k, m]) =>
+      `<button type="button" role="tab" class="chip small" data-metric="${k}" aria-selected="${k === recMetric}">${m.label}</button>`).join("")}</div>
+    <div id="rec-chart">${progressChart(rec)}</div>
+    <h3 class="card-h" style="margin-top:14px">Sesiones · ${rec.sessions}</h3>
+    <div class="list" id="rec-sessions">${sessions.slice(0, 10).map(row).join("")}</div>
+    ${sessions.length > 10 ? `<button class="btn small" type="button" id="rec-more" style="margin-top:8px">Ver todas</button>` : ""}
+    <p class="hint">Cada sesión muestra su serie más pesada, sin contar calentamientos. El 1RM estimado es el peso que podrías levantar una sola vez (fórmula de Epley). El volumen suma kg × repeticiones de todas las series.</p>
+    <button class="btn primary" type="button" data-close>Cerrar</button>`, {
+    onOpen: sheet => {
+      sheet.querySelectorAll("[data-metric]").forEach(b => b.addEventListener("click", () => {
+        recMetric = b.dataset.metric;
+        sheet.querySelectorAll("[data-metric]").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+        sheet.querySelector("#rec-chart").innerHTML = progressChart(rec);
+      }));
+      sheet.querySelector("#rec-more")?.addEventListener("click", e => {
+        sheet.querySelector("#rec-sessions").innerHTML = sessions.map(row).join("");
+        e.currentTarget.remove();
+      });
+    }
+  });
 }

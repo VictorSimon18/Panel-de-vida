@@ -6,6 +6,7 @@ import { iso, addDays, parseISO } from "../stats.js";
 import { seg, field } from "../forms.js";
 import { ring, stackChart } from "../charts.js";
 import { meets } from "../habits.js";
+import { nutriWeightCard } from "./tendencia.js";
 
 export const KCAL_HABIT = "hb-kcal";
 export const PROTEIN_HABIT = "hb-proteina";
@@ -74,7 +75,7 @@ export function nutricionTab(state) {
     <div class="legend"><span style="--c:var(--agenda)">Calorías al día</span>${goals.kcal ? `<span style="--c:#ececee">Objetivo ${int(goals.kcal)} kcal</span>` : ""}</div>
   </section>`;
 
-  return hoy + evo;
+  return hoy + evo + nutriWeightCard(state);
 }
 
 // ---------- Objetivos (crean o actualizan los hábitos automáticos)

@@ -9,6 +9,7 @@ import { todayItems, money, week, streak, iso, parseISO } from "../stats.js";
 import { habitsToday, habitValue, setHabitValue, AUTO_LABEL } from "../habits.js";
 import { toggleTask } from "../agenda.js";
 import { weekChart, ring } from "../charts.js";
+import { weeklyBanner, closeWeekly } from "./semana.js";
 
 const PRI = { alta: ["Alta", "var(--danger)"], media: ["Media", "var(--agenda)"], baja: ["Baja", "var(--muted)"] };
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s));
@@ -34,6 +35,7 @@ export function render(state) {
     </header>
 
     ${banners(state)}
+    ${weeklyBanner(state)}
 
     <div class="cols">
     <div class="col col-1">
@@ -127,7 +129,7 @@ function moneyCard(state) {
 
 function weekCard(state) {
   const w = week(state);
-  const header = `<h2 class="card-h"><span class="h-dot" style="--c:var(--work)"></span>Tu semana<span class="spacer"></span></h2>`;
+  const header = `<h2 class="card-h"><span class="h-dot" style="--c:var(--work)"></span>Tu semana<span class="spacer"></span><a class="btn small" href="#semana">Semanas</a></h2>`;
   if (!w.hasData) return `<section class="card">${header}<div class="empty">Aquí verás tus horas de trabajo y estudio, y tu sueño, de lunes a domingo.</div></section>`;
   return `<section class="card">${header}
     <div class="week-stats">
@@ -143,6 +145,8 @@ function weekCard(state) {
 // ---------- Interacción: marcar tareas y hábitos desde el resumen
 export function mount(root, _state, signal) {
   root.addEventListener("click", e => {
+    const wc = e.target.closest("[data-act=weekly-close]");
+    if (wc) { closeWeekly(wc.dataset.ws); toast("Lo tienes cuando quieras en «Semanas»"); return; }
     const t = e.target.closest("[data-task]");
     if (t) {
       let r = null;

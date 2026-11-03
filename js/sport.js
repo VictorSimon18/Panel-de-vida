@@ -40,7 +40,8 @@ export function records(state) {
       if (!map.has(key)) map.set(key, { name: ex.name, best: null, bestE1rm: 0, history: [], sessions: 0 });
       const rec = map.get(key);
       const top = valid.reduce((a, s) => s.w > a.w || (s.w === a.w && s.r > a.r) ? s : a);
-      rec.history.push({ date: w.date, w: top.w, r: top.r });
+      rec.history.push({ date: w.date, w: top.w, r: top.r, workoutId: w.id, sets: valid.length,
+        e1: Math.max(...valid.map(s => e1rm(s.w, s.r))), vol: valid.reduce((a, s) => a + s.w * s.r, 0) });
       rec.sessions++;
       if (!rec.best || top.w > rec.best.w || (top.w === rec.best.w && top.r > rec.best.r)) rec.best = { ...top, date: w.date };
       rec.bestE1rm = Math.max(rec.bestE1rm, ...valid.map(s => e1rm(s.w, s.r)));

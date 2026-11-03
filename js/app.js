@@ -19,6 +19,7 @@ import * as habitos from "./views/habitos.js";
 import * as agenda from "./views/agenda.js";
 import * as ajustes from "./views/ajustes.js";
 import * as logros from "./views/logros.js";
+import * as semana from "./views/semana.js";
 
 const ROUTES = {
   resumen:  { view: resumen,  title: "Resumen" },
@@ -27,7 +28,8 @@ const ROUTES = {
   habitos:  { view: habitos,  title: "Hábitos y deporte",  area: "hab" },
   agenda:   { view: agenda,   title: "Agenda",             area: "ag" },
   ajustes:  { view: ajustes,  title: "Ajustes" },
-  logros:   { view: logros,   title: "Logros" }
+  logros:   { view: logros,   title: "Logros" },
+  semana:   { view: semana,   title: "Semanas" }
 };
 
 const viewEl = document.getElementById("view");

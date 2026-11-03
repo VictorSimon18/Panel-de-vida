@@ -62,6 +62,7 @@ function openGuide() {
   const sheet = openSheet(`
     <h2>Crear los Atajos</h2>
     <p>Se hacen una sola vez en la app <b>Atajos</b> del iPhone. Los nombres de las acciones pueden variar un poco según tu versión de iOS. Empieza por «Enviar al Panel»: los demás lo usan.</p>
+    <p class="hint">Importante: en los textos, lo que va entre corchetes, como <code>[Entrada solicitada]</code>, <b>no se escribe</b>. Es una <b>variable</b>: borra los corchetes y, en ese hueco, insértala desde la barra de variables que aparece encima del teclado. Debe verse como una cápsula de color.</p>
     <div class="copy-box">
       ${copyRow("Dirección (URL)", c.url, "cp-url")}
       ${copyRow("Valor de la cabecera Authorization (incluye tu token: no lo compartas)", c.auth, "cp-auth")}
@@ -136,6 +137,13 @@ function openGuide() {
       `Ejecútalo una vez con ▶︎ y permite el acceso a Salud.`,
       `Crea <b>tres automatizaciones</b> de <b>Hora del día</b> (14:00, 18:00 y 23:45), <b>Diariamente</b>, <b>Ejecutar inmediatamente</b>, todas con <b>Nutrición al Panel</b>. Cada envío actualiza el total del día.`,
       `En la app: <b>Hábitos → Nutrición → Objetivos</b> para poner tus calorías y proteína.`
+    ])}
+
+    ${shortcut("10 · Aviso del resumen semanal (lunes a las 8:00)", "", [
+      `Pestaña <b>Automatización</b> → <b>+</b> → <b>Hora del día</b> → <b>08:00</b>, <b>Semanalmente</b>, deja marcado solo el <b>lunes</b> → <b>Ejecutar inmediatamente</b> → <b>Nuevo atajo en blanco</b>.`,
+      `Añade la acción <b>Mostrar notificación</b> con el texto «Ya tienes el resumen de tu semana en Panel de Vida» (y si quieres, título «Resumen semanal»).`,
+      `Listo. Al abrir la app el lunes verás la tarjeta <b>Tu semana pasada</b> arriba del Resumen. Las semanas anteriores están en <b>Resumen → Tu semana → Semanas</b>.`,
+      `Nota: el iPhone no deja que una notificación de Atajos abra directamente una app web como esta; al tocarla se abre Atajos. Abre Panel de Vida desde su icono.`
     ])}
 
     <p class="hint">Para comprobar que todo funciona, usa <b>Enviar mensaje de prueba</b> en Ajustes, o ejecuta un atajo y luego abre la app: verás un aviso con lo recibido.</p>

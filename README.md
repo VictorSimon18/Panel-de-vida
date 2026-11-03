@@ -72,6 +72,17 @@ Foodvisor escribe en Apple Salud las calorías, los macros y el peso, pero **no 
   - Últimos 14 días: gráfico con la línea del objetivo y medias de 7 días.
 - **Objetivos:** calorías ("no pasarme" o "llegar") y proteína. Cada uno es un hábito automático con racha y XP. En modo "no pasarme", el día cuenta cuando termina.
 - **Peso:** el que registras en Foodvisor llega solo a Cuerpo.
+- **Peso vs calorías** (en Nutrición y en Cuerpo): las últimas 6 semanas con calorías y proteína medias (solo días terminados con registro) y el cambio de la media del peso respecto a la semana anterior. Con al menos 2 semanas completas (≥ 4 días de calorías) estima tus **calorías de mantenimiento**: kcal medias − cambio de peso semanal × 7.700 / 7.
+
+## Tendencia del peso
+
+En **Hábitos → Cuerpo**, la gráfica de los últimos 90 días muestra cada pesaje como un punto suave y, encima, la **media de 7 días**, que filtra las subidas y bajadas diarias. Arriba: la media actual y su cambio en 7 y 30 días; debajo, el ritmo en kg por semana.
+
+## Resumen semanal
+
+- **Cada lunes**, arriba del Resumen, aparece la tarjeta **Tu semana pasada** (lunes a domingo): gasto frente a la semana anterior, horas de estudio y de trabajo, entrenos de gimnasio y fútbol, días con todos los hábitos cumplidos, calorías y proteína medias, peso (media de 7 días) y su cambio, y tareas hechas. Se puede cerrar; el cierre se sincroniza.
+- **Semanas** (desde la tarjeta o desde *Resumen → Tu semana → Semanas*): cualquier semana anterior con flechas.
+- **Aviso del lunes a las 8:00:** automatización de Atajos con *Mostrar notificación* (apartado 10 de la guía). iOS no deja que la notificación abra directamente una app web, así que se abre el panel desde su icono.
 
 ## Hevy (entrenos de gimnasio)
 
@@ -85,7 +96,7 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 - **Rutinas:** tras importar, el panel deja de mostrar "Entrenar" y "Rutinas", porque se usa Hevy para eso. Para volver a apuntar en el panel, desmarca *Apunto el gimnasio solo en Hevy* en Ajustes → Hevy.
 - **Hábitos → Gimnasio** tiene dos zonas:
   - **Últimos entrenos:** agrupados por mes, con el total del mes y "Ver más" para ir hacia atrás.
-  - **Récords:** con buscador de ejercicios y ordenados por los más recientes.
+  - **Récords:** con buscador de ejercicios y ordenados por los más recientes. Al tocar un ejercicio se abre su **progreso**: récord, 1RM estimado y mejor volumen; una gráfica con selector (**peso máximo**, **1RM estimado** con la fórmula de Epley, o **volumen** = kg × reps sin calentamientos), por meses si hay 3 o más (si no, por sesión), y la lista de sesiones con su serie más pesada.
 - **Formatos que reconoce:** fechas en inglés ("21 Oct 2026, 18:05"), en español o ISO, y peso en kg o libras (se convierte).
 
 ## Instalarla en el iPhone
@@ -210,11 +221,14 @@ js/
   inbox.js              Buzón de Atajos: convierte los mensajes de Siri y Salud en datos
   hevy.js               Importación de entrenos desde el CSV de Hevy
   views/nutricion.js    Pestaña Nutrición y objetivos (datos de Foodvisor vía Salud)
+  views/tendencia.js    Gráfica de tendencia del peso y tarjeta «Peso vs calorías»
+  views/semana.js       Tarjeta del lunes y pantalla «Semanas» (resumen semanal)
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
   icons.js              Juego de iconos
   demo.js               Datos de ejemplo (se cargan y se quitan desde Ajustes)
   ui.js                 Utilidades: formatos, hoja inferior, avisos
+  trends.js             Media de 7 días del peso, semanas de nutrición, mantenimiento y resumen semanal
   finance.js            Lógica de finanzas: categorías, saldos, fijos automáticos
   work.js               Lógica de trabajo y estudios: horas por semana, proyectos, aprendizaje
   forms.js              Piezas de formulario compartidas
