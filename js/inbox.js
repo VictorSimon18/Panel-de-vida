@@ -135,7 +135,12 @@ export function applyInbox(s, messages, today = iso()) {
         if (b) b.weight = Math.round(w * 10) / 10;
         else s.habits.body.push({ id: id + "-peso", date, weight: Math.round(w * 10) / 10, fat: null, waist: null, source: "foodvisor" });
       }
-      if (!hasNutri && !(w > 0)) { skipped.push("nutrición sin datos"); continue; }
+      if (!hasNutri && !(w > 0)) {
+        // se muestra lo recibido para poder ver qué falla en el atajo
+        const got = ["calorias", "proteinas", "carbohidratos", "grasas", "peso"].map(k => `${k}: «${m[k] ?? "falta"}»`).join(", ");
+        skipped.push(`nutrición sin datos (llegó ${got})`);
+        continue;
+      }
       done.push([hasNutri && `${int(v.kcal || 0)} kcal`, v.protein > 0 && `${int(v.protein)} g proteína`, w > 0 && `${String(Math.round(w * 10) / 10).replace(".", ",")} kg`].filter(Boolean).join(" · "));
     } else if (tipo === "pasos") {
       const value = Math.round(num(m.valor ?? m.pasos));
