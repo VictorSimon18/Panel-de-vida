@@ -25,7 +25,8 @@ const norm = s => String(s || "").trim().toLowerCase().normalize("NFD").replace(
 /** "clave: valor" por línea → objeto con claves normalizadas (sin tildes, minúsculas) */
 export function parseMessage(text) {
   const out = {};
-  for (const line of String(text || "").split(/\r?\n/)) {
+  // una línea por campo, o todo en una línea separado por «;» (útil para probar a mano)
+  for (const line of String(text || "").split(/\r?\n|;/)) {
     const i = line.indexOf(":");
     if (i < 1) continue;
     out[norm(line.slice(0, i))] = line.slice(i + 1).trim();
