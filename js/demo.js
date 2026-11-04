@@ -60,28 +60,6 @@ export function buildDemo(alias) {
   s.finance.goals = [{ id: "goal-viaje", name: "Viaje a Japón", target: 3000, saved: 1400, deadline: iso(new Date(now.getFullYear() + 1, 6, 1)), history: [] },
     { id: "goal-colchon", name: "Fondo de emergencia", target: 2000, saved: 650, deadline: null, history: [] }];
 
-  // ---- Trabajo y estudios (últimos 13 días)
-  const ms = (names, doneN) => names.map((name, i) => ({ id: nid("ms"), name, done: i < doneN, doneAt: i < doneN ? d(-(names.length - i) * 2) : null }));
-  s.work.projects = [
-    { id: "prj-informe", name: "Informe trimestral", kind: "trabajo", deadline: d(4), archived: false,
-      milestones: ms(["Recopilar datos de ventas", "Análisis por región", "Primer borrador", "Revisión con el equipo", "Entrega final"], 3) },
-    { id: "prj-sql", name: "Aprobar el certificado de SQL", kind: "estudio", deadline: d(45), archived: false,
-      milestones: ms(["Consultas básicas", "JOINs", "Subconsultas", "Índices y rendimiento", "Examen de prueba", "Examen oficial"], 2) },
-    { id: "prj-web", name: "Rediseño de la intranet", kind: "trabajo", deadline: null, archived: true,
-      milestones: ms(["Maqueta", "Desarrollo", "Publicación"], 3) }
-  ];
-  for (let i = 55; i >= 0; i--) {
-    const day = addDays(now, -i), wd = (day.getDay() + 6) % 7;
-    if (wd < 5) s.work.entries.push({ id: nid("w"), date: iso(day), minutes: Math.round((300 + r() * 180) / 15) * 15, projectId: "prj-informe", kind: "trabajo" });
-    if (r() < .6) s.work.entries.push({ id: nid("w"), date: iso(day), minutes: Math.round((30 + r() * 90) / 15) * 15, projectId: "prj-sql", kind: "estudio" });
-  }
-  s.work.learning = [
-    { id: "lrn-sql", name: "Curso de SQL", type: "curso", done: 12, total: 40, unit: "lecciones", startedAt: d(-30) },
-    { id: "lrn-libro", name: "Hábitos atómicos", type: "libro", done: 184, total: 320, unit: "páginas", startedAt: d(-20) },
-    { id: "lrn-ingles", name: "Inglés (conversación)", type: "habilidad", done: 34, total: 100, unit: "horas", startedAt: d(-90) },
-    { id: "lrn-excel", name: "Excel avanzado", type: "curso", done: 24, total: 24, unit: "lecciones", startedAt: d(-60), finishedAt: d(-10) }
-  ];
-
   // ---- Hábitos (últimas 17 semanas; hoy a medias)
   s.habits.habits = [
     { id: "hb-agua", name: "Beber agua", unit: "L", target: 2, step: 0.5, frequency: { type: "daily" }, createdAt: d(-120) },
@@ -120,11 +98,20 @@ export function buildDemo(alias) {
         exercises: rt.exercises.map(ex => ({ name: ex.name, sets: Array.from({ length: ex.sets }, () => ({ w: Math.round((base[ex.name] + inc * (ex.name === "Prensa" ? 4 : 1)) / 2.5) * 2.5, r: ex.reps })) })) });
     });
   }
-  // fútbol: entrenamiento los martes, partido algunos sábados
-  for (let wk = 7; wk >= 0; wk--) {
+  // fútbol: entrenos martes y jueves, partido de liga cada sábado (y alguna copa o amistoso)
+  const rivals = ["CD Arenal", "UD Puerto", "Atlético Norte", "Racing Sur", "CF Ribera", "SD Vega", "Real Olivar", "CD Cantera"];
+  const positions = ["mc", "mc", "mco", "ext", "mc"];
+  for (let wk = 14; wk >= 0; wk--) {
     const ws = addDays(weekStart(now), -7 * wk);
-    if (iso(addDays(ws, 1)) <= today) s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, 1)), type: "futbol", kind: "entrenamiento", minutes: 90, note: "" });
-    if (wk % 2 === 0 && iso(addDays(ws, 5)) < today) s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, 5)), type: "futbol", kind: "partido", minutes: 70, note: "Liga" });
+    for (const off of [1, 3]) if (iso(addDays(ws, off)) <= today) s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, off)), type: "futbol", kind: "entrenamiento", minutes: 90, note: "" });
+    if (iso(addDays(ws, 5)) < today) {
+      const gf = Math.floor(r() * 4), ga = Math.floor(r() * 3), starter = r() < .8;
+      const goals = Math.min(gf, r() < .35 ? 1 + (r() < .2 ? 1 : 0) : 0), assists = Math.min(gf - goals, r() < .5 ? 1 : 0);
+      s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, 5)), type: "futbol", kind: "partido",
+        rival: rivals[wk % rivals.length], venue: wk % 2 ? "visitante" : "local", comp: wk === 6 ? "copa" : wk === 12 ? "amistoso" : "liga",
+        gf, ga, goals, assists, starter, minutes: starter ? 70 + Math.round(r() * 20) : 15 + Math.round(r() * 25),
+        yellow: r() < .15 ? 1 : 0, red: false, position: positions[wk % positions.length], rating: Math.round((5.5 + r() * 3 + goals) * 2) / 2, note: "" });
+    }
   }
 
   for (let i = 13; i >= 0; i--) {
@@ -137,8 +124,8 @@ export function buildDemo(alias) {
   const ts = new Date().toISOString();
   const task = (title, due, extra = {}) => ({ id: nid("tk"), title, due, time: null, priority: "media", tags: [], note: "", repeat: null, done: false, doneAt: null, createdAt: d(-10), updatedAt: ts, ...extra });
   s.agenda.tasks = [
-    task("Entregar informe trimestral", today, { time: "18:00", priority: "alta", tags: ["trabajo"] }),
-    task("Lección 13 del curso de SQL", today, { tags: ["estudio"] }),
+    task("Renovar la ficha del equipo", today, { time: "18:00", priority: "alta", tags: ["fútbol"] }),
+    task("Comprar espinilleras", today, { tags: ["fútbol"] }),
     task("Pagar la cuota del equipo", d(-1), { tags: ["fútbol"] }),
     task("Comprar proteína", today, { priority: "baja", done: true, doneAt: ts }),
     task("Revisar el presupuesto de noviembre", d(2), { tags: ["finanzas"] }),

@@ -90,9 +90,11 @@ export function weekSummary(state, ws) {
 
   const spendIn = (a, b) => -state.finance.transactions.filter(t => !t.transferId && t.amount < 0 && inW(t.date, a, b)).reduce((s, t) => s + t.amount, 0);
   const incomeIn = (a, b) => state.finance.transactions.filter(t => !t.transferId && t.amount > 0 && inW(t.date, a, b)).reduce((s, t) => s + t.amount, 0);
-  const minIn = (kind, a, b) => state.work.entries.filter(e => e.kind === kind && inW(e.date, a, b)).reduce((s, e) => s + (e.minutes || 0), 0);
 
   const wos = state.habits.workouts.filter(w => inW(w.date));
+  const matches = wos.filter(w => w.type === "futbol" && w.kind === "partido");
+  const res = r => matches.filter(m => m.gf != null && m.ga != null && (r === "V" ? m.gf > m.ga : r === "D" ? m.gf < m.ga : m.gf === m.ga)).length;
+  const stepLogs = state.habits.logs.filter(l => l.habitId === "hb-pasos-salud" && inW(l.date) && l.value > 0);
   const levels = days.map(d => dayLevel(state, d));
   const nut = (state.habits.nutrition || []).filter(x => x.kcal > 0 && inW(x.date));
   const wmap = weightByDay(state);
@@ -101,9 +103,10 @@ export function weekSummary(state, ws) {
   return {
     start: ws, end, days,
     spend: spendIn(days[0], end), spendPrev: spendIn(prevA, prevB), income: incomeIn(days[0], end),
-    study: minIn("estudio", days[0], end), studyPrev: minIn("estudio", prevA, prevB),
-    work: minIn("trabajo", days[0], end), workPrev: minIn("trabajo", prevA, prevB),
-    gym: wos.filter(w => w.type === "gym").length, futbol: wos.filter(w => w.type === "futbol").length,
+    matches: matches.length, goals: matches.reduce((s, m) => s + (Number(m.goals) || 0), 0), assists: matches.reduce((s, m) => s + (Number(m.assists) || 0), 0),
+    V: res("V"), E: res("E"), D: res("D"),
+    gym: wos.filter(w => w.type === "gym").length, futbolTrain: wos.filter(w => w.type === "futbol" && w.kind !== "partido").length,
+    steps: mean(stepLogs.map(l => l.value)), stepDays: stepLogs.length,
     habitDays: levels.filter(l => l === 4).length, habitTracked: levels.filter(l => l != null).length,
     kcal: mean(nut.map(x => x.kcal)), protein: mean(nut.map(x => x.protein).filter(v => v > 0)), kcalDays: nut.length,
     weight: wEnd, weightDelta: wEnd != null && wStart != null ? wEnd - wStart : null,
@@ -112,5 +115,5 @@ export function weekSummary(state, ws) {
 }
 
 /** ¿Hay algo apuntado esa semana? */
-export const weekHasData = w => w.spend > 0 || w.income > 0 || w.study > 0 || w.work > 0 || w.gym > 0 || w.futbol > 0 ||
+export const weekHasData = w => w.spend > 0 || w.income > 0 || w.matches > 0 || w.gym > 0 || w.futbolTrain > 0 || w.stepDays > 0 ||
   w.habitTracked > 0 || w.kcalDays > 0 || w.weight != null || w.tasksDone > 0;

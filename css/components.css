@@ -158,7 +158,7 @@
   transition: color .2s;
 }
 .tab[data-area="fin"] { --c: var(--fin); }
-.tab[data-area="work"] { --c: var(--work); }
+.tab[data-area="fut"] { --c: var(--fut); }
 .tab[data-area="hab"] { --c: var(--hab); }
 .tab[data-area="ag"] { --c: var(--agenda); }
 .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
@@ -745,3 +745,38 @@ code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .avatar-row .btn-row { flex: 1; }
 .logo.avatar-big { width: 64px; height: 64px; font-size: 18px; }
 .avatar-row .btn { white-space: nowrap; text-align: center; justify-content: center; }
+
+/* =========================================================
+   Fútbol
+   ========================================================= */
+.season-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 2px 0 10px; }
+.season-bar b { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -.01em; }
+.fut-hero { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.fut-big { padding: 12px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--surface-2); text-align: center; }
+.fut-big b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -.02em; color: var(--fut); line-height: 1.1; }
+.fut-big small { font-size: var(--fs-xs); color: var(--muted); }
+.vde { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-top: 12px; font-size: 13px; }
+.vde > span:not(.muted) { color: var(--c); font-weight: 600; }
+.vde b { font-size: var(--fs-lg); }
+.vde .muted { margin-left: auto; font-size: var(--fs-xs); }
+.last5 { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.last5 small { color: var(--muted); font-size: var(--fs-xs); }
+.last5 > div { display: flex; gap: 6px; }
+.res-dot { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  color: var(--c); border: 1.5px solid var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
+.fut-table .nw-row { grid-template-columns: 1.8fr .6fr .6fr .6fr 1fr; }
+.tap-kv { width: 100%; background: none; border: 0; border-top: 1px solid var(--line-soft); color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.list .tap-kv:first-child { border-top: 0; }
+.tap-kv:active { background: var(--surface-2); }
+
+/* Formulario de partido */
+.form-h { margin: 8px 0 0; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.score-row { display: flex; align-items: center; gap: 8px; }
+.score-row .input { width: 64px; text-align: center; font-size: 20px; font-weight: 700; }
+.score-res { margin-left: 6px; font-size: 13px; }
+.score-res[data-r="V"] { color: var(--fin); } .score-res[data-r="E"] { color: var(--muted); } .score-res[data-r="D"] { color: var(--danger); }
+.counter { display: flex; align-items: center; gap: 6px; }
+.counter .input { text-align: center; font-weight: 700; min-width: 0; }
+.counter .btn.small { min-width: 40px; min-height: 40px; font-size: 18px; padding: 0; }
+.range { width: 100%; accent-color: var(--fut); }
+.range-ends { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--dim); }

@@ -18,7 +18,7 @@ export function pasosTab(state) {
   const h = state.habits.habits.find(x => x.id === STEPS_HABIT_ID);
   if (!h) return `<section class="card">
     <h2 class="card-h">Pasos</h2>
-    <div class="empty">Aún no han llegado pasos de Salud.<br>Añade los pasos al atajo <b>Nutrición al Panel</b>: <a href="#ajustes">Ajustes → Siri y Salud → Cómo crear los Atajos</a> (apartado 9).</div>
+    <div class="empty">Aún no han llegado pasos de Salud.<br>Añade los pasos al atajo <b>Nutrición al Panel</b>: <a href="#ajustes">Ajustes → Siri y Salud → Cómo crear los Atajos</a> (apartado 8).</div>
   </section>`;
 
   const today = iso();

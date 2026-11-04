@@ -21,7 +21,7 @@ export function nutricionTab(state) {
 
   if (!list.length) return `<section class="card">
     <h2 class="card-h">Nutrición<span class="spacer"></span><button class="btn small" type="button" data-act="nutri-goals">Objetivos</button></h2>
-    <div class="empty">Aún no han llegado datos de Foodvisor.<br>Monta el atajo <b>Nutrición al Panel</b> en <a href="#ajustes">Ajustes → Siri y Salud → Cómo crear los Atajos</a> (apartado 9).</div>
+    <div class="empty">Aún no han llegado datos de Foodvisor.<br>Monta el atajo <b>Nutrición al Panel</b> en <a href="#ajustes">Ajustes → Siri y Salud → Cómo crear los Atajos</a> (apartado 8).</div>
   </section>`;
 
   // ---- Hoy

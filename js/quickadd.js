@@ -8,7 +8,7 @@ const OPTIONS = [
   { id: "money",  c: "var(--fin)",    icon: icon.money,    title: "Gasto o ingreso",       sub: "Movimiento o transferencia", phase: "Finanzas" },
   { id: "habit",  c: "var(--hab)",    icon: icon.habit,    title: "Hábito, sueño o ánimo", sub: "Registro de hoy",           phase: "Hábitos y deporte" },
   { id: "task",   c: "var(--agenda)", icon: icon.task,     title: "Tarea o evento",        sub: "Con fecha y prioridad",     phase: "Agenda" },
-  { id: "train",  c: "var(--work)",   icon: icon.dumbbell, title: "Entreno o tiempo",      sub: "Trabajo, estudio, gimnasio, fútbol", phase: "Hábitos y deporte" }
+  { id: "train",  c: "var(--fut)",    icon: icon.ball,     title: "Partido o entreno",     sub: "Fútbol o gimnasio",         phase: "Fútbol" }
 ];
 
 // Registro de formularios: cada fase añadirá el suyo con registerQuickAction()

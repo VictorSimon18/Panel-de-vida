@@ -29,9 +29,9 @@ export function weekGrid(w) {
   const wd = w.weightDelta;
   return `<div class="wk-grid">
     ${tile("Gasto", money(w.spend), vs(w.spend, w.spendPrev, "down"), "var(--fin)")}
-    ${tile("Estudio", hours(w.study), vs(w.study, w.studyPrev), "var(--work)")}
-    ${tile("Trabajo", hours(w.work), vs(w.work, w.workPrev), "var(--work)")}
-    ${tile("Entrenos", String(w.gym + w.futbol), `<small class="wk-vs">${w.gym} gimnasio · ${w.futbol} fútbol</small>`, "var(--hab)")}
+    ${tile("Fútbol", w.matches ? `${w.matches} ${w.matches === 1 ? "partido" : "partidos"}` : "—", w.matches ? `<small class="wk-vs">${w.goals} ${w.goals === 1 ? "gol" : "goles"} · ${w.assists} asist.${w.V + w.E + w.D ? ` · ${w.V}V ${w.E}E ${w.D}D` : ""}</small>` : "", "var(--fut)")}
+    ${tile("Entrenos", String(w.gym + w.futbolTrain), `<small class="wk-vs">${w.gym} gimnasio · ${w.futbolTrain} fútbol</small>`, "var(--hab)")}
+    ${tile("Pasos", w.steps != null ? int(w.steps) : "—", w.steps != null ? `<small class="wk-vs">media de ${w.stepDays} ${w.stepDays === 1 ? "día" : "días"}</small>` : "", "var(--hab)")}
     ${tile("Hábitos", w.habitTracked ? `${w.habitDays}/${w.habitTracked}` : "—", `<small class="wk-vs">días con todos cumplidos</small>`, "var(--hab)")}
     ${tile("Calorías", w.kcal != null ? `${int(w.kcal)} kcal` : "—", w.kcal != null ? `<small class="wk-vs">media de ${w.kcalDays} ${w.kcalDays === 1 ? "día" : "días"}${w.protein != null ? ` · ${int(w.protein)} g proteína` : ""}</small>` : "", "var(--agenda)")}
     ${tile("Peso", w.weight != null ? `${num1(w.weight)} kg` : "—", wd != null ? `<small class="wk-vs" style="color:${wd < -0.04 ? "var(--fin)" : wd > 0.04 ? "var(--agenda)" : ""}">${wd > 0.04 ? "+" : wd < -0.04 ? "−" : "±"}${num1(Math.abs(Math.round(wd * 10) / 10))} kg en la semana</small>` : "")}

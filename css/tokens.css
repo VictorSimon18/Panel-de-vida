@@ -37,7 +37,8 @@
 
   /* Un color por área */
   --fin: #7fcf9b;     /* Finanzas */
-  --work: #7ea6f0;    /* Trabajo y estudios */
+  --work: #7ea6f0;    /* (azul: se usa en gráficos) */
+  --fut: #7ea6f0;     /* Fútbol */
   --hab: #e88fb4;     /* Hábitos y deporte */
   --agenda: #e0b467;  /* Agenda y tareas */
 

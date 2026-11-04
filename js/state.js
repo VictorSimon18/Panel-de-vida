@@ -2,7 +2,7 @@
 
 import { dbGet, dbSet } from "./db.js";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 const KEY = "state";
 
 // Estructura completa de los datos. Cada sección se irá rellenando en su fase.
@@ -25,16 +25,11 @@ export function defaultState() {
       recurring: [],         // { id, name, amount, accountId, categoryId, every, nextDate }
       goals: []              // { id, name, target, saved, deadline }
     },
-    work: {
-      entries: [],           // { id, date, minutes, projectId, kind: "trabajo"|"estudio", note }
-      projects: [],          // { id, name, kind, milestones: [{ id, name, done }] }
-      learning: []           // { id, name, type: "curso"|"libro"|"habilidad", done, total, unit }
-    },
     habits: {
       habits: [],            // { id, name, unit, target, frequency }
       logs: [],              // { id, habitId, date, value }
       routines: [],          // { id, name, exercises: [{ id, name }] }
-      workouts: [],          // { id, date, type: "gym"|"futbol", routineId, minutes, sets: [] }
+      workouts: [],          // { id, date, type: "gym"|"futbol", … }  (gimnasio en sport.js; fútbol en futbol.js)
       body: [],              // { id, date, weight, fat, measures }
       sleep: [],             // { id, date, hours, quality }
       mood: [],              // { id, date, value }
@@ -48,7 +43,7 @@ export function defaultState() {
     inboxSeen: [],           // mensajes de Atajos ya procesados (para no duplicar)
     game: {
       xp: 0,
-      areaXp: { fin: 0, work: 0, hab: 0, ag: 0 },
+      areaXp: { fin: 0, fut: 0, hab: 0, ag: 0 },
       achievements: [],      // { id, unlockedAt }
       log: []                // { at, area, xp, reason }
     }
@@ -65,7 +60,18 @@ function fillDefaults(target, defaults) {
 }
 
 // Migraciones entre versiones del formato: { 2: s => { ...; return s; } }
-const migrations = {};
+const migrations = {
+  // v2: «Trabajo y estudios» se sustituye por el área «Fútbol»: se borran sus datos y sus logros
+  2: s => {
+    delete s.work;
+    if (s.game) {
+      s.game.achievements = (s.game.achievements || []).filter(a => !a.id.startsWith("work-"));
+      if (s.game.areaXp) delete s.game.areaXp.work;
+      if (s.game.lastLevels) delete s.game.lastLevels.work;
+    }
+    return s;
+  }
+};
 
 export function migrate(data) {
   let s = data;

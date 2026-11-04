@@ -37,3 +37,5 @@ export const icon = {
   ball: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 2.5-1.3 4h-4.4l-1.3-4z"/><path d="M12 3.5v4M15.5 10l4-1.3M14.2 14l2.4 3.4M9.8 14l-2.4 3.4M8.5 10l-4-1.3"/>'),
   moon: svg('<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>')
 };
+// El área Fútbol usa el balón
+icon.fut = icon.ball;

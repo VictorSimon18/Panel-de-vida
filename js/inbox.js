@@ -5,9 +5,8 @@
 //   tipo: gasto        importe: 12,50     nota: Mercadona
 //   tipo: tarea        titulo: Llamar al dentista     fecha: mañana
 //   tipo: habito       nombre: Agua       cantidad: 0,5
-//   tipo: tiempo       clase: estudio     horas: 2
 //   tipo: gimnasio     minutos: 60
-//   tipo: futbol       minutos: 90        partido: sí
+//   tipo: futbol       minutos: 90        partido: sí   rival: CD Ejemplo   resultado: 3-1   goles: 1   asistencias: 0
 //   tipo: pasos        fecha: 2026-11-01  valor: 8.423
 //   tipo: cuerpo       peso: 75,4         grasa: 18,5   cintura: 84
 //   tipo: nutricion    calorias: 1.850 kcal   proteinas: 120 g   carbohidratos: 210   grasas: 60   peso: 75,4
@@ -135,17 +134,23 @@ export function applyInbox(s, messages, today = iso()) {
       setHabitValue(s, h.id, day, habitValue(s, h, day) + amount);
       done.push(`${h.name} +${String(amount).replace(".", ",")} ${h.unit || ""}`.trim());
     } else if (tipo === "tiempo") {
-      const minutes = Math.round(m.minutos ? num(m.minutos) : num(m.horas) * 60);
-      if (!(minutes > 0) || minutes > 24 * 60) { skipped.push("tiempo no válido"); continue; }
-      const kind = norm(m.clase).startsWith("trab") ? "trabajo" : "estudio";
-      const p = m.proyecto && s.work.projects.find(x => !x.archived && norm(x.name).includes(norm(m.proyecto)));
-      s.work.entries.push({ id, date: parseDay(m.fecha, today) || today, minutes, kind, projectId: p?.id || null, note: m.nota || "", source: "siri" });
-      done.push(`${minutes >= 60 ? `${String(Math.round(minutes / 6) / 10).replace(".", ",")} h` : `${minutes} min`} de ${kind}`);
+      skipped.push("el apartado de trabajo y estudios ya no existe");
     } else if (tipo === "gimnasio" || tipo === "futbol") {
       const minutes = Math.round(num(m.minutos)) || (tipo === "futbol" ? 90 : 60);
       const date = parseDay(m.fecha, today) || today;
       if (tipo === "gimnasio") s.habits.workouts.push({ id, date, type: "gym", routineId: null, minutes, exercises: [], note: "Desde Siri", source: "siri" });
-      else s.habits.workouts.push({ id, date, type: "futbol", kind: ["si", "sí", "partido"].includes(norm(m.partido)) ? "partido" : "entrenamiento", minutes, note: "", source: "siri" });
+      else {
+        const partido = ["si", "partido"].includes(norm(m.partido));
+        const w = { id, date, type: "futbol", kind: partido ? "partido" : "entrenamiento", minutes, note: m.nota || "", source: "siri" };
+        if (partido) {
+          if (m.rival) w.rival = m.rival.trim();
+          const sc = String(m.resultado || "").match(/(\d+)\s*[-–:]\s*(\d+)/);   // «3-1»: tu equipo – rival
+          if (sc) { w.gf = Number(sc[1]); w.ga = Number(sc[2]); }
+          if (m.goles) w.goals = Math.max(0, Math.round(num(m.goles)) || 0);
+          if (m.asistencias) w.assists = Math.max(0, Math.round(num(m.asistencias)) || 0);
+        }
+        s.habits.workouts.push(w);
+      }
       done.push(`${tipo === "gimnasio" ? "gimnasio" : "fútbol"} ${minutes} min`);
     } else if (tipo === "cuerpo") {
       const data = { weight: num(m.peso), fat: num(m.grasa), waist: num(m.cintura) };

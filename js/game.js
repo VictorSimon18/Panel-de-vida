@@ -10,7 +10,7 @@ import { meets } from "./habits.js";
 
 export const AREAS = {
   fin:  { key: "fin",  name: "Finanzas",           short: "Finanzas", color: "var(--fin)",    hex: "#7fcf9b", route: "finanzas" },
-  work: { key: "work", name: "Trabajo y estudios", short: "Trabajo",  color: "var(--work)",   hex: "#7ea6f0", route: "trabajo" },
+  fut:  { key: "fut",  name: "Fútbol",             short: "Fútbol",   color: "var(--fut)",    hex: "#7ea6f0", route: "futbol" },
   hab:  { key: "hab",  name: "Hábitos y deporte",  short: "Hábitos",  color: "var(--hab)",    hex: "#e88fb4", route: "habitos" },
   ag:   { key: "ag",   name: "Agenda y tareas",    short: "Agenda",   color: "var(--agenda)", hex: "#e0b467", route: "agenda" }
 };
@@ -35,8 +35,8 @@ export const titleFor = level => TITLES.filter(([l]) => level >= l).pop()[1];
 // ---------- Tabla de XP (se muestra tal cual en la pantalla de Logros)
 export const XP = {
   tx: 5, txDailyCap: 10, goalContribution: 10, goalReached: 100, positiveMonth: 50,
-  per30min: 5, workDailyCapMin: 720, milestone: 25, project: 100, learn10pct: 10, learnDone: 75,
-  habitDay: 10, perfectDay: 20, gym: 30, futbolTraining: 25, futbolMatch: 30, record: 20, wellbeing: 3, body: 5,
+  futbolTraining: 25, futbolMatch: 30, goal: 10, assist: 5, win: 10,
+  habitDay: 10, perfectDay: 20, gym: 30, record: 20, wellbeing: 3, body: 5,
   task: { baja: 5, media: 10, alta: 15 }, onTime: 5, event: 2
 };
 
@@ -45,15 +45,13 @@ export const XP_RULES = [
   ["fin", "Aportación a una meta de ahorro", `${XP.goalContribution}`],
   ["fin", "Meta de ahorro conseguida", `${XP.goalReached}`],
   ["fin", "Mes cerrado con balance positivo", `${XP.positiveMonth}`],
-  ["work", "Cada 30 min de trabajo o estudio (máx. 12 h al día)", `${XP.per30min}`],
-  ["work", "Hito completado", `${XP.milestone}`],
-  ["work", "Proyecto completado", `${XP.project}`],
-  ["work", "Cada 10 % de un curso, libro o habilidad", `${XP.learn10pct}`],
-  ["work", "Curso, libro o habilidad terminado", `${XP.learnDone}`],
+  ["fut", "Partido jugado", `${XP.futbolMatch}`],
+  ["fut", "Victoria", `${XP.win}`],
+  ["fut", "Gol / asistencia", `${XP.goal} / ${XP.assist}`],
+  ["fut", "Entreno de fútbol", `${XP.futbolTraining}`],
   ["hab", "Hábito cumplido en un día", `${XP.habitDay}`],
   ["hab", "Día perfecto (todos los hábitos del día)", `${XP.perfectDay}`],
   ["hab", "Entreno de gimnasio", `${XP.gym}`],
-  ["hab", "Fútbol: entrenamiento / partido", `${XP.futbolTraining} / ${XP.futbolMatch}`],
   ["hab", "Nuevo récord en un ejercicio", `${XP.record}`],
   ["hab", "Sueño o ánimo apuntado", `${XP.wellbeing}`],
   ["hab", "Medición corporal", `${XP.body}`],
@@ -64,9 +62,9 @@ export const XP_RULES = [
 
 // ---------- Cálculo de XP y estadísticas (para los logros)
 export function computeXP(state, today = iso()) {
-  const fin = state.finance, work = state.work, hb = state.habits, ag = state.agenda;
+  const fin = state.finance, hb = state.habits, ag = state.agenda;
   const st = {};
-  const areas = { fin: 0, work: 0, hab: 0, ag: 0 };
+  const areas = { fin: 0, fut: 0, hab: 0, ag: 0 };
 
   // Finanzas
   const perDay = new Map();
@@ -94,27 +92,25 @@ export function computeXP(state, today = iso()) {
   areas.fin += positiveMonths * XP.positiveMonth;
   Object.assign(st, { txCount, goalsReached, positiveMonths, recurring: fin.recurring.length, accounts: fin.accounts.length });
 
-  // Trabajo y estudios
-  const workDay = new Map();
-  let workMin = 0;
-  for (const e of work.entries) { workDay.set(e.date, (workDay.get(e.date) || 0) + (e.minutes || 0)); workMin += e.minutes || 0; }
-  workDay.forEach(m => { areas.work += Math.floor(Math.min(m, XP.workDailyCapMin) / 30) * XP.per30min; });
-  let milestones = 0, projectsDone = 0;
-  for (const p of work.projects) {
-    const ms = p.milestones || [];
-    const d = ms.filter(m => m.done).length;
-    milestones += d;
-    if (ms.length && d === ms.length) projectsDone++;
+  // Fútbol: partidos (con victoria, goles y asistencias) y entrenos
+  let futbol = 0, partidos = 0, futbolMin = 0, futGoals = 0, futAssists = 0, futWins = 0, maxGoals = 0, bestRating = 0, futTrain = 0, unbeaten = 0, bestUnbeaten = 0;
+  const seasonCount = new Map();
+  for (const w of hb.workouts.filter(x => x.type === "futbol").sort((a, b) => a.date.localeCompare(b.date))) {
+    futbol++; futbolMin += w.minutes || 0;
+    if (w.kind !== "partido") { futTrain++; areas.fut += XP.futbolTraining; continue; }
+    partidos++;
+    const g = Number(w.goals) || 0, as = Number(w.assists) || 0;
+    futGoals += g; futAssists += as; maxGoals = Math.max(maxGoals, g); bestRating = Math.max(bestRating, Number(w.rating) || 0);
+    areas.fut += XP.futbolMatch + g * XP.goal + as * XP.assist;
+    if (w.gf != null && w.ga != null) {
+      if (w.gf > w.ga) { futWins++; areas.fut += XP.win; }
+      unbeaten = w.gf >= w.ga ? unbeaten + 1 : 0;
+      bestUnbeaten = Math.max(bestUnbeaten, unbeaten);
+    }
+    const y = Number(w.date.slice(0, 4)) - (Number(w.date.slice(5, 7)) >= 8 ? 0 : 1);
+    seasonCount.set(y, (seasonCount.get(y) || 0) + 1);
   }
-  areas.work += milestones * XP.milestone + projectsDone * XP.project;
-  let learnDone = 0;
-  for (const l of work.learning) {
-    if (!(l.total > 0)) continue;
-    const frac = Math.min(1, l.done / l.total);
-    areas.work += Math.floor(frac * 10) * XP.learn10pct;
-    if (frac >= 1) { areas.work += XP.learnDone; learnDone++; }
-  }
-  Object.assign(st, { workHours: workMin / 60, milestones, projectsDone, learnDone });
+  Object.assign(st, { futbol, partidos, futbolMin, futGoals, futAssists, futWins, maxGoals, bestRating, futTrain, bestUnbeaten, bestSeason: Math.max(0, ...seasonCount.values()) });
 
   // Hábitos y deporte
   const logSum = new Map();
@@ -149,11 +145,8 @@ export function computeXP(state, today = iso()) {
     if (due.length && due.every(h => doneDates.get(h.id).has(d))) perfectDays++;
   }
   areas.hab += perfectDays * XP.perfectDay;
-  let gym = 0, futbol = 0, partidos = 0, futbolMin = 0;
-  for (const w of hb.workouts) {
-    if (w.type === "gym") { gym++; areas.hab += XP.gym; }
-    else if (w.type === "futbol") { futbol++; futbolMin += w.minutes || 0; if (w.kind === "partido") { partidos++; areas.hab += XP.futbolMatch; } else areas.hab += XP.futbolTraining; }
-  }
+  let gym = 0;
+  for (const w of hb.workouts) if (w.type === "gym") { gym++; areas.hab += XP.gym; }
   // Récords: cada vez que el peso máximo de un ejercicio supera al anterior
   let records = 0;
   const best = new Map();
@@ -189,7 +182,7 @@ export function computeXP(state, today = iso()) {
       prev = d;
     }
   }
-  Object.assign(st, { habitDays, perfectDays, gym, futbol, partidos, futbolMin, records, wellbeing: hb.sleep.length + hb.mood.length, body: hb.body.length, bestHabitStreak });
+  Object.assign(st, { habitDays, perfectDays, gym, records, wellbeing: hb.sleep.length + hb.mood.length, body: hb.body.length, bestHabitStreak });
 
   // Agenda
   let tasksDone = 0, onTime = 0;
@@ -205,14 +198,14 @@ export function computeXP(state, today = iso()) {
 
   st.streak = globalStreak(state);
   st.backup = !!state.settings.lastBackupAt;
-  const total = areas.fin + areas.work + areas.hab + areas.ag;
+  const total = areas.fin + areas.fut + areas.hab + areas.ag;
   st.level = levelFromXp(total).level;
   return { total, areas, stats: st };
 }
 
 // ---------- Logros: [id, área, nombre, descripción, (stats) => [actual, objetivo]]
 export const ACHIEVEMENTS = [
-  ["first-xp", "all", "Primer paso", "Gana tus primeros puntos de experiencia", s => [s.level > 1 || s.txCount + s.habitDays + s.tasksDone + s.workHours > 0 ? 1 : 0, 1]],
+  ["first-xp", "all", "Primer paso", "Gana tus primeros puntos de experiencia", s => [s.level > 1 || s.txCount + s.habitDays + s.tasksDone + s.futbol > 0 ? 1 : 0, 1]],
   ["lvl-5", "all", "Runner", "Llega al nivel 5", s => [s.level, 5]],
   ["lvl-10", "all", "Netrunner", "Llega al nivel 10", s => [s.level, 10]],
   ["lvl-20", "all", "Ciberninja", "Llega al nivel 20", s => [s.level, 20]],
@@ -228,12 +221,16 @@ export const ACHIEVEMENTS = [
   ["fin-green", "fin", "Mes en verde", "Cierra un mes con balance positivo", s => [s.positiveMonths, 1]],
   ["fin-green6", "fin", "Seis meses en verde", "Cierra 6 meses con balance positivo", s => [s.positiveMonths, 6]],
 
-  ["work-1h", "work", "Primera hora", "Registra tu primera hora de trabajo o estudio", s => [Math.floor(s.workHours), 1]],
-  ["work-100h", "work", "Cien horas", "Registra 100 horas", s => [Math.floor(s.workHours), 100]],
-  ["work-500h", "work", "Maratón", "Registra 500 horas", s => [Math.floor(s.workHours), 500]],
-  ["work-ms10", "work", "Paso a paso", "Completa 10 hitos", s => [s.milestones, 10]],
-  ["work-project", "work", "Misión cumplida", "Completa un proyecto", s => [s.projectsDone, 1]],
-  ["work-learn", "work", "Mente curiosa", "Termina un curso, libro o habilidad", s => [s.learnDone, 1]],
+  ["hab-futbol", "fut", "Once titular", "Juega 10 partidos", s => [s.partidos, 10]],
+  ["fut-goal", "fut", "Primer gol", "Marca tu primer gol", s => [s.futGoals, 1]],
+  ["fut-hat", "fut", "Hat-trick", "Marca 3 goles en un partido", s => [s.maxGoals, 3]],
+  ["fut-25g", "fut", "Goleador", "Marca 25 goles", s => [s.futGoals, 25]],
+  ["fut-assist10", "fut", "Asistente", "Da 10 asistencias", s => [s.futAssists, 10]],
+  ["fut-unbeaten", "fut", "Invicto", "10 partidos seguidos sin perder", s => [s.bestUnbeaten, 10]],
+  ["fut-mvp", "fut", "Partidazo", "Ponte un 9 o más en un partido", s => [s.bestRating >= 9 ? 1 : 0, 1]],
+  ["fut-season", "fut", "Temporada completa", "Juega 20 partidos en una temporada", s => [s.bestSeason, 20]],
+  ["fut-50", "fut", "Veterano", "Juega 50 partidos", s => [s.partidos, 50]],
+  ["fut-train25", "fut", "Constancia", "Completa 25 entrenos de fútbol", s => [s.futTrain, 25]],
 
   ["hab-first", "hab", "Buen comienzo", "Cumple un hábito por primera vez", s => [s.habitDays, 1]],
   ["hab-perfect", "hab", "Día perfecto", "Cumple todos los hábitos de un día", s => [s.perfectDays, 1]],
@@ -243,7 +240,6 @@ export const ACHIEVEMENTS = [
   ["hab-gym100", "hab", "Bestia del gimnasio", "Completa 100 entrenos de gimnasio", s => [s.gym, 100]],
   ["hab-pr", "hab", "Nuevo récord", "Bate tu primer récord", s => [s.records, 1]],
   ["hab-pr25", "hab", "Imparable", "Bate 25 récords", s => [s.records, 25]],
-  ["hab-futbol", "hab", "Once titular", "Juega 10 partidos de fútbol", s => [s.partidos, 10]],
   ["hab-sleep", "hab", "Autoconocimiento", "Apunta sueño o ánimo 30 veces", s => [s.wellbeing, 30]],
 
   ["ag-first", "ag", "Tachado", "Completa tu primera tarea", s => [s.tasksDone, 1]],

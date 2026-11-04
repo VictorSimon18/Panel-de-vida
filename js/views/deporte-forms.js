@@ -5,7 +5,7 @@ import { openSheet, closeSheet, toast, confirmSheet, esc, uid, int } from "../ui
 import { iso, parseISO } from "../stats.js";
 import { seg, field } from "../forms.js";
 import { areaChart } from "../charts.js";
-import { lastSets, newRecords, records, kg, FUTBOL_KINDS, QUALITY } from "../sport.js";
+import { lastSets, newRecords, records, kg, QUALITY } from "../sport.js";
 import { moodPicker, saveWellbeing } from "./habitos-forms.js";
 
 const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(n);
@@ -187,45 +187,6 @@ export function openRoutineForm(id = null) {
     if (!await confirmSheet({ title: `¿Borrar la rutina «${r.name}»?`, text: "Los entrenos ya guardados se conservan.", ok: "Borrar", danger: true })) return;
     update(st => { st.habits.routines = st.habits.routines.filter(x => x.id !== r.id); });
     toast("Rutina borrada");
-  });
-}
-
-// ---------- Fútbol
-export function openFutbolForm(id = null) {
-  const w = id ? getState().habits.workouts.find(x => x.id === id) : null;
-  const sheet = openSheet(`
-    <h2>${w ? "Editar sesión de fútbol" : "Fútbol"}</h2>
-    <form class="form" id="fb-form" novalidate>
-      ${seg("kind", FUTBOL_KINDS, w?.kind || "entrenamiento")}
-      <div class="row2">
-        ${field("Fecha", "fb-date", `<input class="input" type="date" id="fb-date" value="${w?.date || iso()}">`)}
-        ${field("Minutos", "fb-min", `<input class="input" id="fb-min" inputmode="numeric" autocomplete="off" value="${w?.minutes || ""}" placeholder="90">`)}
-      </div>
-      <div class="quick-add">${[45, 60, 90, 120].map(m => `<button class="chip" type="button" data-min="${m}">${m} min</button>`).join("")}</div>
-      ${field("Nota (opcional)", "fb-note", `<input class="input" id="fb-note" maxlength="80" autocomplete="off" value="${esc(w?.note || "")}" placeholder="p. ej. Liga contra el Atlético B">`)}
-      <div class="btn-row">
-        ${w ? `<button class="btn danger" type="button" id="fb-del">Borrar</button>` : `<button class="btn" type="button" data-close>Cancelar</button>`}
-        <button class="btn primary" type="submit">Guardar</button>
-      </div>
-    </form>`);
-  const form = sheet.querySelector("#fb-form");
-  form.querySelector(".quick-add").addEventListener("click", e => { const b = e.target.closest("[data-min]"); if (b) form.querySelector("#fb-min").value = b.dataset.min; });
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-    const minutes = parseNum(form.querySelector("#fb-min").value);
-    if (!(minutes > 0)) { toast("Indica los minutos", { error: true }); return; }
-    const data = { type: "futbol", kind: form.querySelector("[name=kind]:checked").value, date: form.querySelector("#fb-date").value || iso(), minutes: Math.round(minutes), note: form.querySelector("#fb-note").value.trim() };
-    update(st => {
-      if (w) Object.assign(st.habits.workouts.find(x => x.id === w.id), data);
-      else st.habits.workouts.push({ id: uid(), ...data });
-    });
-    closeSheet();
-    toast(w ? "Sesión actualizada" : `${FUTBOL_KINDS[data.kind]} de ${data.minutes} min apuntado`);
-  });
-  sheet.querySelector("#fb-del")?.addEventListener("click", async () => {
-    if (!await confirmSheet({ title: "¿Borrar esta sesión?", text: "No se puede deshacer.", ok: "Borrar", danger: true })) return;
-    update(st => { st.habits.workouts = st.habits.workouts.filter(x => x.id !== w.id); });
-    toast("Sesión borrada");
   });
 }
 

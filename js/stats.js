@@ -52,7 +52,7 @@ export function money(state, now = new Date()) {
   return { total, income, expense, upcoming, hasAccounts: fin.accounts.length > 0 };
 }
 
-// ---------- Semana (lunes a domingo): horas de trabajo/estudio y sueño
+// ---------- Semana (lunes a domingo): horas de deporte (gimnasio y fútbol) y sueño
 export function week(state, now = new Date()) {
   const start = weekStart(now);
   const days = Array.from({ length: 7 }, (_, i) => iso(addDays(start, i)));
@@ -60,7 +60,7 @@ export function week(state, now = new Date()) {
   const todayIdx = days.indexOf(today);
   const hours = days.map((d, i) => {
     if (i > todayIdx) return null;
-    const m = state.work.entries.filter(e => e.date === d).reduce((s, e) => s + (e.minutes || 0), 0);
+    const m = state.habits.workouts.filter(w => w.date === d).reduce((s, w) => s + (w.minutes || 0), 0);
     return m / 60;
   });
   const sleep = days.map((d, i) => {
@@ -84,7 +84,6 @@ export function activeDays(state) {
   state.habits.sleep.forEach(x => add(x.date));
   state.habits.mood.forEach(x => add(x.date));
   (state.habits.nutrition || []).forEach(x => add(x.date));
-  state.work.entries.forEach(e => add(e.date));
   state.finance.transactions.forEach(t => !t.auto && add(t.date));
   state.agenda.tasks.forEach(t => t.done && add(t.doneAt));
   return s;
@@ -100,7 +99,7 @@ export function streak(state, now = new Date()) {
 }
 
 export function hasAnyData(state) {
-  const f = state.finance, w = state.work, h = state.habits, a = state.agenda;
-  return [f.accounts, f.transactions, f.recurring, f.goals, w.entries, w.projects, w.learning,
+  const f = state.finance, h = state.habits, a = state.agenda;
+  return [f.accounts, f.transactions, f.recurring, f.goals,
     h.habits, h.logs, h.workouts, h.body, h.sleep, h.mood, h.nutrition || [], h.activity || [], a.tasks, a.events].some(arr => arr.length > 0);
 }

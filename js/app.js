@@ -14,7 +14,7 @@ import { requestPersistence } from "./db.js";
 import { toast, closeSheet } from "./ui.js";
 import * as resumen from "./views/resumen.js";
 import * as finanzas from "./views/finanzas.js";
-import * as trabajo from "./views/trabajo.js";
+import * as futbol from "./views/futbol.js";
 import * as habitos from "./views/habitos.js";
 import * as agenda from "./views/agenda.js";
 import * as ajustes from "./views/ajustes.js";
@@ -24,7 +24,7 @@ import * as semana from "./views/semana.js";
 const ROUTES = {
   resumen:  { view: resumen,  title: "Resumen" },
   finanzas: { view: finanzas, title: "Finanzas",           area: "fin" },
-  trabajo:  { view: trabajo,  title: "Trabajo y estudios", area: "work" },
+  futbol:   { view: futbol,   title: "Fútbol",             area: "fut" },
   habitos:  { view: habitos,  title: "Hábitos y deporte",  area: "hab" },
   agenda:   { view: agenda,   title: "Agenda",             area: "ag" },
   ajustes:  { view: ajustes,  title: "Ajustes" },

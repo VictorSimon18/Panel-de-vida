@@ -8,15 +8,15 @@ import { heatmap, stackChart, ring } from "../charts.js";
 import { registerQuickAction } from "../quickadd.js";
 import { update, getState } from "../state.js";
 import { freqText, habitValue, setHabitValue, streaks, dayLevel, heatDays, habitsToday, isScheduled, isDone, AUTO_LABEL } from "../habits.js";
-import { records, sportSummary, wellbeingDays, workoutVolume, avg, kg, MOODS, MOOD_COLOR, QUALITY, FUTBOL_KINDS } from "../sport.js";
+import { records, sportSummary, wellbeingDays, workoutVolume, avg, kg, MOODS, MOOD_COLOR, QUALITY } from "../sport.js";
 import { openHabitForm, openHabitDetail, openDayLog } from "./habitos-forms.js";
 import { nutricionTab, openNutritionGoals } from "./nutricion.js";
 import { weightTrendBlock, nutriWeightCard } from "./tendencia.js";
 import { pasosTab, openStepsGoal } from "./pasos.js";
-import { openWorkoutForm, openRoutineForm, openFutbolForm, openBodyForm, openWellbeingForm, openRecordDetail } from "./deporte-forms.js";
+import { openWorkoutForm, openRoutineForm, openBodyForm, openWellbeingForm, openRecordDetail } from "./deporte-forms.js";
 
 const ui = { tab: "habitos", archived: false, gymView: "entrenos", gymMonths: 3, recQuery: "" };
-const TABS = { habitos: "Hábitos", gym: "Gimnasio", futbol: "Fútbol", cuerpo: "Cuerpo", nutricion: "Nutrición", pasos: "Pasos", bienestar: "Bienestar" };
+const TABS = { habitos: "Hábitos", gym: "Gimnasio", cuerpo: "Cuerpo", nutricion: "Nutrición", pasos: "Pasos", bienestar: "Bienestar" };
 const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(n);
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s)).replace(".", "");
 const dayName = s => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" }).format(parseISO(s)).replace(/\./g, ""); return t[0].toUpperCase() + t.slice(1); };
@@ -52,7 +52,7 @@ export function render(state) {
     <div class="chips" role="tablist">${Object.entries(TABS).map(([k, l]) =>
       `<button type="button" role="tab" class="chip" data-act="tab" data-tab="${k}" aria-selected="${ui.tab === k}">${l}</button>`).join("")}</div>
 
-    ${({ habitos: habitosTab, gym: gymTab, futbol: futbolTab, cuerpo: cuerpoTab, nutricion: nutricionTab, pasos: pasosTab, bienestar: bienestarTab })[ui.tab](state)}`;
+    ${({ habitos: habitosTab, gym: gymTab, cuerpo: cuerpoTab, nutricion: nutricionTab, pasos: pasosTab, bienestar: bienestarTab })[ui.tab](state)}`;
 }
 
 // ---------- Hábitos
@@ -181,26 +181,6 @@ function viewWorkout(state, id) {
 }
 
 
-// ---------- Fútbol
-function futbolTab(state) {
-  const sp = sportSummary(state);
-  const list = state.habits.workouts.filter(w => w.type === "futbol").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 15);
-  return `<section class="card">
-    <div class="btn-row"><button class="btn primary" type="button" data-act="new-futbol">${icon.ball} Apuntar sesión</button></div>
-    <div class="week-stats">
-      <div><b class="num" style="color:var(--hab)">${sp.futbolMonth.sessions}</b><small>sesiones este mes</small></div>
-      <div><b class="num">${sp.futbolMonth.minutes}</b><small>minutos este mes</small></div>
-      <div><b class="num">${sp.futbolMonth.partidos}</b><small>partidos</small></div>
-    </div>
-    ${list.length ? `<div class="list">${list.map(w => `
-      <button class="item tap" type="button" data-act="edit-futbol" data-id="${w.id}">
-        <span class="cat-ico" style="--c:${w.kind === "partido" ? "var(--agenda)" : "var(--hab)"}"></span>
-        <span class="t">${FUTBOL_KINDS[w.kind] || "Fútbol"}<small>${dayName(w.date)}${w.note ? ` · ${esc(w.note)}` : ""}</small></span>
-        <b class="num">${w.minutes} min</b>
-      </button>`).join("")}</div>` : `<div class="empty">Apunta tus entrenamientos y partidos con los minutos jugados.</div>`}
-  </section>`;
-}
-
 // ---------- Cuerpo
 function cuerpoTab(state) {
   const list = [...state.habits.body].sort((a, b) => b.date.localeCompare(a.date));
@@ -281,8 +261,6 @@ export function mount(root, _state, signal) {
       case "new-routine": openRoutineForm(); break;
       case "edit-routine": openRoutineForm(id); break;
       case "record": openRecordDetail(b.dataset.name); break;
-      case "new-futbol": openFutbolForm(); break;
-      case "edit-futbol": openFutbolForm(id); break;
       case "new-body": openBodyForm(); break;
       case "edit-body": openBodyForm(id); break;
       case "wellbeing": openWellbeingForm(); break;

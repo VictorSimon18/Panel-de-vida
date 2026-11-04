@@ -1,6 +1,6 @@
 # Panel de Vida
 
-Panel personal minimalista (estilo «Grafito», oscuro) para el iPhone: **finanzas**, **trabajo y estudios**, **hábitos y deporte**, y **agenda y tareas**, más una pantalla de **resumen** con niveles y experiencia (XP).
+Panel personal minimalista (estilo «Grafito», oscuro) para el iPhone: **finanzas**, **fútbol**, **hábitos y deporte**, y **agenda y tareas**, más una pantalla de **resumen** con niveles y experiencia (XP).
 
 - Es una app web instalable (PWA): se añade a la pantalla de inicio y se abre a pantalla completa, como una app normal.
 - Funciona sin conexión.
@@ -15,7 +15,7 @@ Panel personal minimalista (estilo «Grafito», oscuro) para el iPhone: **finanz
 | 1 | Estructura: PWA, navegación, almacenamiento, copias de seguridad | ✅ |
 | 2 | Estilo completo y pantalla de resumen | ✅ |
 | 3 | Finanzas | ✅ |
-| 4 | Trabajo y estudios | ✅ |
+| 4 | Fútbol (antes «Trabajo y estudios») | ✅ |
 | 5 | Hábitos y deporte | ✅ |
 | 6 | Agenda y tareas | ✅ |
 | 7 | Gamificación (XP, logros, celebraciones) y avisos en el Calendario | ✅ |
@@ -27,7 +27,7 @@ Panel personal minimalista (estilo «Grafito», oscuro) para el iPhone: **finanz
 3. Con la ventana ancha aparece el **diseño de escritorio**:
    - Menú lateral y resumen en tres columnas.
    - Los formularios se abren en una ventana central.
-   - Atajos de teclado: **N** para apuntar algo, **1–5** para cambiar de sección (Resumen, Finanzas, Trabajo, Hábitos, Agenda) y **Esc** para cerrar.
+   - Atajos de teclado: **N** para apuntar algo, **1–5** para cambiar de sección (Resumen, Finanzas, Fútbol, Hábitos, Agenda) y **Esc** para cerrar.
 
 Para tener los mismos datos que en el iPhone, activa la sincronización (ver abajo).
 
@@ -54,18 +54,18 @@ Los datos se guardan **cifrados** en un Gist secreto de tu cuenta de GitHub. Se 
 
 Requiere tener activada la sincronización. Los Atajos del iPhone no pueden abrir la app instalada, así que **dejan mensajes en tu Gist** (el «buzón»). La app los recoge en la siguiente sincronización, los apunta y los borra del Gist. Si dos dispositivos recogen el mismo mensaje, no se duplica.
 
-- **Siri:** «Apunta un gasto», «Nueva tarea», «He bebido agua» (o cualquier hábito), «Apunta estudio», «He ido al gimnasio»…
-- **Salud:** el atajo «Nutrición al Panel» (14:00, 18:00 y 23:45) envía también los **pasos**, la **distancia** y las **calorías activas** del día. Los pasos van al hábito «Pasos» (se crea solo, con objetivo de 10.000). Si no usas Foodvisor, hay un atajo solo de pasos (apartado 7).
+- **Siri:** «Apunta un gasto», «Nueva tarea», «He bebido agua» (o cualquier hábito), «He ido al gimnasio»…
+- **Salud:** el atajo «Nutrición al Panel» (14:00, 18:00 y 23:45) envía también los **pasos**, la **distancia** y las **calorías activas** del día. Los pasos van al hábito «Pasos» (se crea solo, con objetivo de 10.000). Si no usas Foodvisor, hay un atajo solo de pasos (apartado 6).
 - **Cómo montarlo:** en **Ajustes → Siri y Salud → Cómo crear los Atajos** está la guía paso a paso, con botones para copiar la dirección y la cabecera. El botón **Enviar mensaje de prueba** comprueba el circuito completo.
 - **Privacidad:** los Atajos no pueden cifrar, así que los mensajes del buzón están **sin cifrar** en tu Gist secreto desde que se envían hasta que la app los recoge. El resto de tus datos sigue cifrado.
 
-Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `tiempo` (clase: estudio o trabajo, horas o minutos, proyecto), `gimnasio` / `futbol` (minutos, partido: sí), `pasos` (fecha, valor o pasos, distancia, activas) y `cuerpo` (peso, grasa, cintura). El mensaje `nutricion` admite además `pasos`, `distancia` (km, m o millas) y `activas` (kcal o kJ).
+Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `gimnasio` / `futbol` (minutos, partido: sí y, en un partido, rival, resultado `3-1`, goles, asistencias), `pasos` (fecha, valor o pasos, distancia, activas) y `cuerpo` (peso, grasa, cintura). El mensaje `nutricion` admite además `pasos`, `distancia` (km, m o millas) y `activas` (kcal o kJ).
 
 **Aviso diario de peso:** una automatización de Atajos a las 6:00 con *Ejecutar tras confirmar* envía una notificación. Al tocarla, el atajo «Apunta mi peso» pregunta el peso y lo envía al panel (Hábitos → Cuerpo).
 
 ## Nutrición (Foodvisor)
 
-Foodvisor escribe en Apple Salud las calorías, los macros y el peso, pero **no el agua**. El atajo **Nutrición al Panel** lee de Salud los totales del día y el último peso, y los envía por el buzón. Una automatización lo ejecuta a las **14:00, 18:00 y 23:45**, y cada envío sustituye el total del día. La guía está en Ajustes → Siri y Salud, apartado 9.
+Foodvisor escribe en Apple Salud las calorías, los macros y el peso, pero **no el agua**. El atajo **Nutrición al Panel** lee de Salud los totales del día y el último peso, y los envía por el buzón. Una automatización lo ejecuta a las **14:00, 18:00 y 23:45**, y cada envío sustituye el total del día. La guía está en Ajustes → Siri y Salud, apartado 8.
 
 - **Hábitos → Nutrición:**
   - Hoy: calorías frente al objetivo con lo que te queda, barra de proteína y reparto de macros.
@@ -88,9 +88,9 @@ En **Hábitos → Cuerpo**, la gráfica de los últimos 90 días muestra cada pe
 
 ## Resumen semanal
 
-- **Cada lunes**, arriba del Resumen, aparece la tarjeta **Tu semana pasada** (lunes a domingo): gasto frente a la semana anterior, horas de estudio y de trabajo, entrenos de gimnasio y fútbol, días con todos los hábitos cumplidos, calorías y proteína medias, peso (media de 7 días) y su cambio, y tareas hechas. Se puede cerrar; el cierre se sincroniza.
+- **Cada lunes**, arriba del Resumen, aparece la tarjeta **Tu semana pasada** (lunes a domingo): gasto frente a la semana anterior, partidos de fútbol (goles, asistencias y resultados), entrenos de gimnasio y fútbol, media de pasos, días con todos los hábitos cumplidos, calorías y proteína medias, peso (media de 7 días) y su cambio, y tareas hechas. Se puede cerrar; el cierre se sincroniza.
 - **Semanas** (desde la tarjeta o desde *Resumen → Tu semana → Semanas*): cualquier semana anterior con flechas.
-- **Aviso del lunes a las 8:00:** automatización de Atajos con *Mostrar notificación* (apartado 10 de la guía). iOS no deja que la notificación abra directamente una app web, así que se abre el panel desde su icono.
+- **Aviso del lunes a las 8:00:** automatización de Atajos con *Mostrar notificación* (apartado 9 de la guía). iOS no deja que la notificación abra directamente una app web, así que se abre el panel desde su icono.
 
 ## Hevy (entrenos de gimnasio)
 
@@ -125,11 +125,16 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 - **Fijos:** se repiten cada mes, semana o año y se apuntan solos el día que toca, aunque la app lleve días sin abrirse.
 - **Metas de ahorro:** objetivo, aportaciones y, si les pones fecha límite, cuánto tienes que ahorrar al mes para llegar.
 
-## Trabajo y estudios
+## Fútbol
 
-- **Tiempo:** apuntas a mano las horas de trabajo o de estudio, con botones rápidos de +15 min, +30 min, +1 h y +2 h y un proyecto opcional. Arriba ves la semana día a día y puedes ir a semanas anteriores. Debajo, las horas de las últimas 8 semanas.
-- **Proyectos y objetivos:** se dividen en hitos. El porcentaje de avance sale de los hitos completados. Cada proyecto puede tener fecha límite y muestra las horas que le has dedicado. Los terminados se pueden archivar.
-- **Aprendizaje:** cursos, libros y habilidades con su progreso (p. ej. 12/40 lecciones). Con **+1** avanzas una unidad.
+Sustituye al antiguo apartado «Trabajo y estudios» (sus datos se borraron al actualizar: migración v2). Los partidos y entrenos se guardan en `habits.workouts` (tipo `futbol`), así que siguen contando para el hábito automático de fútbol.
+
+- **Temporadas** de agosto a julio, con flechas para ver las anteriores.
+- **Temporada:** goles, asistencias y partidos; victorias, empates y derrotas y los goles del equipo; últimos 5 resultados; nota media, minutos y % de titular; rachas marcando y sin perder (actual y mejor), minutos por gol, entrenos y tarjetas.
+- **Partidos:** fecha, rival, competición (liga, copa, torneo, amistoso), local o visitante, resultado (tu equipo – rival), titular o suplente, minutos, goles y asistencias (con − / +), posición, tarjetas, nota del 1 al 10 (de 0,5 en 0,5, opcional) y comentario. La competición, la posición y titular/suplente se rellenan con lo del último partido. No deja guardar más goles tuyos que los de tu equipo.
+- **Entrenos:** fecha, minutos y nota.
+- **Estadísticas:** goles y asistencias por mes, tablas por competición y por posición (PJ, G, A, V-E-D) y récords de todas las temporadas (más goles, más asistencias, mejor nota, mayor victoria, hat-tricks).
+- **XP:** partido 30, victoria 10, gol 10, asistencia 5, entreno 25. Logros: Once titular, Primer gol, Hat-trick, Goleador, Asistente, Invicto, Partidazo, Temporada completa, Veterano y Constancia.
 
 ## Hábitos y deporte
 
@@ -140,10 +145,9 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 - **Rachas:** días seguidos cumpliendo (o semanas, en los hábitos semanales). Si no cumples un día que tocaba, la racha vuelve a 0. Mientras el día de hoy no termina, no rompe la racha.
 - **Mapa de calor:** uno general de 17 semanas y otro dentro de cada hábito. Toca un hábito para verlo junto con su mejor racha y su % de cumplimiento.
 - **Gimnasio:** rutinas guardadas. Al entrenar, cada ejercicio sale relleno con lo que hiciste la última vez, y el peso de la primera serie se copia a las siguientes. Avisa de los récords nuevos y muestra la evolución de cada ejercicio con su 1RM estimado (fórmula de Epley).
-- **Fútbol:** entrenamientos y partidos con sus minutos.
 - **Cuerpo:** peso, % de grasa y cintura, con gráfico.
 - **Bienestar:** horas y calidad del sueño, y estado de ánimo (de Fatal a Genial) de los últimos 14 días.
-- **Botón +:** *Hábito, sueño o ánimo* abre el registro rápido del día, y *Entreno o tiempo* incluye Gimnasio y Fútbol.
+- **Botón +:** *Hábito, sueño o ánimo* abre el registro rápido del día, y *Partido o entreno* abre Partido, Entreno de fútbol o Gimnasio.
 
 ## Agenda y tareas
 
@@ -240,12 +244,12 @@ js/
   ui.js                 Utilidades: formatos, hoja inferior, avisos
   trends.js             Media de 7 días del peso, semanas de nutrición, mantenimiento y resumen semanal
   finance.js            Lógica de finanzas: categorías, saldos, fijos automáticos
-  work.js               Lógica de trabajo y estudios: horas por semana, proyectos, aprendizaje
+  futbol.js             Fútbol: temporadas, estadísticas de partidos, rachas y récords
   forms.js              Piezas de formulario compartidas
   habits.js             Lógica de hábitos: rachas, cumplimiento, mapa de calor
-  sport.js              Lógica de deporte: récords, fútbol, sueño y ánimo
+  sport.js              Lógica de deporte: récords del gimnasio, sueño y ánimo
   agenda.js             Lógica de agenda: repeticiones, agrupación, calendario, exportación .ics
-  views/                Una vista por pantalla (resumen, finanzas, trabajo, hábitos, agenda, ajustes)
+  views/                Una vista por pantalla (resumen, finanzas, fútbol, hábitos, agenda, ajustes)
                         y sus formularios (p. ej. finanzas-forms.js)
 ```
 

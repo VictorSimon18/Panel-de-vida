@@ -97,20 +97,14 @@ function openGuide() {
       send
     ])}
 
-    ${shortcut("5 · Apunta tiempo de estudio o trabajo", "apunta estudio", [
-      `<b>Solicitar entrada</b> de tipo Número: «¿Cuántas horas?».`,
-      `Acción <b>Texto</b>:` + txt("tipo: tiempo\nclase: estudio\nhoras: [Entrada solicitada]") + `Para trabajo, otro atajo igual con <code>clase: trabajo</code>. Puedes añadir <code>proyecto: SQL</code>.`,
-      send
-    ])}
-
-    ${shortcut("6 · Entrenos", "he ido al gimnasio", [
+    ${shortcut("5 · Entrenos", "he ido al gimnasio", [
       `Atajo <b>He ido al gimnasio</b> con una acción <b>Texto</b>:` + txt("tipo: gimnasio\nminutos: 60"),
-      `Atajo <b>He jugado al fútbol</b> con:` + txt("tipo: futbol\nminutos: 90") + `Para un partido, añade <code>partido: sí</code>.`,
+      `Atajo <b>He jugado al fútbol</b> con:` + txt("tipo: futbol\nminutos: 90") + `Para un partido, añade <code>partido: sí</code> (y si quieres <code>rival: …</code>, <code>resultado: 3-1</code>, <code>goles: 1</code>, <code>asistencias: 0</code>). Lo verás en el área <b>Fútbol</b>.`,
       send
     ])}
 
-    ${shortcut("7 · Solo pasos (si no usas Foodvisor)", "", [
-      `Si ya tienes <b>Nutrición al Panel</b> (apartado 9), <b>no hagas este</b>: los pasos van en ese atajo.`,
+    ${shortcut("6 · Solo pasos (si no usas Foodvisor)", "", [
+      `Si ya tienes <b>Nutrición al Panel</b> (apartado 8), <b>no hagas este</b>: los pasos van en ese atajo.`,
       `Crea un atajo <b>Pasos al Panel</b>: acción <b>Buscar muestras de salud</b> → tipo <b>Pasos</b>, <i>Fecha de inicio</i> es <b>Hoy</b>.`,
       `Acción <b>Calcular estadísticas</b> → <b>Suma</b> de las muestras.`,
       `Acción <b>Formatear fecha</b>: Fecha actual, formato personalizado <code>yyyy-MM-dd</code>.`,
@@ -121,7 +115,7 @@ function openGuide() {
       `En la app aparecerá el hábito <b>Pasos</b> (objetivo 10.000; puedes cambiarlo en Hábitos).`
     ])}
 
-    ${shortcut("8 · Peso cada mañana (con aviso)", "apunta mi peso", [
+    ${shortcut("7 · Peso cada mañana (con aviso)", "apunta mi peso", [
       `Crea un atajo <b>Apunta mi peso</b>: <b>Solicitar entrada</b> de tipo <b>Número</b> con la pregunta «¿Cuánto pesas hoy?».`,
       `Acción <b>Texto</b>:` + txt("tipo: cuerpo\npeso: [Entrada solicitada]") + `Si algún día quieres más datos, añade líneas <code>grasa: …</code> o <code>cintura: …</code>.`,
       send,
@@ -129,7 +123,7 @@ function openGuide() {
       `Cada mañana a las 6:00 te llegará la notificación; tócala, escribe el peso y listo. Aparecerá en <b>Hábitos → Cuerpo</b>.`
     ])}
 
-    ${shortcut("9 · Nutrición y pasos (automático 3 veces al día)", "", [
+    ${shortcut("8 · Nutrición y pasos (automático 3 veces al día)", "", [
       `En Salud → tu foto → Apps → <b>Foodvisor</b>, deja activados los permisos de escritura (Energía alimentaria, Proteínas, Carbohidratos, Grasas totales, Peso).`,
       `Crea un atajo <b>Nutrición al Panel</b>. Para cada dato repite este par de acciones:<br>· <b>Buscar muestras de salud</b> → tipo <b>Energía alimentaria</b>, filtro <i>Fecha de inicio</i> <b>es hoy</b>.<br>· <b>Calcular estadísticas</b> → <b>Suma</b>.<br>Haz lo mismo con <b>Proteínas</b>, <b>Carbohidratos</b> y <b>Grasas totales</b> (cuatro sumas en total).`,
       `Actividad: repite el mismo par con <b>Pasos</b>, <b>Distancia caminando y corriendo</b> y <b>Energía activa</b> (tres sumas más).`,
@@ -141,7 +135,7 @@ function openGuide() {
       `En la app: <b>Hábitos → Nutrición → Objetivos</b> para poner tus calorías y proteína, y <b>Hábitos → Pasos → Objetivo</b> para los pasos.`
     ])}
 
-    ${shortcut("10 · Aviso del resumen semanal (lunes a las 8:00)", "", [
+    ${shortcut("9 · Aviso del resumen semanal (lunes a las 8:00)", "", [
       `Pestaña <b>Automatización</b> → <b>+</b> → <b>Hora del día</b> → <b>08:00</b>, <b>Semanalmente</b>, deja marcado solo el <b>lunes</b> → <b>Ejecutar inmediatamente</b> → <b>Nuevo atajo en blanco</b>.`,
       `Añade la acción <b>Mostrar notificación</b> con el texto «Ya tienes el resumen de tu semana en Panel de Vida» (y si quieres, título «Resumen semanal»).`,
       `Listo. Al abrir la app el lunes verás la tarjeta <b>Tu semana pasada</b> arriba del Resumen. Las semanas anteriores están en <b>Resumen → Tu semana → Semanas</b>.`,

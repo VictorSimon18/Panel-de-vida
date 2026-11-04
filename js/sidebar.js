@@ -6,7 +6,7 @@ import { icon } from "./icons.js";
 import { openQuickAdd } from "./quickadd.js";
 
 // Atajos 1-5 en el mismo orden que el menú
-export const SHORTCUT_ROUTES = ["resumen", "finanzas", "trabajo", "habitos", "agenda"];
+export const SHORTCUT_ROUTES = ["resumen", "finanzas", "futbol", "habitos", "agenda"];
 
 export function renderSidebar(state, route) {
   const el = document.getElementById("sidebar");

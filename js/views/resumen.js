@@ -129,16 +129,16 @@ function moneyCard(state) {
 
 function weekCard(state) {
   const w = week(state);
-  const header = `<h2 class="card-h"><span class="h-dot" style="--c:var(--work)"></span>Tu semana<span class="spacer"></span><a class="btn small" href="#semana">Semanas</a></h2>`;
-  if (!w.hasData) return `<section class="card">${header}<div class="empty">Aquí verás tus horas de trabajo y estudio, y tu sueño, de lunes a domingo.</div></section>`;
+  const header = `<h2 class="card-h"><span class="h-dot" style="--c:var(--fut)"></span>Tu semana<span class="spacer"></span><a class="btn small" href="#semana">Semanas</a></h2>`;
+  if (!w.hasData) return `<section class="card">${header}<div class="empty">Aquí verás tus horas de deporte (gimnasio y fútbol) y tu sueño, de lunes a domingo.</div></section>`;
   return `<section class="card">${header}
     <div class="week-stats">
-      <div><b class="num" style="color:var(--work)">${num1(w.totalHours)} h</b><small>trabajo y estudio</small></div>
+      <div><b class="num" style="color:var(--fut)">${num1(w.totalHours)} h</b><small>de deporte</small></div>
       <div><b class="num" style="color:var(--cyan)">${w.avgSleep != null ? num1(w.avgSleep) + " h" : "—"}</b><small>sueño medio</small></div>
       <div><b class="num" style="color:var(--hab)">${w.workouts}</b><small>entrenos</small></div>
     </div>
     ${weekChart({ bars: w.hours, line: w.sleep, labels: w.labels, today: w.todayIdx })}
-    <div class="legend"><span style="--c:var(--work)">Horas de trabajo y estudio</span><span style="--c:var(--cyan)">Horas de sueño</span></div>
+    <div class="legend"><span style="--c:var(--fut)">Horas de deporte</span><span style="--c:var(--cyan)">Horas de sueño</span></div>
   </section>`;
 }
 
