@@ -54,9 +54,10 @@ function applyActivity(s, date, m, id, today) {
   if (steps >= 0) {
     let h = s.habits.habits.find(x => x.id === STEPS_HABIT_ID);
     if (!h) {
-      h = { id: STEPS_HABIT_ID, name: "Pasos", unit: "pasos", target: 10000, step: 1000, frequency: { type: "daily" }, source: "salud", archived: false, createdAt: today };
+      h = { id: STEPS_HABIT_ID, name: "Pasos", unit: "pasos", target: 10000, step: 1000, auto: "steps", frequency: { type: "daily" }, source: "salud", archived: false, createdAt: today };
       s.habits.habits.push(h);
     }
+    h.auto = "steps";   // se completa solo al llegar al objetivo (también en hábitos creados antes)
     // el total del día sustituye al anterior (la automatización puede ejecutarse varias veces)
     setHabitValue(s, h.id, date, steps);
     out.push(`${int(steps)} pasos`);
@@ -89,6 +90,12 @@ function parseDay(v, today) {
  * nombre del archivo, así que si el mismo mensaje llega dos veces no se duplica.
  * Devuelve { done: [textos para el aviso], skipped: [motivos] }.
  */
+/** El hábito Pasos es automático: los creados en versiones anteriores eran manuales */
+export function ensureStepsHabit(s) {
+  const h = s.habits.habits.find(x => x.id === STEPS_HABIT_ID);
+  if (h && h.auto !== "steps") h.auto = "steps";
+}
+
 export function applyInbox(s, messages, today = iso()) {
   const done = [], skipped = [];
   s.inboxSeen ||= [];

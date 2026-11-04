@@ -69,7 +69,7 @@ function habitosTab(state) {
     return `<div class="habit${done ? " is-done" : ""}">
       <button class="habit-main" type="button" data-act="habit-detail" data-id="${h.id}">
         <span class="habit-top"><b>${esc(h.name)}</b>${st.current ? `<span class="flame num">${icon.flame}${st.current}</span>` : ""}</span>
-        <small>${freqText(h)}${h.auto ? ` · auto (${AUTO_LABEL[h.auto]})` : ` · ${num(v)}/${num(h.target)} ${esc(h.unit)}`}</small>
+        <small>${freqText(h)}${h.auto === "steps" ? ` · ${num(v)}/${num(h.target)} ${esc(h.unit)} · auto` : h.auto ? ` · auto (${AUTO_LABEL[h.auto]})` : ` · ${num(v)}/${num(h.target)} ${esc(h.unit)}`}</small>
         <span class="dots">${last7.map(d => {
           const sch = isScheduled(h, d) || h.frequency?.type === "weekly";
           return `<i class="${isDone(state, h, d) ? "on" : sch ? "" : "off"}${d === today ? " today" : ""}" title="${d}"></i>`;

@@ -15,11 +15,15 @@ const parseNum = s => { const n = Number(String(s || "").replace(",", ".")); ret
 export function openHabitForm(id = null) {
   const h = id ? getState().habits.habits.find(x => x.id === id) : null;
   const f = h?.frequency || { type: "daily", days: [1, 3, 5], times: 3 };
+  // hábitos que se rellenan con datos (calorías, proteína, pasos): se mantiene su origen y solo se cambia el objetivo
+  const dataAuto = h?.auto && !WORKOUT_AUTO.includes(h.auto) ? h.auto : null;
   const sheet = openSheet(`
     <h2>${h ? "Editar hábito" : "Nuevo hábito"}</h2>
     <form class="form" id="habit-form" novalidate>
       ${field("Nombre", "hb-name", `<input class="input" id="hb-name" maxlength="40" autocomplete="off" value="${esc(h?.name || "")}" placeholder="p. ej. Beber agua, Leer, Meditar">`)}
-      ${field("Se marca solo al apuntar…", "hb-auto", `<select class="input" id="hb-auto">
+      ${dataAuto ? `<p class="hint">Se marca solo con ${AUTO_LABEL[dataAuto]} al llegar al objetivo.</p>
+      ${field(`Objetivo diario (${esc(h.unit)})`, "hb-target", `<input class="input" id="hb-target" inputmode="decimal" autocomplete="off" value="${num(h.target)}">`)}
+      <select id="hb-auto" hidden><option value="${dataAuto}" selected></option></select>` : field("Se marca solo al apuntar…", "hb-auto", `<select class="input" id="hb-auto">
         <option value="">Nada: lo apunto yo</option>
         ${Object.entries(AUTO_LABEL).filter(([v]) => WORKOUT_AUTO.includes(v)).map(([v, l]) => `<option value="${v}"${h?.auto === v ? " selected" : ""}>Un entreno de ${l}</option>`).join("")}
       </select>`)}
@@ -55,7 +59,11 @@ export function openHabitForm(id = null) {
     const auto = form.querySelector("#hb-auto").value || null;
     const type = form.querySelector("[name=freq]:checked").value;
     let target = 1, unit = "sesión", step = 1;
-    if (!auto) {
+    if (dataAuto) {
+      target = parseNum(form.querySelector("#hb-target").value || "");
+      if (!(target > 0)) { toast("El objetivo tiene que ser un número mayor que 0", { error: true }); return; }
+      unit = h.unit; step = h.step || target;
+    } else if (!auto) {
       target = parseNum(form.querySelector("#hb-target").value || "1");
       if (!(target > 0)) { toast("El objetivo tiene que ser un número mayor que 0", { error: true }); return; }
       unit = form.querySelector("#hb-unit").value.trim();
@@ -93,7 +101,7 @@ export function openHabitDetail(id) {
   const days = heatDays(17, today).map(date => ({ date, level: habitLevel(s, h, date) }));
   const sheet = openSheet(`
     <h2>${esc(h.name)}</h2>
-    <p>${h.auto === "kcal" || h.auto === "protein" ? `Se marca solo con ${AUTO_LABEL[h.auto]} · objetivo ${num(h.target)} ${esc(h.unit)}${h.mode === "max" ? " como máximo" : ""}` : h.auto ? `Se marca solo al apuntar ${AUTO_LABEL[h.auto]}` : `Objetivo: ${num(h.target)} ${esc(h.unit)}`} · ${freqText(h)}</p>
+    <p>${h.auto === "kcal" || h.auto === "protein" || h.auto === "steps" ? `Se marca solo con ${AUTO_LABEL[h.auto]} · objetivo ${num(h.target)} ${esc(h.unit)}${h.mode === "max" ? " como máximo" : ""}` : h.auto ? `Se marca solo al apuntar ${AUTO_LABEL[h.auto]}` : `Objetivo: ${num(h.target)} ${esc(h.unit)}`} · ${freqText(h)}</p>
     <div class="week-stats">
       <div><b class="num" style="color:var(--agenda)">${st.current}</b><small>racha (${st.unit})</small></div>
       <div><b class="num" style="color:var(--hab)">${st.best}</b><small>mejor racha</small></div>

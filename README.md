@@ -80,7 +80,7 @@ En **Ajustes → Perfil de jugador** puedes cambiar el alias y poner una **foto 
 
 ## Pasos
 
-**Hábitos → Pasos:** hoy frente al objetivo (anillo, lo que te falta, distancia, calorías activas y racha), medias de 7 y 30 días (solo días terminados), días con el objetivo cumplido en los últimos 30, gráfica de 14 días con la línea del objetivo, mejor día, mejor racha y resumen de los últimos 6 meses (media diaria, veces que cumpliste el objetivo y km). El botón **Objetivo** cambia el objetivo del hábito «Pasos». La distancia y las calorías activas se guardan en `habits.activity`.
+**Hábitos → Pasos:** hoy frente al objetivo (anillo, lo que te falta, distancia, calorías activas y racha), medias de 7 y 30 días (solo días terminados), días con el objetivo cumplido en los últimos 30, gráfica de 14 días con la línea del objetivo, mejor día, mejor racha y resumen de los últimos 6 meses (media diaria, veces que cumpliste el objetivo y km). El hábito «Pasos» es **automático**: se marca solo cuando los pasos que llegan de Salud alcanzan el objetivo (no se apunta a mano). El botón **Objetivo** lo cambia. La distancia y las calorías activas se guardan en `habits.activity`.
 
 ## Tendencia del peso
 

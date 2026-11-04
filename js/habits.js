@@ -1,6 +1,7 @@
 // Lógica de hábitos: valores por día, calendario, rachas, cumplimiento y mapa de calor.
 // habit: { id, name, unit, target, step, frequency: { type: "daily"|"days"|"weekly", days: [1..7], times },
-//          auto: null|"gym"|"futbol"|"any", archived, createdAt }
+//          auto: null|"gym"|"futbol"|"any"|"kcal"|"protein"|"steps", archived, createdAt }
+//          ("steps": sus registros los pone el buzón con los pasos de Salud; no se apunta a mano)
 // logs:  { id, habitId, date, value }   (se suman si hay varios el mismo día)
 
 import { iso, addDays, parseISO, weekStart, isoWeekday } from "./stats.js";
@@ -8,14 +9,14 @@ import { uid } from "./ui.js";
 
 export const FREQ_LABEL = { daily: "Todos los días", days: "Días concretos", weekly: "Veces por semana" };
 export const WEEKDAYS = ["L", "M", "X", "J", "V", "S", "D"];
-export const AUTO_LABEL = { gym: "gimnasio", futbol: "fútbol", any: "cualquier entreno", kcal: "las calorías de Foodvisor", protein: "la proteína de Foodvisor" };
+export const AUTO_LABEL = { gym: "gimnasio", futbol: "fútbol", any: "cualquier entreno", kcal: "las calorías de Foodvisor", protein: "la proteína de Foodvisor", steps: "los pasos de Salud" };
 /** Los que dependen de entrenos (los de nutrición se crean desde la pestaña Nutrición) */
 export const WORKOUT_AUTO = ["gym", "futbol", "any"];
 const NUTRI_FIELD = { kcal: "kcal", protein: "protein" };
 
 export function habitValue(state, h, date) {
   if (NUTRI_FIELD[h.auto]) return (state.habits.nutrition || []).find(n => n.date === date)?.[NUTRI_FIELD[h.auto]] || 0;
-  if (h.auto) return state.habits.workouts.filter(w => w.date === date && (h.auto === "any" || w.type === h.auto)).length;
+  if (h.auto && h.auto !== "steps") return state.habits.workouts.filter(w => w.date === date && (h.auto === "any" || w.type === h.auto)).length;
   return state.habits.logs.filter(l => l.habitId === h.id && l.date === date).reduce((s, l) => s + (l.value || 0), 0);
 }
 
@@ -56,7 +57,7 @@ function weekDone(state, h, wsDate) {
 }
 
 function firstDate(state, h) {
-  const dates = h.auto
+  const dates = h.auto && h.auto !== "steps"
     ? state.habits.workouts.filter(w => h.auto === "any" || w.type === h.auto).map(w => w.date)
     : state.habits.logs.filter(l => l.habitId === h.id).map(l => l.date);
   const c = h.createdAt ? [h.createdAt.slice(0, 10)] : [];

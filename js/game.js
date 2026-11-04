@@ -125,13 +125,13 @@ export function computeXP(state, today = iso()) {
   }
   const nutri = new Map((hb.nutrition || []).map(n => [n.date, n]));
   const valueOn = (h, date) => h.auto === "kcal" ? (nutri.get(date)?.kcal || 0) : h.auto === "protein" ? (nutri.get(date)?.protein || 0)
-    : h.auto ? (woByDay.get(`${h.auto}|${date}`) || 0) : (logSum.get(`${h.id}|${date}`) || 0);
+    : h.auto && h.auto !== "steps" ? (woByDay.get(`${h.auto}|${date}`) || 0) : (logSum.get(`${h.id}|${date}`) || 0);
   const doneDates = new Map(); // habitId -> Set(fechas cumplidas)
   let habitDays = 0;
   for (const h of hb.habits) {
     const dates = new Set();
     if (h.auto === "kcal" || h.auto === "protein") nutri.forEach((_, d) => dates.add(d));
-    else if (h.auto) hb.workouts.forEach(w => { if (h.auto === "any" || w.type === h.auto) dates.add(w.date); });
+    else if (h.auto && h.auto !== "steps") hb.workouts.forEach(w => { if (h.auto === "any" || w.type === h.auto) dates.add(w.date); });
     else hb.logs.forEach(l => { if (l.habitId === h.id) dates.add(l.date); });
     const done = new Set([...dates].filter(d => d <= today && meets(h, valueOn(h, d), d, today)));
     doneDates.set(h.id, done);
