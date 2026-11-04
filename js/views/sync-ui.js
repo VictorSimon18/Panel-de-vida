@@ -3,7 +3,17 @@
 import { openSheet, closeSheet, toast, confirmSheet, esc } from "../ui.js";
 import { field } from "../forms.js";
 import { todayISO } from "../ui.js";
-import { connect, disconnect, syncNow, syncConfigured, syncInfo, statusText, getSyncStatus, getDiscarded, clearDiscarded } from "../sync.js";
+import { connect, disconnect, syncNow, syncConfigured, syncInfo, statusText, getSyncStatus, getDiscarded, clearDiscarded, photoSyncError } from "../sync.js";
+import { photoCount, pendingMonths } from "../photos.js";
+import { getState } from "../state.js";
+
+/** Estado de las fotos del diario: cuántas hay aquí, pendientes de subir y si falta alguna */
+function photoLine() {
+  const here = photoCount(), pend = pendingMonths().length, err = photoSyncError();
+  const withPhoto = (getState().diary || []).filter(e => e.photoV).length;
+  const txt = `${here} de ${withPhoto} aquí${pend ? ` · ${pend} ${pend === 1 ? "mes" : "meses"} por subir` : ""}`;
+  return `<div class="kv"><span>Fotos del diario</span><span class="num" id="sync-photos">${txt}</span></div>${err ? `<p class="hint" id="sync-photos-err" style="color:var(--warn)">${esc(err)}</p>` : ""}`;
+}
 
 const TOKEN_URL = "https://github.com/settings/tokens/new?scopes=gist&description=Panel%20de%20Vida";
 const revText = info => `${info.rev}${info.dirty ? " · cambios pendientes" : ""}`;
@@ -28,6 +38,7 @@ export function syncCard() {
         <div class="kv"><span>Estado</span><span id="sync-status" class="sync-st ${st}">${esc(statusText())}</span></div>
         <div class="kv"><span>Este dispositivo</span><span>${esc(info.device)}</span></div>
         <div class="kv"><span>Versión</span><span class="num" id="sync-rev">${revText(info)}</span></div>
+        ${photoLine()}
         <div class="kv"><span>Archivo en GitHub</span><a href="https://gist.github.com/${esc(info.gistId)}" target="_blank" rel="noopener">Ver Gist</a></div>
       </div>
       <div class="btn-row" style="margin-top:12px">
@@ -41,9 +52,11 @@ export function syncCard() {
 export function mountSyncCard(root) {
   root.querySelector("#sync-setup")?.addEventListener("click", openSetup);
   root.querySelector("#sync-now")?.addEventListener("click", async () => {
-    await syncNow();
+    await syncNow({ force: true });
     const s = getSyncStatus();
-    toast(s.state === "error" ? s.msg : "Sincronizado", { error: s.state === "error" });
+    const perr = photoSyncError();
+    toast(s.state === "error" ? s.msg : perr || "Sincronizado", { error: s.state === "error" || !!perr, ms: perr ? 5000 : 2600 });
+    window.dispatchEvent(new Event("pv:render"));
   });
   root.querySelector("#sync-off")?.addEventListener("click", async () => {
     if (!await confirmSheet({ title: "¿Desconectar este dispositivo?", text: "Dejará de sincronizarse. Tus datos se quedan aquí y en GitHub; puedes volver a conectarlo cuando quieras.", ok: "Desconectar", danger: true })) return;

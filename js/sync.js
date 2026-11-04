@@ -189,7 +189,7 @@ export function noteLocalChange() {
 }
 
 /** Sincroniza ahora: sube, baja o pide resolver un conflicto según el caso */
-export function syncNow() {
+export function syncNow({ force = false } = {}) {
   if (!cfg || !key) return Promise.resolve();
   if (busy) return busy;
   if (!navigator.onLine) { setStatus("offline"); return Promise.resolve(); }
@@ -199,6 +199,10 @@ export function syncNow() {
       const got = await readGist(cfg.token, cfg.gistId);
       if (!got) throw new SyncError("No se encuentra el archivo de sincronización en GitHub.");
       const { env: remote, inbox } = got;
+      if (remote.rev === cfg.baseRev || remote.rev < cfg.baseRev) {
+        // fotos primero: cuando el otro dispositivo vea la entrada, su foto ya estará en GitHub
+        try { photoMsg = ""; await uploadPhotos(); } catch (e) { console.error(e); photoMsg = e instanceof SyncError ? e.message : "No se pudieron subir las fotos"; }
+      }
       if (remote.rev === cfg.baseRev) {
         if (cfg.dirty) await writeGist(remote.rev + 1);
         else { cfg.lastSyncAt = new Date().toISOString(); await saveCfg(); }
@@ -214,7 +218,7 @@ export function syncNow() {
         clearTimeout(pushTimer);
         await writeGist(cfg.baseRev + 1, Object.fromEntries(inbox.map(m => [m.name, null])));
       }
-      if (status.state !== "conflict") { await syncPhotos(); setStatus("ok"); }
+      if (status.state !== "conflict") { await syncPhotos({ force }); setStatus("ok"); }
     } catch (e) {
       console.error(e);
       setStatus(navigator.onLine ? "error" : "offline", e instanceof SyncError ? e.message : "Fallo inesperado al sincronizar");
@@ -226,41 +230,60 @@ export function syncNow() {
 // ---------- Fotos del diario: en un segundo Gist secreto, un archivo cifrado por mes («fotos-AAAA-MM.json»).
 // Así la sincronización normal no descarga las fotos: solo se suben los meses que cambian aquí y solo se
 // bajan cuando una entrada del diario dice que su foto tiene otra versión (photoV).
+// Las fotos se suben ANTES que los datos, para que el otro dispositivo nunca vea una entrada cuya foto aún no existe.
 const PHOTO_PREFIX = "fotos-";
-const PHOTO_RETRY_MS = 10 * 60 * 1000;
+const PHOTO_DESC = "Panel de Vida · fotos cifradas (no editar)";
+let photoMsg = "";              // último problema con las fotos (se muestra en Ajustes)
+export const photoSyncError = () => photoMsg;
 
-async function syncPhotos() {
-  const months = pendingMonths();
-  if (months.length) {
-    let gid = getState().settings.photoGistId;
-    if (!gid) {
-      const g = await gh(cfg.token, "/gists", { method: "POST", body: { description: "Panel de Vida · fotos cifradas (no editar)", public: false,
-        files: { "leeme.txt": { content: "Fotos del diario de Panel de Vida, cifradas con tu contraseña. No edites este Gist." } } } });
-      gid = g.id;
-      update(s => { s.settings.photoGistId = gid; });   // se sincroniza para que el otro dispositivo lo encuentre
-    }
-    const files = {};
-    for (const [ym] of months) {
-      const m = monthPhotos(ym);
-      files[`${PHOTO_PREFIX}${ym}.json`] = Object.keys(m).length ? { content: JSON.stringify({ app: "panel-de-vida-fotos", ...(await seal(key, m)) }) } : null;
-    }
-    try { await gh(cfg.token, `/gists/${gid}`, { method: "PATCH", body: { files } }); }
-    catch (e) {
-      // borrar un mes que nunca llegó a subirse da error: se reintenta solo con los que tienen fotos
-      const withContent = Object.fromEntries(Object.entries(files).filter(([, v]) => v));
-      if (Object.keys(withContent).length) await gh(cfg.token, `/gists/${gid}`, { method: "PATCH", body: { files: withContent } });
-      else if (!(e instanceof SyncError)) throw e;
-    }
-    await donePending(months);
+/** Id del Gist de fotos: el de los datos, o se busca en tu cuenta, o se crea */
+async function photoGist(create) {
+  let gid = getState().settings.photoGistId;
+  if (gid) return gid;
+  const list = await gh(cfg.token, "/gists?per_page=100");
+  gid = list.find(g => g.description === PHOTO_DESC || Object.keys(g.files || {}).some(f => f.startsWith(PHOTO_PREFIX)))?.id;
+  if (!gid && create) {
+    const g = await gh(cfg.token, "/gists", { method: "POST", body: { description: PHOTO_DESC, public: false,
+      files: { "leeme.txt": { content: "Fotos del diario de Panel de Vida, cifradas con tu contraseña. No edites este Gist." } } } });
+    gid = g.id;
   }
+  if (gid) update(s => { s.settings.photoGistId = gid; });   // viaja con los datos para que el otro dispositivo lo use
+  return gid;
+}
 
-  const st = getState();
-  const entries = st.diary || [];
+async function uploadPhotos() {
+  const months = pendingMonths();
+  if (!months.length) return;
+  const gid = await photoGist(true);
+  const files = {};
+  for (const [ym] of months) {
+    const m = monthPhotos(ym);
+    files[`${PHOTO_PREFIX}${ym}.json`] = Object.keys(m).length ? { content: JSON.stringify({ app: "panel-de-vida-fotos", ...(await seal(key, m)) }) } : null;
+  }
+  try { await gh(cfg.token, `/gists/${gid}`, { method: "PATCH", body: { files } }); }
+  catch (e) {
+    // borrar un mes que nunca llegó a subirse da error: se reintenta solo con los que tienen fotos
+    const withContent = Object.fromEntries(Object.entries(files).filter(([, v]) => v));
+    if (Object.keys(withContent).length) await gh(cfg.token, `/gists/${gid}`, { method: "PATCH", body: { files: withContent } });
+    else if (!(e instanceof SyncError)) throw e;
+  }
+  await donePending(months);
+}
+
+async function downloadPhotos({ force = false } = {}) {
+  const entries = getState().diary || [];
   await pruneOrphans(entries);
   const want = entries.filter(e => e.photoV && photoVersion(e.date) !== e.photoV);
-  const gid = st.settings.photoGistId;
-  if (!want.length || !gid) return;
-  if (cfg.photoTryAt && Date.now() - cfg.photoTryAt < PHOTO_RETRY_MS && cfg.photoTryKey === want.map(e => e.photoV).join()) return;
+  if (!want.length) return;
+  const gid = await photoGist(false);
+  if (!gid) { photoMsg = "Las fotos aún no han llegado a GitHub desde el otro dispositivo. Abre allí la app para que se suban."; return; }
+  // solo se descarga si el Gist de fotos ha cambiado desde el último intento (o si lo pides tú)
+  const [last] = await gh(cfg.token, `/gists/${gid}/commits?per_page=1`);
+  const ver = last?.version || "";
+  if (!force && ver && ver === cfg.photoSeenVersion) {
+    photoMsg = `${want.length === 1 ? "Falta 1 foto" : `Faltan ${want.length} fotos`} del otro dispositivo: aún no se han subido. Abre allí la app.`;
+    return;
+  }
   const g = await gh(cfg.token, `/gists/${gid}`);
   const got = [];
   for (const ym of new Set(want.map(e => e.date.slice(0, 7)))) {
@@ -270,11 +293,16 @@ async function syncPhotos() {
     for (const e of want) if (e.date.startsWith(ym) && map[e.date]?.v === e.photoV) got.push([e.date, map[e.date]]);
   }
   if (got.length) await storeRemote(got);
-  // si alguna aún no estaba subida (el otro dispositivo la sube justo después), se reintenta en un rato
-  cfg.photoTryAt = got.length === want.length ? 0 : Date.now();
-  cfg.photoTryKey = want.map(e => e.photoV).join();
+  cfg.photoSeenVersion = ver;
   await saveCfg();
+  const missing = want.length - got.length;
+  photoMsg = missing ? `${missing === 1 ? "Falta 1 foto" : `Faltan ${missing} fotos`} del otro dispositivo: aún no se han subido. Abre allí la app.` : "";
   if (got.length) window.dispatchEvent(new Event("pv:render"));
+}
+
+async function syncPhotos(opts) {
+  try { photoMsg = ""; await uploadPhotos(); await downloadPhotos(opts); }
+  catch (e) { console.error(e); photoMsg = e instanceof SyncError ? e.message : "No se pudieron sincronizar las fotos"; }
 }
 
 async function resolveConflict(remote) {
