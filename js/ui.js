@@ -21,6 +21,9 @@ export const monthName = (d = new Date()) =>
   new Intl.DateTimeFormat("es-ES", { month: "long" }).format(d);
 export const daysSince = iso => iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 86400000) : Infinity;
 
+/** Contenido del círculo de perfil: la foto si hay, si no las iniciales «PV» */
+export const avatar = state => state.profile.photo ? `<img src="${state.profile.photo}" alt="">` : "PV";
+
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 // ---------- Avisos breves

@@ -1,7 +1,7 @@
 // Pantalla de resumen (variante A · HUD compacto) conectada a los datos.
 
 import { AREAS, levelFromXp, titleFor } from "../game.js";
-import { esc, int, money as eur, longDate, monthName, toast } from "../ui.js";
+import { esc, int, money as eur, longDate, monthName, toast, avatar } from "../ui.js";
 import { icon } from "../icons.js";
 import { backupDue } from "../backup.js";
 import { update } from "../state.js";
@@ -28,7 +28,7 @@ export function render(state) {
       <div class="streak${days ? "" : " off"}" title="Días seguidos apuntando algo">${icon.flame}<span class="num">${days} ${days === 1 ? "día" : "días"}</span></div>
     </header>
     <header class="topbar">
-      <a class="logo" href="#resumen" aria-label="Resumen">PV</a>
+      <a class="logo" href="#resumen" aria-label="Resumen">${avatar(state)}</a>
       <div class="who"><div class="alias">${esc(state.profile.alias)}</div><div class="title">${titleFor(lv.level)} · Nv. ${lv.level}</div></div>
       <div class="streak${days ? "" : " off"}" title="Días seguidos apuntando algo">${icon.flame}<span class="num">${days}</span></div>
       <a class="icon-btn" href="#ajustes" aria-label="Ajustes">${icon.gear}</a>

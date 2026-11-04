@@ -1,7 +1,7 @@
 // Menú lateral para pantallas anchas (ordenador). En el móvil se oculta y se usa la barra inferior.
 
 import { AREAS, ACHIEVEMENTS, levelFromXp, titleFor } from "./game.js";
-import { esc } from "./ui.js";
+import { esc, avatar } from "./ui.js";
 import { icon } from "./icons.js";
 import { openQuickAdd } from "./quickadd.js";
 
@@ -17,7 +17,7 @@ export function renderSidebar(state, route) {
     </a>`;
   el.innerHTML = `
     <a class="brand" href="#resumen">
-      <span class="logo" aria-hidden="true">PV</span>
+      <span class="logo" aria-hidden="true">${avatar(state)}</span>
       <span class="brand-t"><b>${esc(state.profile.alias)}</b><small>${titleFor(lv.level)} · Nv. ${lv.level}</small></span>
     </a>
     <button class="btn primary side-new" type="button" id="side-new">${icon.plus} Nuevo <kbd>N</kbd></button>

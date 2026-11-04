@@ -74,6 +74,10 @@ Foodvisor escribe en Apple Salud las calorías, los macros y el peso, pero **no 
 - **Peso:** el que registras en Foodvisor llega solo a Cuerpo.
 - **Peso vs calorías** (en Nutrición y en Cuerpo): las últimas 6 semanas con calorías y proteína medias (solo días terminados con registro) y el cambio de la media del peso respecto a la semana anterior. Con al menos 2 semanas completas (≥ 4 días de calorías) estima tus **calorías de mantenimiento**: kcal medias − cambio de peso semanal × 7.700 / 7.
 
+## Perfil
+
+En **Ajustes → Perfil de jugador** puedes cambiar el alias y poner una **foto de perfil**. Se recorta en cuadrado, se reduce a 256 px (unos 20 KB), se guarda con tus datos y se sincroniza cifrada como el resto. No se sube al repositorio. Sale en el círculo de arriba del Resumen y en el menú lateral del ordenador.
+
 ## Pasos
 
 **Hábitos → Pasos:** hoy frente al objetivo (anillo, lo que te falta, distancia, calorías activas y racha), medias de 7 y 30 días (solo días terminados), días con el objetivo cumplido en los últimos 30, gráfica de 14 días con la línea del objetivo, mejor día, mejor racha y resumen de los últimos 6 meses (media diaria, veces que cumpliste el objetivo y km). El botón **Objetivo** cambia el objetivo del hábito «Pasos». La distancia y las calorías activas se guardan en `habits.activity`.

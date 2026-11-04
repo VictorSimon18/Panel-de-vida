@@ -2,7 +2,7 @@
 
 import { update, getState, replaceState, defaultState } from "../state.js";
 import { exportBackup, readBackupFile, applyBackup } from "../backup.js";
-import { esc, toast, confirmSheet, daysSince } from "../ui.js";
+import { esc, toast, confirmSheet, daysSince, avatar } from "../ui.js";
 import { icon } from "../icons.js";
 import { requestPersistence } from "../db.js";
 import { buildDemo } from "../demo.js";
@@ -37,6 +37,14 @@ export function render(state) {
 
     <section class="card">
       <h2 class="card-h">Perfil de jugador</h2>
+      <div class="avatar-row">
+        <span class="logo avatar-big">${avatar(state)}</span>
+        <div class="btn-row">
+          <label class="btn" for="photo-file">${state.profile.photo ? "Cambiar foto" : "Poner foto"}</label>
+          ${state.profile.photo ? `<button class="btn" type="button" id="photo-del">Quitar</button>` : ""}
+        </div>
+        <input type="file" id="photo-file" accept="image/*" hidden>
+      </div>
       <form id="profile-form" class="field" style="margin-top:10px">
         <label for="alias">Alias</label>
         <div class="btn-row">
@@ -113,7 +121,7 @@ export function mount(root) {
     const ok = await confirmSheet({ title: "¿Quitar los datos de ejemplo?", text: "El panel quedará vacío para que empieces con tus datos reales.", ok: "Quitar" });
     if (!ok) return;
     const fresh = defaultState();
-    fresh.profile.alias = getState().profile.alias;
+    fresh.profile = { ...fresh.profile, alias: getState().profile.alias, photo: getState().profile.photo };
     await replaceState(fresh);
     toast("Datos de ejemplo quitados");
   });
@@ -124,6 +132,21 @@ export function mount(root) {
     if (!alias) { toast("Escribe un alias", { error: true }); return; }
     update(s => { s.profile.alias = alias; });
     toast("Alias guardado");
+  });
+
+  // foto de perfil: se recorta en cuadrado y se reduce a 256 px (se guarda en tus datos y se sincroniza cifrada)
+  root.querySelector("#photo-file").addEventListener("change", async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const photo = await squarePhoto(file, 256);
+      update(s => { s.profile.photo = photo; });
+      toast("Foto de perfil guardada");
+    } catch { toast("No se pudo leer esa imagen", { error: true }); }
+  });
+  root.querySelector("#photo-del")?.addEventListener("click", () => {
+    update(s => { delete s.profile.photo; });
+    toast("Foto quitada");
   });
 
   root.querySelector("#export").addEventListener("click", async () => {
@@ -164,9 +187,9 @@ export function mount(root) {
       ok: "Borrar todo", danger: true
     });
     if (!ok) return;
-    const alias = getState().profile.alias;
+    const { alias, photo } = getState().profile;
     const fresh = defaultState();
-    fresh.profile.alias = alias;
+    fresh.profile = { ...fresh.profile, alias, photo };
     await replaceState(fresh);
     toast("Datos borrados");
   });
@@ -174,5 +197,23 @@ export function mount(root) {
   requestPersistence().then(ok => {
     const el = root.querySelector("#persist-state");
     if (el) el.textContent = ok ? "Activada" : (isStandalone() ? "No disponible" : "Instala la app para activarla");
+  });
+}
+
+/** Imagen → JPEG cuadrado (recorte centrado) de size × size, como data URL */
+function squarePhoto(file, size) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const c = document.createElement("canvas");
+      c.width = c.height = size;
+      c.getContext("2d").drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("imagen")); };
+    img.src = url;
   });
 }

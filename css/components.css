@@ -737,3 +737,11 @@ code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .card.weekly { border-color: rgba(124, 196, 228, .3); }
 @media (min-width: 1024px) { .wk-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .legend .no-dot::before { display: none; }
+
+/* Foto de perfil */
+.logo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.logo:has(img) { background: var(--surface-2); }
+.avatar-row { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.avatar-row .btn-row { flex: 1; }
+.logo.avatar-big { width: 64px; height: 64px; font-size: 18px; }
+.avatar-row .btn { white-space: nowrap; text-align: center; justify-content: center; }
