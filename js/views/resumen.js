@@ -9,6 +9,8 @@ import { todayItems, money, week, streak, iso, parseISO } from "../stats.js";
 import { habitsToday, habitValue, setHabitValue, AUTO_LABEL } from "../habits.js";
 import { toggleTask } from "../agenda.js";
 import { weekChart, ring } from "../charts.js";
+import { catColor, catLabel } from "../finance.js";
+import { openTxForm } from "./finanzas-forms.js";
 import { weeklyBanner, closeWeekly } from "./semana.js";
 import { diaryCard, viewEntry, openEntryForm } from "./diario.js";
 
@@ -115,17 +117,33 @@ function habitsCard(state) {
 
 function moneyCard(state) {
   const m = money(state);
-  const header = `<h2 class="card-h"><span class="h-dot" style="--c:var(--fin)"></span>Dinero · ${monthName()}<span class="spacer"></span><a href="#finanzas">Ver</a></h2>`;
-  if (!m.hasAccounts) return `<section class="card">${header}<div class="money-big num">${eur(0)}</div><div class="empty">Crea tus cuentas en <b>Finanzas</b> para ver aquí el saldo, lo ingresado, lo gastado y los próximos cargos fijos.</div></section>`;
+  const header = `<h2 class="card-h"><span class="h-dot" style="--c:var(--fin)"></span>Dinero<span class="spacer"></span><a href="#finanzas">Ver</a></h2>`;
+  if (!m.hasAccounts) return `<section class="card">${header}<div class="money-big num">${eur(0)}</div><div class="empty">Crea tus cuentas en <b>Finanzas</b> para ver aquí el saldo y tus últimos movimientos.</div></section>`;
+  const fin = state.finance;
+  const accName = id => fin.accounts.find(a => a.id === id)?.name || "Cuenta borrada";
+  // últimos movimientos (de una transferencia solo se muestra la salida)
+  const last = fin.transactions.filter(t => !(t.transferId && t.amount > 0))
+    .sort((a, b) => b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id))).slice(0, 5);
+  const next = m.upcoming[0];
   return `<section class="card">${header}
     <div class="money-big num">${eur(m.total)}</div>
-    <div class="money-sub">Saldo total de tus cuentas</div>
+    <div class="money-sub">Saldo total de tus ${fin.accounts.length} ${fin.accounts.length === 1 ? "cuenta" : "cuentas"}</div>
     <div class="split">
-      <div><small>Ingresado</small><b class="num pos">+${eur(m.income)}</b></div>
-      <div><small>Gastado</small><b class="num neg">${eur(m.expense)}</b></div>
+      <div><small>Ingresado en ${monthName()}</small><b class="num pos">+${eur(m.income)}</b></div>
+      <div><small>Gastado en ${monthName()}</small><b class="num neg">${eur(m.expense)}</b></div>
     </div>
-    ${m.upcoming.length ? `<div class="list">${m.upcoming.map(r => `
-      <div class="item"><span class="t">${esc(r.name)}<small>Cargo fijo · ${shortDate(r.nextDate)}</small></span><b class="num">${eur(r.amount)}</b></div>`).join("")}</div>` : ""}
+    <h3 class="card-h" style="margin-top:14px">Últimos movimientos</h3>
+    ${last.length ? `<div class="list tight">${last.map(t => t.transferId ? `
+      <button class="item tap" type="button" data-tx="${t.id}">
+        <span class="cat-ico" style="--c:var(--cyan)">⇄</span>
+        <span class="t">${esc(t.note || "Transferencia")}<small>${shortDate(t.date)} · ${esc(accName(t.accountId))} → ${esc(accName(fin.transactions.find(x => x.transferId === t.transferId && x.amount > 0)?.accountId))}</small></span>
+        <b class="num">${eur(-t.amount)}</b></button>` : `
+      <button class="item tap" type="button" data-tx="${t.id}">
+        <span class="cat-ico" style="--c:${catColor(state, t.categoryId)}"></span>
+        <span class="t">${esc(t.note || catLabel(state, t.categoryId))}<small>${shortDate(t.date)} · ${esc(catLabel(state, t.categoryId).split(" › ").pop())} · ${esc(accName(t.accountId))}</small></span>
+        <b class="num ${t.amount > 0 ? "pos" : ""}">${t.amount > 0 ? "+" : ""}${eur(t.amount)}</b></button>`).join("")}</div>`
+      : `<div class="empty">Aún no hay movimientos. Pulsa <b>+</b> para apuntar un gasto o un ingreso.</div>`}
+    ${next ? `<p class="hint" style="margin-top:8px">Próximo cargo fijo: <b>${esc(next.name)}</b> · ${shortDate(next.nextDate)} · ${eur(next.amount)}</p>` : ""}
   </section>`;
 }
 
@@ -147,6 +165,8 @@ function weekCard(state) {
 // ---------- Interacción: marcar tareas y hábitos desde el resumen
 export function mount(root, _state, signal) {
   root.addEventListener("click", e => {
+    const tx = e.target.closest("[data-tx]");
+    if (tx) { openTxForm({ id: tx.dataset.tx }); return; }
     const da = e.target.closest("[data-act=view-entry], [data-act=write-today]");
     if (da) { if (da.dataset.act === "write-today") openEntryForm(iso()); else viewEntry(da.dataset.date); return; }
     const wc = e.target.closest("[data-act=weekly-close]");
