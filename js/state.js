@@ -38,7 +38,8 @@ export function defaultState() {
       body: [],              // { id, date, weight, fat, measures }
       sleep: [],             // { id, date, hours, quality }
       mood: [],              // { id, date, value }
-      nutrition: []          // { id, date, kcal, protein, carbs, fat, fiber, sugar, source, at }
+      nutrition: [],         // { id, date, kcal, protein, carbs, fat, fiber, sugar, source, at }
+      activity: []           // { id, date, km, active, at }  (distancia y calorías activas de Salud; los pasos van en el hábito Pasos)
     },
     agenda: {
       tasks: [],             // { id, title, due, priority, tags, done, repeat }

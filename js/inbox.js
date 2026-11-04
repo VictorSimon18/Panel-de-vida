@@ -11,6 +11,7 @@
 //   tipo: pasos        fecha: 2026-11-01  valor: 8.423
 //   tipo: cuerpo       peso: 75,4         grasa: 18,5   cintura: 84
 //   tipo: nutricion    calorias: 1.850 kcal   proteinas: 120 g   carbohidratos: 210   grasas: 60   peso: 75,4
+//                      pasos: 8.423   distancia: 6,2 km   activas: 420 kcal   (opcionales: actividad del día)
 
 import { iso, addDays } from "./stats.js";
 import { parseAmount } from "./finance.js";
@@ -40,6 +41,37 @@ const num = v => {
   const n = m ? parseAmount(m[0]) : NaN;
   return Number.isFinite(n) ? n : NaN;
 };
+
+// Distancia a km (Salud puede dar km, m o millas) y energía a kcal (o kJ)
+const toKm = v => { const n = num(v), t = norm(v); return !(n >= 0) ? NaN : /\bmi\b|milla/.test(t) ? n * 1.609 : /\d\s*m\b|metro/.test(t) && !/km/.test(t) ? n / 1000 : n; };
+const toKcal = v => { const n = num(v); return !(n >= 0) ? NaN : /kj/.test(norm(v)) ? n / 4.184 : n; };
+
+/** Pasos (en el hábito Pasos), distancia y calorías activas de un día. Devuelve el texto para el aviso o "". */
+function applyActivity(s, date, m, id, today) {
+  const steps = Math.round(num(m.pasos ?? m.valor));
+  const km = toKm(m.distancia), active = toKcal(m.activas ?? m.energia_activa);
+  const out = [];
+  if (steps >= 0) {
+    let h = s.habits.habits.find(x => x.id === STEPS_HABIT_ID);
+    if (!h) {
+      h = { id: STEPS_HABIT_ID, name: "Pasos", unit: "pasos", target: 10000, step: 1000, frequency: { type: "daily" }, source: "salud", archived: false, createdAt: today };
+      s.habits.habits.push(h);
+    }
+    // el total del día sustituye al anterior (la automatización puede ejecutarse varias veces)
+    setHabitValue(s, h.id, date, steps);
+    out.push(`${int(steps)} pasos`);
+  }
+  if (km >= 0 || active >= 0) {
+    s.habits.activity ||= [];
+    const data = { at: new Date().toISOString() };
+    if (km >= 0) data.km = Math.round(km * 100) / 100;
+    if (active >= 0) data.active = Math.round(active);
+    const prev = s.habits.activity.find(a => a.date === date);
+    if (prev) Object.assign(prev, data); else s.habits.activity.push({ id: id + "-act", date, km: null, active: null, ...data });
+    if (km > 0) out.push(`${String(Math.round(km * 10) / 10).replace(".", ",")} km`);
+  }
+  return out.join(" · ");
+}
 
 function parseDay(v, today) {
   const s = norm(v);
@@ -135,24 +167,18 @@ export function applyInbox(s, messages, today = iso()) {
         if (b) b.weight = Math.round(w * 10) / 10;
         else s.habits.body.push({ id: id + "-peso", date, weight: Math.round(w * 10) / 10, fat: null, waist: null, source: "foodvisor" });
       }
-      if (!hasNutri && !(w > 0)) {
+      const act = applyActivity(s, date, { pasos: m.pasos, distancia: m.distancia, activas: m.activas ?? m.energia_activa }, id, today);
+      if (!hasNutri && !(w > 0) && !act) {
         // se muestra lo recibido para poder ver qué falla en el atajo
-        const got = ["calorias", "proteinas", "carbohidratos", "grasas", "peso"].map(k => `${k}: «${m[k] ?? "falta"}»`).join(", ");
+        const got = ["calorias", "proteinas", "carbohidratos", "grasas", "peso", "pasos"].map(k => `${k}: «${m[k] ?? "falta"}»`).join(", ");
         skipped.push(`nutrición sin datos (llegó ${got})`);
         continue;
       }
-      done.push([hasNutri && `${int(v.kcal || 0)} kcal`, v.protein > 0 && `${int(v.protein)} g proteína`, w > 0 && `${String(Math.round(w * 10) / 10).replace(".", ",")} kg`].filter(Boolean).join(" · "));
+      done.push([hasNutri && `${int(v.kcal || 0)} kcal`, v.protein > 0 && `${int(v.protein)} g proteína`, w > 0 && `${String(Math.round(w * 10) / 10).replace(".", ",")} kg`, act].filter(Boolean).join(" · "));
     } else if (tipo === "pasos") {
-      const value = Math.round(num(m.valor ?? m.pasos));
-      if (!(value >= 0)) { skipped.push("pasos sin valor"); continue; }
-      let h = s.habits.habits.find(x => x.id === STEPS_HABIT_ID);
-      if (!h) {
-        h = { id: STEPS_HABIT_ID, name: "Pasos", unit: "pasos", target: 10000, step: 1000, frequency: { type: "daily" }, source: "salud", archived: false, createdAt: today };
-        s.habits.habits.push(h);
-      }
-      // el total del día sustituye al anterior (la automatización puede ejecutarse varias veces)
-      setHabitValue(s, h.id, parseDay(m.fecha, today) || today, value);
-      done.push(`${int(value)} pasos`);
+      const txt = applyActivity(s, parseDay(m.fecha, today) || today, m, id, today);
+      if (!txt) { skipped.push("pasos sin valor"); continue; }
+      done.push(txt);
     } else {
       skipped.push(`mensaje de tipo «${m.tipo || "?"}» desconocido`);
     }

@@ -707,7 +707,7 @@ code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .nutri-hero .t { display: grid; gap: 3px; }
 .nutri-hero .t b { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
 .nutri-hero small { color: var(--muted); font-size: 13px; }
-.nutri-hero small b { color: var(--fg); font-size: inherit; font-weight: 600; letter-spacing: 0; }
+.nutri-hero .t small b { color: var(--fg); font-size: inherit; font-weight: 600; letter-spacing: 0; }
 .nutri-hero small .over { color: var(--danger); }
 .nutri-hero small .ok { color: var(--fin); }
 .macro { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }

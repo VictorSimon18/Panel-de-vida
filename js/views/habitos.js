@@ -6,16 +6,17 @@ import { icon } from "../icons.js";
 import { iso, addDays, parseISO } from "../stats.js";
 import { heatmap, stackChart, ring } from "../charts.js";
 import { registerQuickAction } from "../quickadd.js";
-import { update } from "../state.js";
+import { update, getState } from "../state.js";
 import { freqText, habitValue, setHabitValue, streaks, dayLevel, heatDays, habitsToday, isScheduled, isDone, AUTO_LABEL } from "../habits.js";
 import { records, sportSummary, wellbeingDays, workoutVolume, avg, kg, MOODS, MOOD_COLOR, QUALITY, FUTBOL_KINDS } from "../sport.js";
 import { openHabitForm, openHabitDetail, openDayLog } from "./habitos-forms.js";
 import { nutricionTab, openNutritionGoals } from "./nutricion.js";
 import { weightTrendBlock, nutriWeightCard } from "./tendencia.js";
+import { pasosTab, openStepsGoal } from "./pasos.js";
 import { openWorkoutForm, openRoutineForm, openFutbolForm, openBodyForm, openWellbeingForm, openRecordDetail } from "./deporte-forms.js";
 
 const ui = { tab: "habitos", archived: false, gymView: "entrenos", gymMonths: 3, recQuery: "" };
-const TABS = { habitos: "Hábitos", gym: "Gimnasio", futbol: "Fútbol", cuerpo: "Cuerpo", nutricion: "Nutrición", bienestar: "Bienestar" };
+const TABS = { habitos: "Hábitos", gym: "Gimnasio", futbol: "Fútbol", cuerpo: "Cuerpo", nutricion: "Nutrición", pasos: "Pasos", bienestar: "Bienestar" };
 const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(n);
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s)).replace(".", "");
 const dayName = s => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" }).format(parseISO(s)).replace(/\./g, ""); return t[0].toUpperCase() + t.slice(1); };
@@ -51,7 +52,7 @@ export function render(state) {
     <div class="chips" role="tablist">${Object.entries(TABS).map(([k, l]) =>
       `<button type="button" role="tab" class="chip" data-act="tab" data-tab="${k}" aria-selected="${ui.tab === k}">${l}</button>`).join("")}</div>
 
-    ${({ habitos: habitosTab, gym: gymTab, futbol: futbolTab, cuerpo: cuerpoTab, nutricion: nutricionTab, bienestar: bienestarTab })[ui.tab](state)}`;
+    ${({ habitos: habitosTab, gym: gymTab, futbol: futbolTab, cuerpo: cuerpoTab, nutricion: nutricionTab, pasos: pasosTab, bienestar: bienestarTab })[ui.tab](state)}`;
 }
 
 // ---------- Hábitos
@@ -274,6 +275,7 @@ export function mount(root, _state, signal) {
       case "view-workout": viewWorkout(_state, id); break;
       case "gym-view": ui.gymView = b.dataset.v; rerender(); break;
       case "nutri-goals": e.preventDefault(); openNutritionGoals(); break;
+      case "steps-goal": openStepsGoal(getState()); break;
       case "gym-more": ui.gymMonths += 3; rerender(); break;
       case "gym-source": update(s => { s.settings.gymSource = b.dataset.v; }); break;
       case "new-routine": openRoutineForm(); break;
@@ -287,6 +289,10 @@ export function mount(root, _state, signal) {
       case "edit-wb": openWellbeingForm(b.dataset.date); break;
     }
   }, { signal });
+
+  // que la pestaña elegida se vea en la fila de pestañas (en el móvil no caben todas)
+  const chips = root.querySelector(".chips"), sel = chips?.querySelector('[aria-selected="true"]');
+  if (sel && (sel.offsetLeft + sel.offsetWidth > chips.scrollLeft + chips.clientWidth || sel.offsetLeft < chips.scrollLeft)) chips.scrollLeft = sel.offsetLeft - 16;
 
   // buscador de récords
   const search = root.querySelector("#rec-search");

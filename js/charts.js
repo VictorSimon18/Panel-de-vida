@@ -105,7 +105,7 @@ export function stackChart(points, { colors = ["#7ea6f0", "#7cc4e4"], unit = "h"
   let g = "";
   [0, top / 2, top].forEach(v => {
     g += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${r1(y(v))}" y2="${r1(y(v))}" stroke="rgba(255,255,255,.06)"/>`;
-    g += `<text x="${pad.l - 6}" y="${r1(y(v) + 3)}" font-size="9" fill="#5d626b" text-anchor="end">${r1(v)}</text>`;
+    g += `<text x="${pad.l - 6}" y="${r1(y(v) + 3)}" font-size="9" fill="#5d626b" text-anchor="end">${String(r1(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</text>`;
   });
   points.forEach((p, i) => {
     const x0 = r1(cx(i) - bw / 2);

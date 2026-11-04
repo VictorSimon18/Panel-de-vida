@@ -55,11 +55,11 @@ Los datos se guardan **cifrados** en un Gist secreto de tu cuenta de GitHub. Se 
 Requiere tener activada la sincronización. Los Atajos del iPhone no pueden abrir la app instalada, así que **dejan mensajes en tu Gist** (el «buzón»). La app los recoge en la siguiente sincronización, los apunta y los borra del Gist. Si dos dispositivos recogen el mismo mensaje, no se duplica.
 
 - **Siri:** «Apunta un gasto», «Nueva tarea», «He bebido agua» (o cualquier hábito), «Apunta estudio», «He ido al gimnasio»…
-- **Salud:** una automatización diaria a las 23:45 envía los **pasos** del día al hábito «Pasos» (se crea solo, con objetivo de 10.000).
+- **Salud:** el atajo «Nutrición al Panel» (14:00, 18:00 y 23:45) envía también los **pasos**, la **distancia** y las **calorías activas** del día. Los pasos van al hábito «Pasos» (se crea solo, con objetivo de 10.000). Si no usas Foodvisor, hay un atajo solo de pasos (apartado 7).
 - **Cómo montarlo:** en **Ajustes → Siri y Salud → Cómo crear los Atajos** está la guía paso a paso, con botones para copiar la dirección y la cabecera. El botón **Enviar mensaje de prueba** comprueba el circuito completo.
 - **Privacidad:** los Atajos no pueden cifrar, así que los mensajes del buzón están **sin cifrar** en tu Gist secreto desde que se envían hasta que la app los recoge. El resto de tus datos sigue cifrado.
 
-Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `tiempo` (clase: estudio o trabajo, horas o minutos, proyecto), `gimnasio` / `futbol` (minutos, partido: sí), `pasos` (fecha, valor) y `cuerpo` (peso, grasa, cintura).
+Formato de un mensaje: una línea por campo, `clave: valor`. Los tipos son `gasto` / `ingreso` (importe, nota), `tarea` (titulo, fecha: hoy, mañana, ninguna o AAAA-MM-DD), `habito` (nombre, cantidad), `tiempo` (clase: estudio o trabajo, horas o minutos, proyecto), `gimnasio` / `futbol` (minutos, partido: sí), `pasos` (fecha, valor o pasos, distancia, activas) y `cuerpo` (peso, grasa, cintura). El mensaje `nutricion` admite además `pasos`, `distancia` (km, m o millas) y `activas` (kcal o kJ).
 
 **Aviso diario de peso:** una automatización de Atajos a las 6:00 con *Ejecutar tras confirmar* envía una notificación. Al tocarla, el atajo «Apunta mi peso» pregunta el peso y lo envía al panel (Hábitos → Cuerpo).
 
@@ -73,6 +73,10 @@ Foodvisor escribe en Apple Salud las calorías, los macros y el peso, pero **no 
 - **Objetivos:** calorías ("no pasarme" o "llegar") y proteína. Cada uno es un hábito automático con racha y XP. En modo "no pasarme", el día cuenta cuando termina.
 - **Peso:** el que registras en Foodvisor llega solo a Cuerpo.
 - **Peso vs calorías** (en Nutrición y en Cuerpo): las últimas 6 semanas con calorías y proteína medias (solo días terminados con registro) y el cambio de la media del peso respecto a la semana anterior. Con al menos 2 semanas completas (≥ 4 días de calorías) estima tus **calorías de mantenimiento**: kcal medias − cambio de peso semanal × 7.700 / 7.
+
+## Pasos
+
+**Hábitos → Pasos:** hoy frente al objetivo (anillo, lo que te falta, distancia, calorías activas y racha), medias de 7 y 30 días (solo días terminados), días con el objetivo cumplido en los últimos 30, gráfica de 14 días con la línea del objetivo, mejor día, mejor racha y resumen de los últimos 6 meses (media diaria, veces que cumpliste el objetivo y km). El botón **Objetivo** cambia el objetivo del hábito «Pasos». La distancia y las calorías activas se guardan en `habits.activity`.
 
 ## Tendencia del peso
 
@@ -223,6 +227,7 @@ js/
   hevy.js               Importación de entrenos desde el CSV de Hevy
   views/nutricion.js    Pestaña Nutrición y objetivos (datos de Foodvisor vía Salud)
   views/tendencia.js    Gráfica de tendencia del peso y tarjeta «Peso vs calorías»
+  views/pasos.js        Pestaña Pasos de Hábitos (pasos, distancia y calorías activas de Salud)
   views/semana.js       Tarjeta del lunes y pantalla «Semanas» (resumen semanal)
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)

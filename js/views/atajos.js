@@ -109,7 +109,8 @@ function openGuide() {
       send
     ])}
 
-    ${shortcut("7 · Pasos de Salud (automático cada noche)", "", [
+    ${shortcut("7 · Solo pasos (si no usas Foodvisor)", "", [
+      `Si ya tienes <b>Nutrición al Panel</b> (apartado 9), <b>no hagas este</b>: los pasos van en ese atajo.`,
       `Crea un atajo <b>Pasos al Panel</b>: acción <b>Buscar muestras de salud</b> → tipo <b>Pasos</b>, <i>Fecha de inicio</i> es <b>Hoy</b>.`,
       `Acción <b>Calcular estadísticas</b> → <b>Suma</b> de las muestras.`,
       `Acción <b>Formatear fecha</b>: Fecha actual, formato personalizado <code>yyyy-MM-dd</code>.`,
@@ -128,15 +129,16 @@ function openGuide() {
       `Cada mañana a las 6:00 te llegará la notificación; tócala, escribe el peso y listo. Aparecerá en <b>Hábitos → Cuerpo</b>.`
     ])}
 
-    ${shortcut("9 · Nutrición de Foodvisor (automático 3 veces al día)", "", [
+    ${shortcut("9 · Nutrición y pasos (automático 3 veces al día)", "", [
       `En Salud → tu foto → Apps → <b>Foodvisor</b>, deja activados los permisos de escritura (Energía alimentaria, Proteínas, Carbohidratos, Grasas totales, Peso).`,
       `Crea un atajo <b>Nutrición al Panel</b>. Para cada dato repite este par de acciones:<br>· <b>Buscar muestras de salud</b> → tipo <b>Energía alimentaria</b>, filtro <i>Fecha de inicio</i> <b>es hoy</b>.<br>· <b>Calcular estadísticas</b> → <b>Suma</b>.<br>Haz lo mismo con <b>Proteínas</b>, <b>Carbohidratos</b> y <b>Grasas totales</b> (cuatro sumas en total).`,
+      `Actividad: repite el mismo par con <b>Pasos</b>, <b>Distancia caminando y corriendo</b> y <b>Energía activa</b> (tres sumas más).`,
       `Peso: <b>Buscar muestras de salud</b> → tipo <b>Peso</b>, filtro <i>Fecha de inicio</i> <b>es hoy</b>, <i>Ordenar por</i> <b>Fecha de inicio</b>, <b>Más reciente primero</b>, <i>Limitar</i> a <b>1</b>.`,
-      `Acción <b>Texto</b> (cada valor es la variable <b>Estadísticas</b> de su par; mantén pulsada una variable para ver de qué acción viene):` + txt("tipo: nutricion\ncalorias: [Estadísticas de Energía]\nproteinas: [Estadísticas de Proteínas]\ncarbohidratos: [Estadísticas de Carbohidratos]\ngrasas: [Estadísticas de Grasas]\npeso: [Muestras de salud de Peso]"),
+      `Acción <b>Texto</b> (cada valor es la variable <b>Estadísticas</b> de su par; mantén pulsada una variable para ver de qué acción viene):` + txt("tipo: nutricion\ncalorias: [Estadísticas de Energía]\nproteinas: [Estadísticas de Proteínas]\ncarbohidratos: [Estadísticas de Carbohidratos]\ngrasas: [Estadísticas de Grasas]\npeso: [Muestras de salud de Peso]\npasos: [Estadísticas de Pasos]\ndistancia: [Estadísticas de Distancia]\nactivas: [Estadísticas de Energía activa]"),
       send,
       `Ejecútalo una vez con ▶︎ y permite el acceso a Salud.`,
       `Crea <b>tres automatizaciones</b> de <b>Hora del día</b> (14:00, 18:00 y 23:45), <b>Diariamente</b>, <b>Ejecutar inmediatamente</b>, todas con <b>Nutrición al Panel</b>. Cada envío actualiza el total del día.`,
-      `En la app: <b>Hábitos → Nutrición → Objetivos</b> para poner tus calorías y proteína.`
+      `En la app: <b>Hábitos → Nutrición → Objetivos</b> para poner tus calorías y proteína, y <b>Hábitos → Pasos → Objetivo</b> para los pasos.`
     ])}
 
     ${shortcut("10 · Aviso del resumen semanal (lunes a las 8:00)", "", [

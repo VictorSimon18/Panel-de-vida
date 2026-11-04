@@ -102,5 +102,5 @@ export function streak(state, now = new Date()) {
 export function hasAnyData(state) {
   const f = state.finance, w = state.work, h = state.habits, a = state.agenda;
   return [f.accounts, f.transactions, f.recurring, f.goals, w.entries, w.projects, w.learning,
-    h.habits, h.logs, h.workouts, h.body, h.sleep, h.mood, h.nutrition || [], a.tasks, a.events].some(arr => arr.length > 0);
+    h.habits, h.logs, h.workouts, h.body, h.sleep, h.mood, h.nutrition || [], h.activity || [], a.tasks, a.events].some(arr => arr.length > 0);
 }
