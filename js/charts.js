@@ -192,9 +192,18 @@ export function trendChart(points, { color = "#e88fb4", format = v => v, from, t
   // ~5 etiquetas de fecha repartidas
   const fmt = d => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(new Date(t(d) * 864e5 + 12 * 36e5)).replace(".", "");
   const toISO = n => new Date(n * 864e5).toISOString().slice(0, 10);
+  // sin repetir fechas (con pocos días saldría la misma varias veces) y sin que se pisen: mínimo 48 px entre ellas
+  const lastD = toISO(Math.round(t1));
+  const ticks = [];
   for (let k = 0; k <= 4; k++) {
     const d = toISO(Math.round(t0 + (t1 - t0) * k / 4));
-    g += `<text x="${r1(x(d))}" y="${h - 6}" font-size="10" text-anchor="${k === 0 ? "start" : k === 4 ? "end" : "middle"}" fill="${k === 4 ? "#ececee" : "#8b9099"}" font-weight="${k === 4 ? 700 : 500}">${fmt(d)}</text>`;
+    if (ticks.includes(d) || (d !== lastD && x(lastD) - x(d) < 48) || (ticks.length && x(d) - x(ticks.at(-1)) < 48)) continue;
+    ticks.push(d);
   }
+  if (!ticks.includes(lastD)) ticks.push(lastD);
+  ticks.forEach((d, i) => {
+    const isLast = d === lastD, isFirst = i === 0 && !isLast;
+    g += `<text x="${r1(x(d))}" y="${h - 6}" font-size="10" text-anchor="${isFirst ? "start" : isLast ? "end" : "middle"}" fill="${isLast ? "#ececee" : "#8b9099"}" font-weight="${isLast ? 700 : 500}">${fmt(d)}</text>`;
+  });
   return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Tendencia">${g}</svg>`;
 }
