@@ -7,6 +7,7 @@
 
 import { iso, addDays, parseISO, streak as globalStreak } from "./stats.js";
 import { meets } from "./habits.js";
+import { hasContent } from "./diary.js";
 
 export const AREAS = {
   fin:  { key: "fin",  name: "Finanzas",           short: "Finanzas", color: "var(--fin)",    hex: "#7fcf9b", route: "finanzas" },
@@ -37,7 +38,8 @@ export const XP = {
   tx: 5, txDailyCap: 10, goalContribution: 10, goalReached: 100, positiveMonth: 50,
   futbolTraining: 25, futbolMatch: 30, goal: 10, assist: 5, win: 10,
   habitDay: 10, perfectDay: 20, gym: 30, record: 20, wellbeing: 3, body: 5,
-  task: { baja: 5, media: 10, alta: 15 }, onTime: 5, event: 2
+  task: { baja: 5, media: 10, alta: 15 }, onTime: 5, event: 2,
+  diaryDay: 8, diaryPhoto: 2
 };
 
 export const XP_RULES = [
@@ -57,7 +59,8 @@ export const XP_RULES = [
   ["hab", "Medición corporal", `${XP.body}`],
   ["ag", "Tarea completada (baja / media / alta)", `${XP.task.baja} / ${XP.task.media} / ${XP.task.alta}`],
   ["ag", "Bonus por completarla a tiempo", `${XP.onTime}`],
-  ["ag", "Evento creado", `${XP.event}`]
+  ["ag", "Evento creado", `${XP.event}`],
+  ["all", "Día escrito en el diario (+ foto)", `${XP.diaryDay} (+${XP.diaryPhoto})`]
 ];
 
 // ---------- Cálculo de XP y estadísticas (para los logros)
@@ -196,16 +199,25 @@ export function computeXP(state, today = iso()) {
   const overdue = ag.tasks.filter(t => !t.done && t.due && t.due < today).length;
   Object.assign(st, { tasksDone, onTime, events: ag.events.length, overdue });
 
+  // Diario (cuenta para la XP global, no para un área)
+  const diaryEntries = (state.diary || []).filter(hasContent);
+  const diaryPhotos = diaryEntries.filter(e => e.photoV).length;
+  const diaryXP = diaryEntries.length * XP.diaryDay + diaryPhotos * XP.diaryPhoto;
+  const days = new Set(diaryEntries.map(e => e.date));
+  let diaryBestStreak = 0, run = 0, prevD = null;
+  for (const d of [...days].sort()) { run = prevD && iso(addDays(parseISO(prevD), 1)) === d ? run + 1 : 1; diaryBestStreak = Math.max(diaryBestStreak, run); prevD = d; }
+  Object.assign(st, { diaryDays: diaryEntries.length, diaryPhotos, diaryBestStreak });
+
   st.streak = globalStreak(state);
   st.backup = !!state.settings.lastBackupAt;
-  const total = areas.fin + areas.fut + areas.hab + areas.ag;
+  const total = areas.fin + areas.fut + areas.hab + areas.ag + diaryXP;
   st.level = levelFromXp(total).level;
   return { total, areas, stats: st };
 }
 
 // ---------- Logros: [id, área, nombre, descripción, (stats) => [actual, objetivo]]
 export const ACHIEVEMENTS = [
-  ["first-xp", "all", "Primer paso", "Gana tus primeros puntos de experiencia", s => [s.level > 1 || s.txCount + s.habitDays + s.tasksDone + s.futbol > 0 ? 1 : 0, 1]],
+  ["first-xp", "all", "Primer paso", "Gana tus primeros puntos de experiencia", s => [s.level > 1 || s.txCount + s.habitDays + s.tasksDone + s.futbol + s.diaryDays > 0 ? 1 : 0, 1]],
   ["lvl-5", "all", "Runner", "Llega al nivel 5", s => [s.level, 5]],
   ["lvl-10", "all", "Netrunner", "Llega al nivel 10", s => [s.level, 10]],
   ["lvl-20", "all", "Ciberninja", "Llega al nivel 20", s => [s.level, 20]],
@@ -213,6 +225,10 @@ export const ACHIEVEMENTS = [
   ["streak-7", "all", "Semana encendida", "7 días seguidos apuntando algo", s => [s.streak, 7]],
   ["streak-30", "all", "Mes en llamas", "30 días seguidos apuntando algo", s => [s.streak, 30]],
   ["backup", "all", "A salvo", "Exporta tu primera copia de seguridad", s => [s.backup ? 1 : 0, 1]],
+  ["diary-first", "all", "Querido diario", "Escribe tu primera entrada", s => [s.diaryDays, 1]],
+  ["diary-7", "all", "Semana contada", "Escribe 7 días seguidos", s => [s.diaryBestStreak, 7]],
+  ["diary-100", "all", "Memorias", "Escribe 100 días", s => [s.diaryDays, 100]],
+  ["diary-photo30", "all", "Álbum", "Guarda 30 fotos en el diario", s => [s.diaryPhotos, 30]],
 
   ["fin-first", "fin", "Primer euro controlado", "Apunta tu primer movimiento", s => [s.txCount, 1]],
   ["fin-100", "fin", "Contable", "Apunta 100 movimientos", s => [s.txCount, 100]],

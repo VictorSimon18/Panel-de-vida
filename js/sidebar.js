@@ -24,6 +24,7 @@ export function renderSidebar(state, route) {
     <nav class="side-nav">
       ${link("resumen", icon.home, "Resumen", "", null, "1")}
       ${Object.values(AREAS).map((a, i) => link(a.route, icon[a.key], a.short, `<span class="nav-lv">Nv. ${levelFromXp(state.game.areaXp[a.key] || 0).level}</span>`, a.color, String(i + 2))).join("")}
+      ${link("diario", icon.book, "Diario", "", "var(--cyan)")}
       ${link("logros", icon.trophy, "Logros", `<span class="nav-lv">${(state.game.achievements || []).length}/${ACHIEVEMENTS.length}</span>`)}
     </nav>
     <div class="side-bottom">

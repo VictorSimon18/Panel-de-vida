@@ -15,6 +15,8 @@ import { toast, closeSheet } from "./ui.js";
 import * as resumen from "./views/resumen.js";
 import * as finanzas from "./views/finanzas.js";
 import * as futbol from "./views/futbol.js";
+import * as diario from "./views/diario.js";
+import { loadPhotos } from "./photos.js";
 import * as habitos from "./views/habitos.js";
 import * as agenda from "./views/agenda.js";
 import * as ajustes from "./views/ajustes.js";
@@ -29,7 +31,8 @@ const ROUTES = {
   agenda:   { view: agenda,   title: "Agenda",             area: "ag" },
   ajustes:  { view: ajustes,  title: "Ajustes" },
   logros:   { view: logros,   title: "Logros" },
-  semana:   { view: semana,   title: "Semanas" }
+  semana:   { view: semana,   title: "Semanas" },
+  diario:   { view: diario,   title: "Diario" }
 };
 
 const viewEl = document.getElementById("view");
@@ -66,6 +69,7 @@ function render({ scrollTop = false } = {}) {
 
 async function start() {
   await loadState();
+  await loadPhotos();
   // Categorías por defecto y gastos fijos que hayan vencido desde la última vez
   update(s => { ensureFinance(s); ensureAgenda(s); ensureStepsHabit(s); syncGame(s, { silent: true }); });
   initQuickAdd();

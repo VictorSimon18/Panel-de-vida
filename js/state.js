@@ -40,6 +40,7 @@ export function defaultState() {
       tasks: [],             // { id, title, due, priority, tags, done, repeat }
       events: []             // { id, title, start, end, place }
     },
+    diary: [],               // { id, date, text, tags: [], photoV, updatedAt }  (la foto va aparte: photos.js; el ánimo en habits.mood)
     inboxSeen: [],           // mensajes de Atajos ya procesados (para no duplicar)
     game: {
       xp: 0,

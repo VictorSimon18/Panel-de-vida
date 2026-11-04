@@ -2,6 +2,7 @@
 
 import { getState, update, replaceState, persist } from "./state.js";
 import { todayISO, daysSince } from "./ui.js";
+import { allPhotos, replaceAllPhotos } from "./photos.js";
 
 const APP_ID = "panel-de-vida";
 
@@ -14,7 +15,8 @@ export function backupDue(state) {
 // Devuelve "shared" | "downloaded" | "cancelled"
 export async function exportBackup() {
   const data = getState();
-  const payload = { app: APP_ID, exportedAt: new Date().toISOString(), schema: data.version, data };
+  // las fotos del diario se guardan aparte: van en la copia en «photos»
+  const payload = { app: APP_ID, exportedAt: new Date().toISOString(), schema: data.version, data, photos: allPhotos() };
   const name = `panel-de-vida-${todayISO()}.json`;
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const file = new File([blob], name, { type: "application/json" });
@@ -59,6 +61,7 @@ export async function readBackupFile(file) {
 }
 
 export async function applyBackup(parsed) {
+  if (parsed.photos && typeof parsed.photos === "object") await replaceAllPhotos(parsed.photos);
   await replaceState(parsed.data);
   await persist();
 }

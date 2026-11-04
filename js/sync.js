@@ -8,7 +8,8 @@
 //   sabe si hay cambios aquí, en la nube o en los dos (conflicto: decides tú cuál conservar).
 
 import { dbGet, dbSet, dbDelete } from "./db.js";
-import { getState, replaceState } from "./state.js";
+import { getState, replaceState, update } from "./state.js";
+import { pendingMonths, donePending, monthPhotos, storeRemote, pruneOrphans, photoVersion } from "./photos.js";
 import { hasAnyData } from "./stats.js";
 import { INBOX_PREFIX } from "./inbox.js";
 
@@ -213,13 +214,67 @@ export function syncNow() {
         clearTimeout(pushTimer);
         await writeGist(cfg.baseRev + 1, Object.fromEntries(inbox.map(m => [m.name, null])));
       }
-      if (status.state !== "conflict") setStatus("ok");
+      if (status.state !== "conflict") { await syncPhotos(); setStatus("ok"); }
     } catch (e) {
       console.error(e);
       setStatus(navigator.onLine ? "error" : "offline", e instanceof SyncError ? e.message : "Fallo inesperado al sincronizar");
     } finally { busy = null; }
   })();
   return busy;
+}
+
+// ---------- Fotos del diario: en un segundo Gist secreto, un archivo cifrado por mes («fotos-AAAA-MM.json»).
+// Así la sincronización normal no descarga las fotos: solo se suben los meses que cambian aquí y solo se
+// bajan cuando una entrada del diario dice que su foto tiene otra versión (photoV).
+const PHOTO_PREFIX = "fotos-";
+const PHOTO_RETRY_MS = 10 * 60 * 1000;
+
+async function syncPhotos() {
+  const months = pendingMonths();
+  if (months.length) {
+    let gid = getState().settings.photoGistId;
+    if (!gid) {
+      const g = await gh(cfg.token, "/gists", { method: "POST", body: { description: "Panel de Vida · fotos cifradas (no editar)", public: false,
+        files: { "leeme.txt": { content: "Fotos del diario de Panel de Vida, cifradas con tu contraseña. No edites este Gist." } } } });
+      gid = g.id;
+      update(s => { s.settings.photoGistId = gid; });   // se sincroniza para que el otro dispositivo lo encuentre
+    }
+    const files = {};
+    for (const [ym] of months) {
+      const m = monthPhotos(ym);
+      files[`${PHOTO_PREFIX}${ym}.json`] = Object.keys(m).length ? { content: JSON.stringify({ app: "panel-de-vida-fotos", ...(await seal(key, m)) }) } : null;
+    }
+    try { await gh(cfg.token, `/gists/${gid}`, { method: "PATCH", body: { files } }); }
+    catch (e) {
+      // borrar un mes que nunca llegó a subirse da error: se reintenta solo con los que tienen fotos
+      const withContent = Object.fromEntries(Object.entries(files).filter(([, v]) => v));
+      if (Object.keys(withContent).length) await gh(cfg.token, `/gists/${gid}`, { method: "PATCH", body: { files: withContent } });
+      else if (!(e instanceof SyncError)) throw e;
+    }
+    await donePending(months);
+  }
+
+  const st = getState();
+  const entries = st.diary || [];
+  await pruneOrphans(entries);
+  const want = entries.filter(e => e.photoV && photoVersion(e.date) !== e.photoV);
+  const gid = st.settings.photoGistId;
+  if (!want.length || !gid) return;
+  if (cfg.photoTryAt && Date.now() - cfg.photoTryAt < PHOTO_RETRY_MS && cfg.photoTryKey === want.map(e => e.photoV).join()) return;
+  const g = await gh(cfg.token, `/gists/${gid}`);
+  const got = [];
+  for (const ym of new Set(want.map(e => e.date.slice(0, 7)))) {
+    const f = g.files?.[`${PHOTO_PREFIX}${ym}.json`];
+    if (!f) continue;
+    const map = await unseal(key, JSON.parse(await fileText(f)));
+    for (const e of want) if (e.date.startsWith(ym) && map[e.date]?.v === e.photoV) got.push([e.date, map[e.date]]);
+  }
+  if (got.length) await storeRemote(got);
+  // si alguna aún no estaba subida (el otro dispositivo la sube justo después), se reintenta en un rato
+  cfg.photoTryAt = got.length === want.length ? 0 : Date.now();
+  cfg.photoTryKey = want.map(e => e.photoV).join();
+  await saveCfg();
+  if (got.length) window.dispatchEvent(new Event("pv:render"));
 }
 
 async function resolveConflict(remote) {

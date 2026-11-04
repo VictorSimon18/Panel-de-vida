@@ -10,6 +10,7 @@ import { habitsToday, habitValue, setHabitValue, AUTO_LABEL } from "../habits.js
 import { toggleTask } from "../agenda.js";
 import { weekChart, ring } from "../charts.js";
 import { weeklyBanner, closeWeekly } from "./semana.js";
+import { diaryCard, viewEntry, openEntryForm } from "./diario.js";
 
 const PRI = { alta: ["Alta", "var(--danger)"], media: ["Media", "var(--agenda)"], baja: ["Baja", "var(--muted)"] };
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s));
@@ -49,6 +50,7 @@ export function render(state) {
     </section>
 
     ${todayCard(state)}
+    ${diaryCard(state)}
     </div>
     <div class="col col-2">
     ${habitsCard(state)}
@@ -145,6 +147,8 @@ function weekCard(state) {
 // ---------- Interacción: marcar tareas y hábitos desde el resumen
 export function mount(root, _state, signal) {
   root.addEventListener("click", e => {
+    const da = e.target.closest("[data-act=view-entry], [data-act=write-today]");
+    if (da) { if (da.dataset.act === "write-today") openEntryForm(iso()); else viewEntry(da.dataset.date); return; }
     const wc = e.target.closest("[data-act=weekly-close]");
     if (wc) { closeWeekly(wc.dataset.ws); toast("Lo tienes cuando quieras en «Semanas»"); return; }
     const t = e.target.closest("[data-task]");

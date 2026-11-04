@@ -136,6 +136,17 @@ Sustituye al antiguo apartado «Trabajo y estudios» (sus datos se borraron al a
 - **Estadísticas:** goles y asistencias por mes, tablas por competición y por posición (PJ, G, A, V-E-D) y récords de todas las temporadas (más goles, más asistencias, mejor nota, mayor victoria, hat-tricks).
 - **XP:** partido 30, victoria 10, gol 10, asistencia 5, entreno 25. Logros: Once titular, Primer gol, Hat-trick, Goleador, Asistente, Invicto, Partidazo, Temporada completa, Veterano y Constancia.
 
+## Diario
+
+Desde la tarjeta **Diario** del Resumen o desde el menú lateral (`#diario`). No ocupa hueco en la barra de abajo.
+
+- **Cada día:** texto, ánimo (el mismo de *Bienestar*: se apunta una sola vez), etiquetas y una foto opcional, reducida a 480 px (unos 35 KB).
+- **Calendario del mes:** cada día con el color de su ánimo y la miniatura de la foto. Al tocar un día se abre su entrada o se escribe.
+- **En este día:** lo que escribiste hace 1, 2… años y hace un mes. El recuerdo más antiguo sale también en el Resumen.
+- **Buscador** por texto y etiquetas, con las etiquetas más usadas como atajos.
+- **XP global:** 8 por día escrito y 2 más si tiene foto. Logros: Querido diario, Semana contada (7 días seguidos), Memorias (100 días) y Álbum (30 fotos).
+- **Fotos aparte:** no van dentro de los datos normales (así un cambio pequeño no vuelve a subir todas las fotos). Se guardan en el dispositivo (`photos.js`) y la entrada solo apunta su versión (`photoV`). Con la sincronización activada se suben a un **segundo Gist secreto** («Panel de Vida · fotos cifradas»), un archivo cifrado por mes (`fotos-AAAA-MM.json`), solo los meses que cambian; el otro dispositivo solo las descarga cuando una entrada dice que su foto es nueva. Las copias de seguridad exportadas incluyen las fotos.
+
 ## Hábitos y deporte
 
 - **Hábitos:**
@@ -236,6 +247,7 @@ js/
   views/nutricion.js    Pestaña Nutrición y objetivos (datos de Foodvisor vía Salud)
   views/tendencia.js    Gráfica de tendencia del peso y tarjeta «Peso vs calorías»
   views/pasos.js        Pestaña Pasos de Hábitos (pasos, distancia y calorías activas de Salud)
+  views/diario.js       Diario: escribir el día, calendario, «en este día» y buscador
   views/semana.js       Tarjeta del lunes y pantalla «Semanas» (resumen semanal)
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)
   charts.js             Gráficos SVG propios (barras + línea semanal, anillos)
@@ -244,6 +256,8 @@ js/
   ui.js                 Utilidades: formatos, hoja inferior, avisos
   trends.js             Media de 7 días del peso, semanas de nutrición, mantenimiento y resumen semanal
   finance.js            Lógica de finanzas: categorías, saldos, fijos automáticos
+  diary.js              Diario: rachas, «en este día», búsqueda y etiquetas
+  photos.js             Fotos del diario: guardado aparte, cola de subida y reducción de tamaño
   futbol.js             Fútbol: temporadas, estadísticas de partidos, rachas y récords
   forms.js              Piezas de formulario compartidas
   habits.js             Lógica de hábitos: rachas, cumplimiento, mapa de calor

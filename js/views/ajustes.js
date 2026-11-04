@@ -2,6 +2,7 @@
 
 import { update, getState, replaceState, defaultState } from "../state.js";
 import { exportBackup, readBackupFile, applyBackup } from "../backup.js";
+import { replaceAllPhotos } from "../photos.js";
 import { esc, toast, confirmSheet, daysSince, avatar } from "../ui.js";
 import { icon } from "../icons.js";
 import { requestPersistence } from "../db.js";
@@ -113,7 +114,9 @@ export function mount(root) {
   mountAtajosCard(root);
   mountHevyCard(root);
   root.querySelector("#demo-on")?.addEventListener("click", async () => {
-    await replaceState(buildDemo(getState().profile.alias));
+    const demo = buildDemo(getState().profile.alias);
+    demo.settings.photoGistId = getState().settings.photoGistId;
+    await replaceState(demo);
     toast("Datos de ejemplo cargados");
     location.hash = "#resumen";
   });
@@ -122,6 +125,7 @@ export function mount(root) {
     if (!ok) return;
     const fresh = defaultState();
     fresh.profile = { ...fresh.profile, alias: getState().profile.alias, photo: getState().profile.photo };
+    fresh.settings.photoGistId = getState().settings.photoGistId;
     await replaceState(fresh);
     toast("Datos de ejemplo quitados");
   });
@@ -190,6 +194,8 @@ export function mount(root) {
     const { alias, photo } = getState().profile;
     const fresh = defaultState();
     fresh.profile = { ...fresh.profile, alias, photo };
+    fresh.settings.photoGistId = getState().settings.photoGistId;   // el Gist de fotos se reutiliza (vaciado)
+    await replaceAllPhotos({});
     await replaceState(fresh);
     toast("Datos borrados");
   });

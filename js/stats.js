@@ -84,6 +84,7 @@ export function activeDays(state) {
   state.habits.sleep.forEach(x => add(x.date));
   state.habits.mood.forEach(x => add(x.date));
   (state.habits.nutrition || []).forEach(x => add(x.date));
+  (state.diary || []).forEach(x => add(x.date));
   state.finance.transactions.forEach(t => !t.auto && add(t.date));
   state.agenda.tasks.forEach(t => t.done && add(t.doneAt));
   return s;
@@ -101,5 +102,5 @@ export function streak(state, now = new Date()) {
 export function hasAnyData(state) {
   const f = state.finance, h = state.habits, a = state.agenda;
   return [f.accounts, f.transactions, f.recurring, f.goals,
-    h.habits, h.logs, h.workouts, h.body, h.sleep, h.mood, h.nutrition || [], h.activity || [], a.tasks, a.events].some(arr => arr.length > 0);
+    h.habits, h.logs, h.workouts, h.body, h.sleep, h.mood, h.nutrition || [], h.activity || [], state.diary || [], a.tasks, a.events].some(arr => arr.length > 0);
 }
