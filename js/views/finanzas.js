@@ -1,6 +1,7 @@
 // Finanzas: saldo, movimientos, gastos por categoría, fijos, metas y cuentas.
 
 import { areaHeader } from "./area.js";
+import { getState } from "../state.js";
 import { esc, money } from "../ui.js";
 import { icon } from "../icons.js";
 import { iso, parseISO } from "../stats.js";
@@ -11,7 +12,7 @@ import { openTxForm, openAccountForm, openRecurringForm, openGoalForm, openContr
 
 // Estado de la pantalla (no se guarda): pestaña, mes visible y categoría desplegada
 // acc: cuenta elegida en la tarjeta de saldo (null = saldo total)
-const ui = { tab: "movs", ym: iso().slice(0, 7), open: null, acc: null };
+const ui = { tab: "movs", ym: iso().slice(0, 7), open: null, acc: null, q: "", qLimit: 50 };
 const TABS = { movs: "Movimientos", gastos: "Gastos", fijos: "Fijos", metas: "Metas", cuentas: "Cuentas" };
 
 registerQuickAction("money", () => openTxForm());
@@ -110,8 +111,51 @@ function movsTab(state) {
   </section>`;
 }
 
+// ---------- Buscador de gastos (todos los meses). Filtra sin repintar la pantalla para no perder el teclado.
+const fold = t => String(t ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+function searchExpenses(state, q) {
+  const words = fold(q).trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return [];
+  const accName = id => state.finance.accounts.find(a => a.id === id)?.name || "";
+  return state.finance.transactions
+    .filter(t => t.amount < 0 && !t.transferId)
+    .filter(t => {
+      const abs = Math.abs(t.amount);
+      // importe en varios formatos: "12,5", "12,50", "12.50", "1.234,56"
+      const hay = fold([t.note, catLabel(state, t.categoryId), accName(t.accountId), money(abs), String(abs), String(abs).replace(".", ","), t.date].join(" "));
+      return words.every(w => hay.includes(w));
+    })
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function searchResults(state) {
+  const found = searchExpenses(state, ui.q);
+  if (!found.length) return `<div class="empty">Ningún gasto coincide con «${esc(ui.q.trim())}».</div>`;
+  const total = found.reduce((s, t) => s - t.amount, 0);
+  const accName = id => state.finance.accounts.find(a => a.id === id)?.name || "Cuenta borrada";
+  const fullDate = d => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", year: "numeric" }).format(parseISO(d)).replace(".", "");
+  return `<div class="kv big"><span>${found.length} ${found.length === 1 ? "gasto" : "gastos"}</span><b class="num neg">${money(total)}</b></div>
+    <div class="list tight">${found.slice(0, ui.qLimit).map(t => `
+      <button class="item tap" type="button" data-act="edit-tx" data-id="${t.id}">
+        <span class="cat-ico" style="--c:${catColor(state, t.categoryId)}"></span>
+        <span class="t">${esc(t.note || catLabel(state, t.categoryId))}<small>${fullDate(t.date)} · ${esc(catLabel(state, t.categoryId))} · ${esc(accName(t.accountId))}</small></span>
+        <b class="num">${money(t.amount)}</b></button>`).join("")}</div>
+    ${found.length > ui.qLimit ? `<button class="btn small" type="button" data-act="q-more" style="margin-top:8px">Ver más (${found.length - ui.qLimit})</button>` : ""}`;
+}
+
 // ---------- Gasto del mes por categoría
 function gastosTab(state, sum) {
+  const searching = !!ui.q.trim();
+  return `<section class="card">
+    <div class="search"><span>${icon.search}</span><input class="input" type="search" id="exp-search" placeholder="Buscar gastos: Mercadona, comida, 12,50…" autocomplete="off" value="${esc(ui.q)}" aria-label="Buscar gastos"></div>
+    <p class="hint" id="exp-hint"${searching ? " hidden" : ""}>Busca en todos los meses por concepto, categoría, cuenta o importe.</p>
+    <div id="exp-results"${searching ? "" : " hidden"}>${searching ? searchResults(state) : ""}</div>
+  </section>
+  <div id="exp-cats"${searching ? " hidden" : ""}>${catsCard(state, sum)}</div>`;
+}
+
+function catsCard(state, sum) {
   const total = -sum.expense;
   const manage = `<button class="btn small" type="button" data-act="cats">Categorías</button>`;
   if (!sum.cats.length) return `<section class="card"><h2 class="card-h">Gasto por categoría<span class="spacer"></span>${manage}</h2><div class="empty">Sin gastos en ${monthLabel(ui.ym).toLowerCase()}.</div></section>`;
@@ -213,6 +257,19 @@ export function mount(root, _state, signal) {
       case "edit-goal": openGoalForm(id); break;
       case "contrib": openContribute(id); break;
       case "cats": openCategories(); break;
+      case "q-more": ui.qLimit += 50; paintSearch(root); break;
     }
   }, { signal });
+  root.querySelector("#exp-search")?.addEventListener("input", e => {
+    ui.q = e.target.value; ui.qLimit = 50;
+    paintSearch(root);
+  }, { signal });
+}
+
+function paintSearch(root) {
+  const on = !!ui.q.trim();
+  root.querySelector("#exp-results").hidden = !on;
+  root.querySelector("#exp-hint").hidden = on;
+  root.querySelector("#exp-cats").hidden = on;
+  root.querySelector("#exp-results").innerHTML = on ? searchResults(getState()) : "";
 }

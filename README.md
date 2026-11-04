@@ -112,6 +112,7 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 - **Tarjeta de saldo:** con el selector de arriba (*Total* o una cuenta) ves el saldo, los ingresos, gastos y balance del mes y la gráfica de los últimos 6 meses de todas las cuentas juntas o de una sola. Las transferencias no cuentan como ingreso ni gasto; en una cuenta aparecen aparte como «Transferencias del mes».
 - **Movimientos:** gastos, ingresos y transferencias entre cuentas. Se pueden apuntar con el botón **+**. Tocar un movimiento lo abre para editarlo o borrarlo.
 - **Importes:** valen `12,50`, `1.234,56` o `12.5`.
+- **Buscador de gastos** (pestaña *Gastos*): busca en todos los meses por concepto, categoría, cuenta, importe (`12,50`) o fecha. Puedes poner varias palabras (p. ej. `super revolut`). Muestra cuántos gastos coinciden y su total; al tocar uno se abre para editarlo.
 - **Categorías:** hay una lista inicial con subcategorías y se puede cambiar en *Gastos → Categorías*. Al borrar una subcategoría, sus movimientos pasan a la categoría principal.
 - **Fijos:** se repiten cada mes, semana o año y se apuntan solos el día que toca, aunque la app lleve días sin abrirse.
 - **Metas de ahorro:** objetivo, aportaciones y, si les pones fecha límite, cuánto tienes que ahorrar al mes para llegar.
