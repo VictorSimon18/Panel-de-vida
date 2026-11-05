@@ -5,9 +5,8 @@ import { esc, int, openSheet, closeSheet, toast } from "../ui.js";
 import { getState } from "../state.js";
 import { icon } from "../icons.js";
 import { iso, parseISO } from "../stats.js";
-import { stackChart } from "../charts.js";
 import { registerQuickAction } from "../quickadd.js";
-import { COMPS, POSITIONS, RESULT, RESULT_COLOR, seasonOf, seasonLabel, seasons, matchesOf, trainingsOf, resultOf, matchStats, seasonMonths, groupBy, records } from "../futbol.js";
+import { COMPS, RESULT, RESULT_COLOR, seasonOf, seasonLabel, seasons, matchesOf, trainingsOf, resultOf, matchStats, records } from "../futbol.js";
 import { openMatchForm, openTrainingForm } from "./futbol-forms.js";
 import { openWorkoutForm } from "./deporte-forms.js";
 
@@ -134,32 +133,33 @@ function entrenosTab(state, today) {
   </section>`;
 }
 
-// ---------- Estadísticas
-function statsTab(state, today) {
-  const ms = matchesOf(state, ui.season);
-  const months = seasonMonths(state, ui.season, today);
+// ---------- Estadísticas: seis cifras de la temporada y tres récords de siempre
+function statsTab(state) {
+  const s = matchStats(matchesOf(state, ui.season));
   const rec = records(state);
-  const row = g => `<div class="nw-row" role="row"><span>${esc(g.label)}</span><span class="num">${g.played}</span><span class="num">${g.goals}</span><span class="num">${g.assists}</span><span class="num">${g.V + g.E + g.D ? `${g.V}-${g.E}-${g.D}` : "—"}</span></div>`;
-  const table = (title, groups) => groups.length ? `<h3 class="card-h" style="margin-top:14px">${title}</h3>
-    <div class="nw-table fut-table" role="table"><div class="nw-row head" role="row"><span></span><span>PJ</span><span>G</span><span>A</span><span>V-E-D</span></div>${groups.map(row).join("")}</div>` : "";
-  const recLine = (label, m, val) => m ? `<button class="kv tap-kv" type="button" data-act="edit-match" data-id="${m.id}"><span>${label}</span><span class="num">${val} · ${m.rival ? esc(m.rival) + ", " : ""}${shortDate(m.date)}</span></button>` : "";
+  const decided = s.V + s.E + s.D;
+  const big = (v, l) => `<div class="fut-big"><b class="num">${v}</b><small>${l}</small></div>`;
+  const recLine = (label, m, val) => m
+    ? `<button class="kv tap-kv" type="button" data-act="edit-match" data-id="${m.id}"><span>★ ${label}</span><span class="num">${val}${m.rival ? ` · ${esc(m.rival)}` : ""}</span></button>`
+    : `<div class="kv"><span>★ ${label}</span><span class="muted">—</span></div>`;
   return `<section class="card">
-    <h2 class="card-h">Goles y asistencias por mes</h2>
-    ${months.some(x => x.goals || x.assists) ? `${stackChart(months.map((x, i) => ({ label: x.label, values: [x.goals, x.assists], highlight: i === months.length - 1 })), { colors: ["#7ea6f0", "#7cc4e4"], unit: "", id: "ga" })}
-      <div class="legend"><span style="--c:#7ea6f0">Goles</span><span style="--c:#7cc4e4">Asistencias</span></div>` : `<div class="empty">Aún no hay goles ni asistencias esta temporada.</div>`}
-    ${table("Por competición", groupBy(ms, "comp", COMPS))}
-    ${table("Por posición", groupBy(ms.filter(m => m.position), "position", POSITIONS))}
+    <h2 class="card-h">Temporada ${seasonLabel(ui.season)}</h2>
+    <div class="fut-hero">
+      ${big(s.played, s.played === 1 ? "partido" : "partidos")}
+      ${big(decided ? `${Math.round(s.V / decided * 100)} %` : "—", "victorias")}
+      ${big(s.rating != null ? num1(s.rating) : "—", "nota media")}
+      ${big(s.goals, s.goals === 1 ? "gol" : "goles")}
+      ${big(s.assists, s.assists === 1 ? "asist." : "asist.")}
+      ${big(`${int(s.minutes)}'`, "minutos")}
+    </div>
   </section>
   <section class="card">
-    <h2 class="card-h">Récords (todas las temporadas)</h2>
-    ${rec.total.played ? `<div class="list">
-      ${recLine("Más goles en un partido", rec.mostGoals, `${rec.mostGoals?.goals} ${rec.mostGoals?.goals === 1 ? "gol" : "goles"}`)}
-      ${recLine("Más asistencias", rec.mostAssists, `${rec.mostAssists?.assists}`)}
+    <h2 class="card-h">Récords</h2>
+    <div class="list">
       ${recLine("Mejor nota", rec.bestRating, num1(rec.bestRating?.rating || 0))}
       ${recLine("Mayor victoria", rec.bigWin, `${rec.bigWin?.gf}–${rec.bigWin?.ga}`)}
-      <div class="kv"><span>Hat-tricks</span><span class="num">${rec.hatTricks}</span></div>
-      <div class="kv"><span>En total</span><span class="num">${rec.total.played} partidos · ${rec.total.goals} goles · ${rec.total.assists} asist.</span></div>
-    </div>` : `<div class="empty">Aquí aparecerán tus mejores partidos.</div>`}
+      ${recLine("Más goles", rec.mostGoals, `${rec.mostGoals?.goals} ${rec.mostGoals?.goals === 1 ? "gol" : "goles"}`)}
+    </div>
   </section>`;
 }
 

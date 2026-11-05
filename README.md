@@ -133,7 +133,7 @@ Sustituye al antiguo apartado «Trabajo y estudios» (sus datos se borraron al a
 - **Temporada:** goles, asistencias y partidos; victorias, empates y derrotas y los goles del equipo; últimos 5 resultados; nota media, minutos y % de titular; rachas marcando y sin perder (actual y mejor), minutos por gol, entrenos y tarjetas.
 - **Partidos:** fecha, rival, competición (liga, copa, torneo, amistoso), local o visitante, resultado (tu equipo – rival), titular o suplente, minutos, goles y asistencias (con − / +), posición, tarjetas, nota del 1 al 10 (de 0,5 en 0,5, opcional) y comentario. La competición, la posición y titular/suplente se rellenan con lo del último partido. No deja guardar más goles tuyos que los de tu equipo.
 - **Entrenos:** fecha, minutos y nota.
-- **Estadísticas:** goles y asistencias por mes, tablas por competición y por posición (PJ, G, A, V-E-D) y récords de todas las temporadas (más goles, más asistencias, mejor nota, mayor victoria, hat-tricks).
+- **Estadísticas:** seis cifras grandes de la temporada (partidos, % de victorias, nota media, goles, asistencias y minutos) y tres récords de siempre (mejor nota, mayor victoria y más goles en un partido; al tocarlos se abre ese partido).
 - **XP:** partido 30, victoria 10, gol 10, asistencia 5, entreno 25. Logros: Once titular, Primer gol, Hat-trick, Goleador, Asistente, Invicto, Partidazo, Temporada completa, Veterano y Constancia.
 
 ## Diario
