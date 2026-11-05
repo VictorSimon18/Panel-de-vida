@@ -7,7 +7,7 @@ import { icon } from "../icons.js";
 import { iso, parseISO } from "../stats.js";
 import { registerQuickAction } from "../quickadd.js";
 import { COMPS, RESULT, RESULT_COLOR, seasonOf, seasonLabel, seasons, matchesOf, trainingsOf, resultOf, matchStats, records } from "../futbol.js";
-import { openMatchForm, openTrainingForm } from "./futbol-forms.js";
+import { openMatchForm, openTrainingForm, viewMatch } from "./futbol-forms.js";
 import { openWorkoutForm } from "./deporte-forms.js";
 
 const ui = { tab: "temporada", season: null };
@@ -97,7 +97,7 @@ function temporadaTab(state, today) {
 function matchItem(m) {
   const r = resultOf(m);
   const bits = [m.goals ? `${m.goals} ${m.goals === 1 ? "gol" : "goles"}` : "", m.assists ? `${m.assists} asist.` : "", m.minutes != null ? `${m.minutes}'` : "", m.rating ? `nota ${num1(m.rating)}` : ""].filter(Boolean).join(" · ");
-  return `<button class="item tap" type="button" data-act="edit-match" data-id="${m.id}">
+  return `<button class="item tap" type="button" data-act="view-match" data-id="${m.id}">
     ${resDot(r)}
     <span class="t">${m.rival ? `${m.venue === "visitante" ? "en " : "vs "}${esc(m.rival)}` : "Partido"}<small>${dayName(m.date)}${m.comp ? ` · ${COMPS[m.comp]}` : ""}${bits ? ` · ${bits}` : ""}</small></span>
     <b class="num">${r ? `${m.gf}–${m.ga}` : ""}</b>
@@ -140,7 +140,7 @@ function statsTab(state) {
   const decided = s.V + s.E + s.D;
   const big = (v, l) => `<div class="fut-big"><b class="num">${v}</b><small>${l}</small></div>`;
   const recLine = (label, m, val) => m
-    ? `<button class="kv tap-kv" type="button" data-act="edit-match" data-id="${m.id}"><span>★ ${label}</span><span class="num">${val}${m.rival ? ` · ${esc(m.rival)}` : ""}</span></button>`
+    ? `<button class="kv tap-kv" type="button" data-act="view-match" data-id="${m.id}"><span>★ ${label}</span><span class="num">${val}${m.rival ? ` · ${esc(m.rival)}` : ""}</span></button>`
     : `<div class="kv"><span>★ ${label}</span><span class="muted">—</span></div>`;
   return `<section class="card">
     <h2 class="card-h">Temporada ${seasonLabel(ui.season)}</h2>
@@ -173,7 +173,7 @@ export function mount(root, _state, signal) {
       case "tab": e.preventDefault(); ui.tab = b.dataset.tab; rerender(); break;
       case "season": { const list = seasons(getState(), iso()); ui.season = list[list.indexOf(ui.season) + Number(b.dataset.n)] ?? ui.season; rerender(); break; }
       case "new-match": openMatchForm(); break;
-      case "edit-match": openMatchForm(id); break;
+      case "view-match": viewMatch(id); break;
       case "new-training": openTrainingForm(); break;
       case "edit-training": openTrainingForm(id); break;
     }

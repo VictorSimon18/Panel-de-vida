@@ -12,6 +12,39 @@ const counter = (id, label, value) => `<div class="field fb-counter"><label for=
   <input class="input num" id="${id}" inputmode="numeric" autocomplete="off" value="${value ?? 0}">
   <button class="btn small" type="button" data-step="1" data-for="${id}" aria-label="Más">+</button></div></div>`;
 
+// ---------- Ver un partido (solo lectura, con Editar y Cerrar)
+const longDay = d => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date(d + "T12:00")); return t[0].toUpperCase() + t.slice(1); };
+const RES_COLOR = { V: "var(--fin)", E: "var(--muted)", D: "var(--danger)" };
+
+export function viewMatch(id) {
+  const m = getState().habits.workouts.find(x => x.id === id);
+  if (!m) return;
+  const r = resultOf(m);
+  const n1 = v => String(v).replace(".", ",");
+  const cards = m.red ? (m.yellow >= 2 ? "Doble amarilla (expulsado)" : "Roja directa") : m.yellow ? "Amarilla" : "Ninguna";
+  const rows = [
+    ["Competición", COMPS[m.comp]],
+    ["Campo", m.venue ? (m.venue === "local" ? "Local" : "Visitante") : null],
+    ["Has jugado de", m.starter == null ? null : m.starter ? "Titular" : "Suplente"],
+    ["Minutos", m.minutes != null ? `${m.minutes}'` : null],
+    ["Goles", m.goals != null ? String(m.goals) : null],
+    ["Asistencias", m.assists != null ? String(m.assists) : null],
+    ["Posición", POSITIONS[m.position]],
+    ["Tarjetas", m.rival != null || m.yellow != null ? cards : null]
+  ].filter(([, v]) => v != null && v !== "");
+  const sheet = openSheet(`
+    <h2>${m.rival ? `${m.venue === "visitante" ? "En casa de" : "Contra"} ${esc(m.rival)}` : "Partido"}</h2>
+    <p>${longDay(m.date)}</p>
+    <div class="match-head">
+      ${r ? `<div class="match-score"><b class="num">${m.gf}–${m.ga}</b><span style="color:${RES_COLOR[r]}">${RESULT[r]}</span></div>` : `<div class="match-score"><b class="muted">Sin resultado</b></div>`}
+      ${m.rating ? `<div class="match-rating"><b class="num">${n1(m.rating)}</b><small>tu nota</small></div>` : ""}
+    </div>
+    ${rows.length ? `<div class="list">${rows.map(([k, v]) => `<div class="kv"><span>${k}</span><span class="num">${esc(v)}</span></div>`).join("")}</div>` : ""}
+    ${m.note ? `<p class="match-note">${esc(m.note)}</p>` : ""}
+    <div class="btn-row"><button class="btn" type="button" id="mv-edit">Editar</button><button class="btn primary" type="button" data-close>Cerrar</button></div>`);
+  sheet.querySelector("#mv-edit").addEventListener("click", () => openMatchForm(id));
+}
+
 // ---------- Partido
 export function openMatchForm(id = null) {
   const m = id ? getState().habits.workouts.find(x => x.id === id) : null;
