@@ -7,7 +7,7 @@ import { icon } from "../icons.js";
 import { iso, parseISO } from "../stats.js";
 import { registerQuickAction } from "../quickadd.js";
 import { COMPS, RESULT, RESULT_COLOR, seasonOf, seasonLabel, seasons, matchesOf, trainingsOf, resultOf, matchStats, records } from "../futbol.js";
-import { openMatchForm, openTrainingForm, viewMatch } from "./futbol-forms.js";
+import { openMatchForm, openTrainingForm, viewMatch, viewTraining } from "./futbol-forms.js";
 import { openWorkoutForm } from "./deporte-forms.js";
 
 const ui = { tab: "temporada", season: null };
@@ -125,7 +125,7 @@ function entrenosTab(state, today) {
       <div><b class="num">${num1(min / 60)} h</b><small>en total</small></div>
     </div>
     ${tr.length ? `<div class="list">${tr.map(w => `
-      <button class="item tap" type="button" data-act="edit-training" data-id="${w.id}">
+      <button class="item tap" type="button" data-act="view-training" data-id="${w.id}">
         <span class="cat-ico" style="--c:var(--fut)"></span>
         <span class="t">Entreno<small>${dayName(w.date)}${w.note ? ` · ${esc(w.note)}` : ""}</small></span>
         <b class="num">${w.minutes} min</b>
@@ -175,7 +175,7 @@ export function mount(root, _state, signal) {
       case "new-match": openMatchForm(); break;
       case "view-match": viewMatch(id); break;
       case "new-training": openTrainingForm(); break;
-      case "edit-training": openTrainingForm(id); break;
+      case "view-training": viewTraining(id); break;
     }
   }, { signal });
   const chips = root.querySelector(".chips"), sel = chips?.querySelector('[aria-selected="true"]');

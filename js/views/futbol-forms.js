@@ -4,7 +4,7 @@ import { getState, update } from "../state.js";
 import { openSheet, closeSheet, toast, confirmSheet, esc, uid } from "../ui.js";
 import { iso } from "../stats.js";
 import { seg, field } from "../forms.js";
-import { COMPS, POSITIONS, RESULT, resultOf, lastMatchDefaults } from "../futbol.js";
+import { COMPS, POSITIONS, RESULT, resultOf, lastMatchDefaults, seasonOf, seasonLabel } from "../futbol.js";
 
 const parseNum = s => { const t = String(s ?? "").trim().replace(",", "."); const v = Number(t); return t && Number.isFinite(v) ? v : null; };
 const counter = (id, label, value) => `<div class="field fb-counter"><label for="${id}">${label}</label>
@@ -139,6 +139,30 @@ export function openMatchForm(id = null) {
     update(st => { st.habits.workouts = st.habits.workouts.filter(x => x.id !== m.id); });
     toast("Partido borrado");
   });
+}
+
+// ---------- Ver un entreno (solo lectura, con Editar y Cerrar)
+export function viewTraining(id) {
+  const all = getState().habits.workouts.filter(w => w.type === "futbol" && w.kind !== "partido").sort((a, b) => a.date.localeCompare(b.date));
+  const w = all.find(x => x.id === id);
+  if (!w) return;
+  const season = seasonOf(w.date);
+  const inSeason = all.filter(x => seasonOf(x.date) === season);
+  const nth = inSeason.indexOf(w) + 1;
+  const month = all.filter(x => x.date.slice(0, 7) === w.date.slice(0, 7));
+  const sheet = openSheet(`
+    <h2>Entreno</h2>
+    <p>${longDay(w.date)}</p>
+    <div class="match-head">
+      <div class="match-score"><b class="num">${w.minutes || 0}'</b><span class="muted">${w.minutes >= 60 ? `${String(Math.round(w.minutes / 6) / 10).replace(".", ",")} h` : "minutos"}</span></div>
+      <div class="match-rating"><b class="num">${nth}º</b><small>entreno de ${inSeason.length} en la temporada ${seasonLabel(season)}</small></div>
+    </div>
+    <div class="list">
+      <div class="kv"><span>Entrenos ese mes</span><span class="num">${month.length} · ${month.reduce((a, x) => a + (x.minutes || 0), 0)} min</span></div>
+    </div>
+    ${w.note ? `<p class="match-note">${esc(w.note)}</p>` : ""}
+    <div class="btn-row"><button class="btn" type="button" id="tv-edit">Editar</button><button class="btn primary" type="button" data-close>Cerrar</button></div>`);
+  sheet.querySelector("#tv-edit").addEventListener("click", () => openTrainingForm(id));
 }
 
 // ---------- Entreno

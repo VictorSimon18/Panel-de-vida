@@ -821,3 +821,4 @@ textarea.input { resize: vertical; min-height: 120px; line-height: 1.5; }
 .match-rating b { display: block; font-size: 28px; font-weight: 800; color: var(--fut); line-height: 1.1; }
 .match-rating small { font-size: var(--fs-xs); color: var(--muted); }
 .match-note { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--fg); }
+.sheet .match-note { color: var(--fg); }
