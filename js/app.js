@@ -9,6 +9,7 @@ import { initQuickAdd, openQuickAdd } from "./quickadd.js";
 import { renderSidebar, SHORTCUT_ROUTES } from "./sidebar.js";
 import { initSync, noteLocalChange, onSyncStatus } from "./sync.js";
 import { applyInbox, ensureStepsHabit } from "./inbox.js";
+import { ensureRoutine } from "./routine.js";
 import { paintSyncStatus, askConflict } from "./views/sync-ui.js";
 import { requestPersistence } from "./db.js";
 import { toast, closeSheet } from "./ui.js";
@@ -71,7 +72,7 @@ async function start() {
   await loadState();
   await loadPhotos();
   // Categorías por defecto y gastos fijos que hayan vencido desde la última vez
-  update(s => { ensureFinance(s); ensureAgenda(s); ensureStepsHabit(s); syncGame(s, { silent: true }); });
+  update(s => { ensureFinance(s); ensureAgenda(s); ensureStepsHabit(s); ensureRoutine(s); syncGame(s, { silent: true }); });
   initQuickAdd();
   // Las vistas pueden pedir repintarse al cambiar su estado interno (pestaña, mes…)
   window.addEventListener("pv:render", () => { const y = window.scrollY; render(); window.scrollTo(0, y); });

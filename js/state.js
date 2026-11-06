@@ -34,6 +34,7 @@ export function defaultState() {
       sleep: [],             // { id, date, hours, quality }
       mood: [],              // { id, date, value }
       nutrition: [],         // { id, date, kcal, protein, carbs, fat, fiber, sugar, source, at }
+      routineLog: [],        // { id, date, at, secs, steps }  (rutina diaria terminada; ver routine.js)
       activity: []           // { id, date, km, active, at }  (distancia y calorías activas de Salud; los pasos van en el hábito Pasos)
     },
     agenda: {

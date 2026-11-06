@@ -136,6 +136,15 @@ Sustituye al antiguo apartado «Trabajo y estudios» (sus datos se borraron al a
 - **Estadísticas:** seis cifras grandes de la temporada (partidos, % de victorias, nota media, goles, asistencias y minutos) y tres récords de siempre (mejor nota, mayor victoria y más goles en un partido; al tocarlos se abre ese partido).
 - **XP:** partido 30, victoria 10, gol 10, asistencia 5, entreno 25. Logros: Once titular, Primer gol, Hat-trick, Goleador, Asistente, Invicto, Partidazo, Temporada completa, Veterano y Constancia.
 
+## Rutina diaria (cronómetro)
+
+**Hábitos → Rutina:** tu rutina de cada día (de inicio: plancha 1:00, plancha lateral izquierda 1:00, plancha lateral derecha 1:00 y 20 flexiones, con 30 s de descanso).
+
+- **Empezar** abre un cronómetro a pantalla completa que encadena los ejercicios: cuenta atrás con anillo en los de tiempo, pitidos en los 3 últimos segundos y al cambiar, descanso con «Siguiente: …», y en los de repeticiones un número grande y el botón **Hecho**. Se puede pausar, saltar o salir (pide confirmación). La pantalla no se apaga mientras dura (si el navegador lo permite).
+- Al terminar se marca solo el hábito automático **Rutina diaria** (racha y XP) y se guarda en `habits.routineLog` con lo que duró.
+- **Editar rutina:** descanso (nada, 15 s, 30 s, 45 s o 1 min) y ejercicios por tiempo o por repeticiones, con nombre, cantidad y orden.
+- **Constancia:** días seguidos, mejor racha, veces en total y los últimos 14 días.
+
 ## Diario
 
 Desde la tarjeta **Diario** del Resumen o desde el menú lateral (`#diario`). No ocupa hueco en la barra de abajo.
@@ -247,6 +256,8 @@ js/
   views/nutricion.js    Pestaña Nutrición y objetivos (datos de Foodvisor vía Salud)
   views/tendencia.js    Gráfica de tendencia del peso y tarjeta «Peso vs calorías»
   views/pasos.js        Pestaña Pasos de Hábitos (pasos, distancia y calorías activas de Salud)
+  routine.js            Rutina diaria: ejercicios por defecto, hábito automático y registro
+  views/rutina.js       Pestaña Rutina: cronómetro a pantalla completa y editor
   views/diario.js       Diario: escribir el día, calendario, «en este día» y buscador
   views/semana.js       Tarjeta del lunes y pantalla «Semanas» (resumen semanal)
   stats.js              Cálculos del resumen (hoy, hábitos, dinero, semana, racha)

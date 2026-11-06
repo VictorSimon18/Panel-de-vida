@@ -13,10 +13,11 @@ import { openHabitForm, openHabitDetail, openDayLog } from "./habitos-forms.js";
 import { nutricionTab, openNutritionGoals } from "./nutricion.js";
 import { weightTrendBlock, nutriWeightCard } from "./tendencia.js";
 import { pasosTab, openStepsGoal } from "./pasos.js";
+import { rutinaTab, openRoutineEditor, startRoutine } from "./rutina.js";
 import { openWorkoutForm, openRoutineForm, openBodyForm, openWellbeingForm, openRecordDetail } from "./deporte-forms.js";
 
 const ui = { tab: "habitos", archived: false, gymView: "entrenos", gymMonths: 3, recQuery: "" };
-const TABS = { habitos: "Hábitos", gym: "Gimnasio", cuerpo: "Cuerpo", nutricion: "Nutrición", pasos: "Pasos", bienestar: "Bienestar" };
+const TABS = { habitos: "Hábitos", rutina: "Rutina", gym: "Gimnasio", cuerpo: "Cuerpo", nutricion: "Nutrición", pasos: "Pasos", bienestar: "Bienestar" };
 const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(n);
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s)).replace(".", "");
 const dayName = s => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" }).format(parseISO(s)).replace(/\./g, ""); return t[0].toUpperCase() + t.slice(1); };
@@ -52,7 +53,7 @@ export function render(state) {
     <div class="chips" role="tablist">${Object.entries(TABS).map(([k, l]) =>
       `<button type="button" role="tab" class="chip" data-act="tab" data-tab="${k}" aria-selected="${ui.tab === k}">${l}</button>`).join("")}</div>
 
-    ${({ habitos: habitosTab, gym: gymTab, cuerpo: cuerpoTab, nutricion: nutricionTab, pasos: pasosTab, bienestar: bienestarTab })[ui.tab](state)}`;
+    ${({ habitos: habitosTab, rutina: rutinaTab, gym: gymTab, cuerpo: cuerpoTab, nutricion: nutricionTab, pasos: pasosTab, bienestar: bienestarTab })[ui.tab](state)}`;
 }
 
 // ---------- Hábitos
@@ -256,6 +257,8 @@ export function mount(root, _state, signal) {
       case "gym-view": ui.gymView = b.dataset.v; rerender(); break;
       case "nutri-goals": e.preventDefault(); openNutritionGoals(); break;
       case "steps-goal": openStepsGoal(getState()); break;
+      case "rt-start": startRoutine(); break;
+      case "rt-edit": openRoutineEditor(); break;
       case "gym-more": ui.gymMonths += 3; rerender(); break;
       case "gym-source": update(s => { s.settings.gymSource = b.dataset.v; }); break;
       case "new-routine": openRoutineForm(); break;

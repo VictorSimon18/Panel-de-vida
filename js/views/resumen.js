@@ -179,7 +179,7 @@ export function mount(root, _state, signal) {
       return;
     }
     const h = e.target.closest("[data-habit]");
-    if (h?.dataset.auto) { const a = h.dataset.auto; toast(["steps", "kcal", "protein"].includes(a) ? `Se marca solo con ${AUTO_LABEL[a]} al llegar al objetivo` : `Se marca solo al apuntar ${AUTO_LABEL[a]}`); return; }
+    if (h?.dataset.auto) { const a = h.dataset.auto; toast(a === "routine" ? "Se marca solo al terminar la rutina en Hábitos → Rutina" : ["steps", "kcal", "protein"].includes(a) ? `Se marca solo con ${AUTO_LABEL[a]} al llegar al objetivo` : `Se marca solo al apuntar ${AUTO_LABEL[a]}`); return; }
     if (h) {
       update(s => {
         const habit = s.habits.habits.find(x => x.id === h.dataset.habit);

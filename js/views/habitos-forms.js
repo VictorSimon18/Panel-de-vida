@@ -101,7 +101,7 @@ export function openHabitDetail(id) {
   const days = heatDays(17, today).map(date => ({ date, level: habitLevel(s, h, date) }));
   const sheet = openSheet(`
     <h2>${esc(h.name)}</h2>
-    <p>${h.auto === "kcal" || h.auto === "protein" || h.auto === "steps" ? `Se marca solo con ${AUTO_LABEL[h.auto]} · objetivo ${num(h.target)} ${esc(h.unit)}${h.mode === "max" ? " como máximo" : ""}` : h.auto ? `Se marca solo al apuntar ${AUTO_LABEL[h.auto]}` : `Objetivo: ${num(h.target)} ${esc(h.unit)}`} · ${freqText(h)}</p>
+    <p>${h.auto === "routine" ? `Se marca solo al terminar la rutina (Hábitos → Rutina)` : h.auto === "kcal" || h.auto === "protein" || h.auto === "steps" ? `Se marca solo con ${AUTO_LABEL[h.auto]} · objetivo ${num(h.target)} ${esc(h.unit)}${h.mode === "max" ? " como máximo" : ""}` : h.auto ? `Se marca solo al apuntar ${AUTO_LABEL[h.auto]}` : `Objetivo: ${num(h.target)} ${esc(h.unit)}`} · ${freqText(h)}</p>
     <div class="week-stats">
       <div><b class="num" style="color:var(--agenda)">${st.current}</b><small>racha (${st.unit})</small></div>
       <div><b class="num" style="color:var(--hab)">${st.best}</b><small>mejor racha</small></div>

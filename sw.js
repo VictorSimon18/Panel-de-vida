@@ -1,7 +1,7 @@
 // Service worker: guarda la app en caché para que funcione sin conexión.
 // IMPORTANTE: sube VERSION cada vez que publiques cambios, para que el iPhone descargue la nueva versión.
 
-const VERSION = "v0.19.7";
+const VERSION = "v0.20.0";
 const CACHE = `panel-de-vida-${VERSION}`;
 
 const FILES = [
@@ -48,6 +48,8 @@ const FILES = [
   "js/diary.js",
   "js/photos.js",
   "js/views/diario.js",
+  "js/routine.js",
+  "js/views/rutina.js",
   "js/views/habitos.js",
   "js/views/habitos-forms.js",
   "js/views/deporte-forms.js",

@@ -822,3 +822,43 @@ textarea.input { resize: vertical; min-height: 120px; line-height: 1.5; }
 .match-rating small { font-size: var(--fs-xs); color: var(--muted); }
 .match-note { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--fg); }
 .sheet .match-note { color: var(--fg); }
+
+/* =========================================================
+   Rutina diaria con cronómetro
+   ========================================================= */
+.rt-steps .item { align-items: center; }
+.rt-n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--hab); border: 1.5px solid var(--hab); }
+.rt-start { width: 100%; margin-top: 10px; min-height: 52px; font-size: 16px; }
+.rt-days { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 3px; margin-top: 12px; }
+.rt-days span { display: grid; justify-items: center; gap: 4px; }
+.rt-days i { width: 100%; max-width: 18px; aspect-ratio: 1; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--line-soft); }
+.rt-days .on i { background: var(--hab); border-color: var(--hab); }
+.rt-days .today small { color: var(--fg); font-weight: 700; }
+.rt-days small { font-size: 9px; color: var(--muted); }
+.rt-edit-row { display: grid; grid-template-columns: 1fr 112px 64px; gap: 6px; padding: 8px 0; border-top: 1px solid var(--line-soft); }
+.rt-edit-row:first-child { border-top: 0; }
+.rt-edit-btns { grid-column: 1 / -1; display: flex; gap: 6px; justify-content: flex-end; }
+.rt-edit-btns .btn.small { min-width: 40px; }
+
+.rt-run { position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column; background: var(--night);
+  padding: calc(var(--safe-top, 0px) + 14px) 20px calc(var(--safe-bottom, 0px) + 20px); }
+.rt-top { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-weight: 600; }
+.rt-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; position: relative; }
+.rt-kind { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--c); }
+.rt-name { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.rt-ring { width: min(72vw, 300px); height: auto; margin-top: 6px; }
+.rt-ring circle { fill: none; stroke-width: 12; }
+.rt-ring .bg { stroke: var(--surface-2); }
+.rt-ring .fg { stroke: var(--c); stroke-linecap: round; transition: stroke-dashoffset .2s linear; }
+.rt-time { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -32%); font-size: 64px; font-weight: 800; letter-spacing: -.03em; }
+.rt-reps b { display: block; font-size: 96px; font-weight: 800; line-height: 1; color: var(--c); letter-spacing: -.04em; }
+.rt-reps small { color: var(--muted); }
+.rt-next { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.rt-next b { color: var(--fg); }
+.rt-ctrl { display: flex; gap: 10px; }
+.rt-ctrl .btn { flex: 1; min-height: 52px; font-size: 16px; }
+.rt-big { width: 100%; max-width: 320px; min-height: 56px; font-size: 18px; margin-top: 14px; }
+.rt-check { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--c); color: var(--c); }
+.rt-check .ico { width: 48px; height: 48px; fill: none; stroke: currentColor; stroke-width: 2; }
+/* con el cronómetro abierto, las confirmaciones salen por encima */
+body:has(#rt-run) .sheet-backdrop, body:has(#rt-run) .sheet { z-index: 90; }
