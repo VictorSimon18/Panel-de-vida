@@ -5,6 +5,11 @@
 //              rival, venue: "local"|"visitante", comp, gf, ga, goals, assists, starter, yellow, red, position, rating }
 // Los campos del partido son opcionales (los partidos antiguos solo tienen minutos).
 
+// Equipos: cada partido y entreno lleva `team`. null en los filtros = los dos juntos.
+export const TEAMS = { sporting: "Sporting Pradillano", fenix: "Fénix de Azara" };
+export const TEAM_SHORT = { sporting: "Sporting", fenix: "Fénix" };
+export const DEFAULT_TEAM = "sporting";
+
 export const COMPS = { liga: "Liga", copa: "Copa", torneo: "Torneo", amistoso: "Amistoso" };
 export const POSITIONS = {
   por: "Portero", dfc: "Defensa central", lat: "Lateral", mcd: "Pivote", mc: "Mediocentro",
@@ -19,12 +24,13 @@ export const seasonLabel = y => `${y}/${String((y + 1) % 100).padStart(2, "0")}`
 export const seasonRange = y => [`${y}-08-01`, `${y + 1}-07-31`];
 
 const all = state => state.habits.workouts.filter(w => w.type === "futbol").sort((a, b) => a.date.localeCompare(b.date));
-export const matchesOf = (state, season = null) => all(state).filter(w => w.kind === "partido" && (season == null || seasonOf(w.date) === season));
-export const trainingsOf = (state, season = null) => all(state).filter(w => w.kind !== "partido" && (season == null || seasonOf(w.date) === season));
+const inTeam = (w, team) => !team || (w.team || DEFAULT_TEAM) === team;
+export const matchesOf = (state, season = null, team = null) => all(state).filter(w => w.kind === "partido" && inTeam(w, team) && (season == null || seasonOf(w.date) === season));
+export const trainingsOf = (state, season = null, team = null) => all(state).filter(w => w.kind !== "partido" && inTeam(w, team) && (season == null || seasonOf(w.date) === season));
 
 /** Temporadas con algo apuntado, más la actual, de la más reciente a la más antigua */
-export function seasons(state, today) {
-  const set = new Set(all(state).map(w => seasonOf(w.date)));
+export function seasons(state, today, team = null) {
+  const set = new Set(all(state).filter(w => inTeam(w, team)).map(w => seasonOf(w.date)));
   set.add(seasonOf(today));
   return [...set].sort((a, b) => b - a);
 }
@@ -88,8 +94,8 @@ export function groupBy(list, key, labels) {
 }
 
 /** Récords de todos los tiempos */
-export function records(state) {
-  const list = matchesOf(state);
+export function records(state, team = null) {
+  const list = matchesOf(state, null, team);
   const top = (f, ok = () => true) => list.filter(ok).reduce((b, m) => (f(m) > (b ? f(b) : -Infinity) ? m : b), null);
   const mostGoals = top(m => n(m.goals), m => n(m.goals) > 0);
   const mostAssists = top(m => n(m.assists), m => n(m.assists) > 0);
@@ -100,7 +106,7 @@ export function records(state) {
 }
 
 /** Lo del último partido para rellenar el siguiente (competición, posición, titular) */
-export function lastMatchDefaults(state) {
-  const m = matchesOf(state).at(-1);
-  return { comp: m?.comp || "liga", position: m?.position || "", starter: m?.starter ?? true };
+export function lastMatchDefaults(state, team = null) {
+  const m = matchesOf(state, null, team).at(-1);
+  return { comp: m?.comp || "liga", position: m?.position || "", starter: m?.starter ?? true, team: team || m?.team || DEFAULT_TEAM };
 }

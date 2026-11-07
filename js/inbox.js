@@ -141,7 +141,8 @@ export function applyInbox(s, messages, today = iso()) {
       if (tipo === "gimnasio") s.habits.workouts.push({ id, date, type: "gym", routineId: null, minutes, exercises: [], note: "Desde Siri", source: "siri" });
       else {
         const partido = ["si", "partido"].includes(norm(m.partido));
-        const w = { id, date, type: "futbol", kind: partido ? "partido" : "entrenamiento", minutes, note: m.nota || "", source: "siri" };
+        const team = /fenix|azara/.test(norm(m.equipo)) ? "fenix" : "sporting";
+        const w = { id, date, type: "futbol", team, kind: partido ? "partido" : "entrenamiento", minutes, note: m.nota || "", source: "siri" };
         if (partido) {
           if (m.rival) w.rival = m.rival.trim();
           const sc = String(m.resultado || "").match(/(\d+)\s*[-–:]\s*(\d+)/);   // «3-1»: tu equipo – rival

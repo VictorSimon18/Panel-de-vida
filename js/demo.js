@@ -103,11 +103,11 @@ export function buildDemo(alias) {
   const positions = ["mc", "mc", "mco", "ext", "mc"];
   for (let wk = 14; wk >= 0; wk--) {
     const ws = addDays(weekStart(now), -7 * wk);
-    for (const off of [1, 3]) if (iso(addDays(ws, off)) <= today) s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, off)), type: "futbol", kind: "entrenamiento", minutes: 90, note: "" });
+    for (const off of [1, 3]) if (iso(addDays(ws, off)) <= today) s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, off)), type: "futbol", team: off === 1 ? "sporting" : "fenix", kind: "entrenamiento", minutes: 90, note: "" });
     if (iso(addDays(ws, 5)) < today) {
       const gf = Math.floor(r() * 4), ga = Math.floor(r() * 3), starter = r() < .8;
       const goals = Math.min(gf, r() < .35 ? 1 + (r() < .2 ? 1 : 0) : 0), assists = Math.min(gf - goals, r() < .5 ? 1 : 0);
-      s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, 5)), type: "futbol", kind: "partido",
+      s.habits.workouts.push({ id: nid("fb"), date: iso(addDays(ws, 5)), type: "futbol", kind: "partido", team: wk % 3 === 0 ? "fenix" : "sporting",
         rival: rivals[wk % rivals.length], venue: wk % 2 ? "visitante" : "local", comp: wk === 6 ? "copa" : wk === 12 ? "amistoso" : "liga",
         gf, ga, goals, assists, starter, minutes: starter ? 70 + Math.round(r() * 20) : 15 + Math.round(r() * 25),
         yellow: r() < .15 ? 1 : 0, red: false, position: positions[wk % positions.length], rating: Math.round((5.5 + r() * 3 + goals) * 2) / 2, note: "" });

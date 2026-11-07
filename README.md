@@ -129,6 +129,7 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 
 Sustituye al antiguo apartado «Trabajo y estudios» (sus datos se borraron al actualizar: migración v2). Los partidos y entrenos se guardan en `habits.workouts` (tipo `futbol`), así que siguen contando para el hábito automático de fútbol.
 
+- **Dos equipos:** arriba eliges **Los dos**, **Sporting Pradillano** o **Fénix de Azara** (se recuerda en cada dispositivo); temporada, partidos, entrenos, estadísticas y récords muestran solo lo de ese equipo, o todo junto. Cada partido y entreno lleva su equipo (`team`: `sporting` | `fenix`); lo apuntado antes pasó al Sporting (migración v3). Con «Los dos», cada partido lleva una etiqueta con su equipo.
 - **Temporadas** de agosto a julio, con flechas para ver las anteriores.
 - **Temporada:** goles, asistencias y partidos; victorias, empates y derrotas y los goles del equipo; últimos 5 resultados; nota media, minutos y % de titular; rachas marcando y sin perder (actual y mejor), minutos por gol, entrenos y tarjetas.
 - **Partidos:** al tocar uno se abre su ficha (resultado, tu nota y todos los datos) con **Editar** y **Cerrar**. Cada partido guarda fecha, rival, competición (liga, copa, torneo, amistoso), local o visitante, resultado (tu equipo – rival), titular o suplente, minutos, goles y asistencias (con − / +), posición, tarjetas, nota del 1 al 10 (de 0,5 en 0,5, opcional) y comentario. La competición, la posición y titular/suplente se rellenan con lo del último partido. No deja guardar más goles tuyos que los de tu equipo.

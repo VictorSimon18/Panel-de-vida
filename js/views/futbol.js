@@ -6,11 +6,15 @@ import { getState } from "../state.js";
 import { icon } from "../icons.js";
 import { iso, parseISO } from "../stats.js";
 import { registerQuickAction } from "../quickadd.js";
-import { COMPS, RESULT, RESULT_COLOR, seasonOf, seasonLabel, seasons, matchesOf, trainingsOf, resultOf, matchStats, records } from "../futbol.js";
+import { COMPS, TEAMS, TEAM_SHORT, RESULT, RESULT_COLOR, seasonOf, seasonLabel, seasons, matchesOf, trainingsOf, resultOf, matchStats, records } from "../futbol.js";
 import { openMatchForm, openTrainingForm, viewMatch, viewTraining } from "./futbol-forms.js";
 import { openWorkoutForm } from "./deporte-forms.js";
 
-const ui = { tab: "temporada", season: null };
+// team: equipo elegido arriba (null = los dos); se recuerda en este dispositivo
+const readTeam = () => { try { const t = localStorage.getItem("pv-fut-team"); return t && TEAMS[t] ? t : null; } catch { return null; } };
+const ui = { tab: "temporada", season: null, team: readTeam() };
+const saveTeam = () => { try { ui.team ? localStorage.setItem("pv-fut-team", ui.team) : localStorage.removeItem("pv-fut-team"); } catch { /* sin almacenamiento */ } };
+const teamTag = w => ui.team ? "" : ` <span class="tag team-tag" data-team="${w.team || "sporting"}">${TEAM_SHORT[w.team || "sporting"]}</span>`;
 const TABS = { temporada: "Temporada", partidos: "Partidos", entrenos: "Entrenos", stats: "Estadísticas" };
 const num1 = v => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(v);
 const dayName = s => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" }).format(parseISO(s)).replace(/\./g, ""); return t[0].toUpperCase() + t.slice(1); };
@@ -29,8 +33,8 @@ registerQuickAction("train", () => {
     const b = e.target.closest("[data-pick]");
     if (!b) return;
     closeSheet();
-    if (b.dataset.pick === "partido") openMatchForm();
-    else if (b.dataset.pick === "entreno") openTrainingForm();
+    if (b.dataset.pick === "partido") openMatchForm(null, ui.team);
+    else if (b.dataset.pick === "entreno") openTrainingForm(null, ui.team);
     else if (getState().settings.gymSource === "hevy") toast("Apunta el entreno en Hevy y luego impórtalo en Hábitos → Gimnasio", { ms: 4000 });
     else openWorkoutForm();
   });
@@ -40,11 +44,15 @@ const resDot = r => `<span class="res-dot" style="--c:${r ? RESULT_COLOR[r] : "v
 
 export function render(state) {
   const today = iso();
-  const list = seasons(state, today);
+  const list = seasons(state, today, ui.team);
   if (ui.season == null || !list.includes(ui.season)) ui.season = seasonOf(today);
   const i = list.indexOf(ui.season);
   return `
     ${areaHeader(state, "fut")}
+    <div class="team-bar" role="tablist" aria-label="Equipo">
+      <button type="button" role="tab" class="team-opt" data-act="team" data-team="" aria-selected="${!ui.team}">Los dos</button>
+      ${Object.entries(TEAMS).map(([k, l]) => `<button type="button" role="tab" class="team-opt" data-act="team" data-team="${k}" data-t="${k}" aria-selected="${ui.team === k}">${l}</button>`).join("")}
+    </div>
     <div class="season-bar">
       <button class="icon-btn" type="button" data-act="season" data-n="1" aria-label="Temporada anterior"${i >= list.length - 1 ? " disabled" : ""}>${icon.back}</button>
       <b>Temporada ${seasonLabel(ui.season)}</b>
@@ -61,7 +69,7 @@ const addBtns = `<div class="btn-row">
 
 // ---------- Temporada
 function temporadaTab(state, today) {
-  const ms = matchesOf(state, ui.season), tr = trainingsOf(state, ui.season);
+  const ms = matchesOf(state, ui.season, ui.team), tr = trainingsOf(state, ui.season, ui.team);
   const s = matchStats(ms);
   if (!ms.length && !tr.length) return `<section class="card">${addBtns}
     <div class="empty">Aún no hay nada en la temporada ${seasonLabel(ui.season)}.<br>Apunta tus partidos con el resultado, tus goles, asistencias y tu nota para ver aquí tu temporada.</div></section>`;
@@ -99,21 +107,21 @@ function matchItem(m) {
   const bits = [m.goals ? `${m.goals} ${m.goals === 1 ? "gol" : "goles"}` : "", m.assists ? `${m.assists} asist.` : "", m.minutes != null ? `${m.minutes}'` : "", m.rating ? `nota ${num1(m.rating)}` : ""].filter(Boolean).join(" · ");
   return `<button class="item tap" type="button" data-act="view-match" data-id="${m.id}">
     ${resDot(r)}
-    <span class="t">${m.rival ? `${m.venue === "visitante" ? "en " : "vs "}${esc(m.rival)}` : "Partido"}<small>${dayName(m.date)}${m.comp ? ` · ${COMPS[m.comp]}` : ""}${bits ? ` · ${bits}` : ""}</small></span>
+    <span class="t">${m.rival ? `${m.venue === "visitante" ? "en " : "vs "}${esc(m.rival)}` : "Partido"}${teamTag(m)}<small>${dayName(m.date)}${m.comp ? ` · ${COMPS[m.comp]}` : ""}${bits ? ` · ${bits}` : ""}</small></span>
     <b class="num">${r ? `${m.gf}–${m.ga}` : ""}</b>
   </button>`;
 }
 
 // ---------- Partidos
 function partidosTab(state) {
-  const ms = matchesOf(state, ui.season).reverse();
+  const ms = matchesOf(state, ui.season, ui.team).reverse();
   if (!ms.length) return `<section class="card">${addBtns}<div class="empty">No hay partidos en la temporada ${seasonLabel(ui.season)}.</div></section>`;
   return `<section class="card">${addBtns}<div class="list">${ms.map(matchItem).join("")}</div></section>`;
 }
 
 // ---------- Entrenos
 function entrenosTab(state, today) {
-  const tr = trainingsOf(state, ui.season).reverse();
+  const tr = trainingsOf(state, ui.season, ui.team).reverse();
   const month = today.slice(0, 7);
   const thisMonth = tr.filter(w => w.date.startsWith(month));
   const min = tr.reduce((a, w) => a + (w.minutes || 0), 0);
@@ -127,7 +135,7 @@ function entrenosTab(state, today) {
     ${tr.length ? `<div class="list">${tr.map(w => `
       <button class="item tap" type="button" data-act="view-training" data-id="${w.id}">
         <span class="cat-ico" style="--c:var(--fut)"></span>
-        <span class="t">Entreno<small>${dayName(w.date)}${w.note ? ` · ${esc(w.note)}` : ""}</small></span>
+        <span class="t">Entreno${teamTag(w)}<small>${dayName(w.date)}${w.note ? ` · ${esc(w.note)}` : ""}</small></span>
         <b class="num">${w.minutes} min</b>
       </button>`).join("")}</div>` : `<div class="empty">Apunta tus entrenamientos con los minutos.</div>`}
   </section>`;
@@ -135,8 +143,8 @@ function entrenosTab(state, today) {
 
 // ---------- Estadísticas: seis cifras de la temporada y tres récords de siempre
 function statsTab(state) {
-  const s = matchStats(matchesOf(state, ui.season));
-  const rec = records(state);
+  const s = matchStats(matchesOf(state, ui.season, ui.team));
+  const rec = records(state, ui.team);
   const decided = s.V + s.E + s.D;
   const big = (v, l) => `<div class="fut-big"><b class="num">${v}</b><small>${l}</small></div>`;
   const recLine = (label, m, val) => m
@@ -171,10 +179,11 @@ export function mount(root, _state, signal) {
     const rerender = () => window.dispatchEvent(new Event("pv:render"));
     switch (b.dataset.act) {
       case "tab": e.preventDefault(); ui.tab = b.dataset.tab; rerender(); break;
-      case "season": { const list = seasons(getState(), iso()); ui.season = list[list.indexOf(ui.season) + Number(b.dataset.n)] ?? ui.season; rerender(); break; }
-      case "new-match": openMatchForm(); break;
+      case "team": ui.team = b.dataset.team || null; saveTeam(); rerender(); break;
+      case "season": { const list = seasons(getState(), iso(), ui.team); ui.season = list[list.indexOf(ui.season) + Number(b.dataset.n)] ?? ui.season; rerender(); break; }
+      case "new-match": openMatchForm(null, ui.team); break;
       case "view-match": viewMatch(id); break;
-      case "new-training": openTrainingForm(); break;
+      case "new-training": openTrainingForm(null, ui.team); break;
       case "view-training": viewTraining(id); break;
     }
   }, { signal });

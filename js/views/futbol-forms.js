@@ -4,7 +4,11 @@ import { getState, update } from "../state.js";
 import { openSheet, closeSheet, toast, confirmSheet, esc, uid } from "../ui.js";
 import { iso } from "../stats.js";
 import { seg, field } from "../forms.js";
-import { COMPS, POSITIONS, RESULT, resultOf, lastMatchDefaults, seasonOf, seasonLabel } from "../futbol.js";
+import { COMPS, POSITIONS, RESULT, TEAMS, DEFAULT_TEAM, resultOf, lastMatchDefaults, seasonOf, seasonLabel } from "../futbol.js";
+
+const teamOf = w => w?.team || DEFAULT_TEAM;
+/** Equipo por defecto de un entreno nuevo: el elegido arriba o el del último entreno */
+const lastTrainingTeam = () => getState().habits.workouts.filter(w => w.type === "futbol" && w.kind !== "partido").sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.team || DEFAULT_TEAM;
 
 const parseNum = s => { const t = String(s ?? "").trim().replace(",", "."); const v = Number(t); return t && Number.isFinite(v) ? v : null; };
 const counter = (id, label, value) => `<div class="field fb-counter"><label for="${id}">${label}</label>
@@ -23,6 +27,7 @@ export function viewMatch(id) {
   const n1 = v => String(v).replace(".", ",");
   const cards = m.red ? (m.yellow >= 2 ? "Doble amarilla (expulsado)" : "Roja directa") : m.yellow ? "Amarilla" : "Ninguna";
   const rows = [
+    ["Equipo", TEAMS[teamOf(m)]],
     ["Competición", COMPS[m.comp]],
     ["Campo", m.venue ? (m.venue === "local" ? "Local" : "Visitante") : null],
     ["Has jugado de", m.starter == null ? null : m.starter ? "Titular" : "Suplente"],
@@ -46,13 +51,14 @@ export function viewMatch(id) {
 }
 
 // ---------- Partido
-export function openMatchForm(id = null) {
+export function openMatchForm(id = null, team = null) {
   const m = id ? getState().habits.workouts.find(x => x.id === id) : null;
-  const def = lastMatchDefaults(getState());
+  const def = lastMatchDefaults(getState(), team);
   const v = (k, d) => m?.[k] ?? d;
   const sheet = openSheet(`
     <h2>${m ? "Editar partido" : "Nuevo partido"}</h2>
     <form class="form" id="mt-form" novalidate>
+      <div class="field"><label>Equipo</label>${seg("team", TEAMS, m ? teamOf(m) : def.team)}</div>
       <div class="row2">
         ${field("Fecha", "mt-date", `<input class="input" type="date" id="mt-date" value="${v("date", iso())}">`)}
         ${field("Rival", "mt-rival", `<input class="input" id="mt-rival" maxlength="40" autocomplete="off" value="${esc(v("rival", ""))}" placeholder="p. ej. CD Ejemplo">`)}
@@ -119,7 +125,7 @@ export function openMatchForm(id = null) {
     const cards = form.querySelector("[name=cards]:checked").value;
     const rating = Number($("#mt-rating").value) || null;
     const data = {
-      type: "futbol", kind: "partido", date: $("#mt-date").value || iso(), minutes: Math.round(minutes),
+      type: "futbol", kind: "partido", team: form.querySelector("[name=team]:checked").value, date: $("#mt-date").value || iso(), minutes: Math.round(minutes),
       rival: $("#mt-rival").value.trim(), comp: form.querySelector("[name=comp]:checked").value,
       venue: form.querySelector("[name=venue]:checked").value, gf, ga, goals, assists,
       starter: form.querySelector("[name=starter]:checked").value === "si",
@@ -147,11 +153,11 @@ export function viewTraining(id) {
   const w = all.find(x => x.id === id);
   if (!w) return;
   const season = seasonOf(w.date);
-  const inSeason = all.filter(x => seasonOf(x.date) === season);
+  const inSeason = all.filter(x => seasonOf(x.date) === season && teamOf(x) === teamOf(w));
   const nth = inSeason.indexOf(w) + 1;
   const month = all.filter(x => x.date.slice(0, 7) === w.date.slice(0, 7));
   const sheet = openSheet(`
-    <h2>Entreno</h2>
+    <h2>Entreno · ${TEAMS[teamOf(w)]}</h2>
     <p>${longDay(w.date)}</p>
     <div class="match-head">
       <div class="match-score"><b class="num">${w.minutes || 0}'</b><span class="muted">${w.minutes >= 60 ? `${String(Math.round(w.minutes / 6) / 10).replace(".", ",")} h` : "minutos"}</span></div>
@@ -166,11 +172,12 @@ export function viewTraining(id) {
 }
 
 // ---------- Entreno
-export function openTrainingForm(id = null) {
+export function openTrainingForm(id = null, team = null) {
   const w = id ? getState().habits.workouts.find(x => x.id === id) : null;
   const sheet = openSheet(`
     <h2>${w ? "Editar entreno" : "Entreno de fútbol"}</h2>
     <form class="form" id="tr-form" novalidate>
+      <div class="field"><label>Equipo</label>${seg("team", TEAMS, w ? teamOf(w) : team || lastTrainingTeam())}</div>
       <div class="row2">
         ${field("Fecha", "tr-date", `<input class="input" type="date" id="tr-date" value="${w?.date || iso()}">`)}
         ${field("Minutos", "tr-min", `<input class="input" id="tr-min" inputmode="numeric" autocomplete="off" value="${w?.minutes || ""}" placeholder="90">`)}
@@ -188,7 +195,7 @@ export function openTrainingForm(id = null) {
     e.preventDefault();
     const minutes = parseNum(form.querySelector("#tr-min").value);
     if (!(minutes > 0)) { toast("Indica los minutos", { error: true }); return; }
-    const data = { type: "futbol", kind: "entrenamiento", date: form.querySelector("#tr-date").value || iso(), minutes: Math.round(minutes), note: form.querySelector("#tr-note").value.trim() };
+    const data = { type: "futbol", kind: "entrenamiento", team: form.querySelector("[name=team]:checked").value, date: form.querySelector("#tr-date").value || iso(), minutes: Math.round(minutes), note: form.querySelector("#tr-note").value.trim() };
     update(st => {
       if (w) Object.assign(st.habits.workouts.find(x => x.id === w.id), data);
       else st.habits.workouts.push({ id: uid(), ...data });

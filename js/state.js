@@ -2,7 +2,7 @@
 
 import { dbGet, dbSet } from "./db.js";
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 const KEY = "state";
 
 // Estructura completa de los datos. Cada sección se irá rellenando en su fase.
@@ -71,6 +71,11 @@ const migrations = {
       if (s.game.areaXp) delete s.game.areaXp.work;
       if (s.game.lastLevels) delete s.game.lastLevels.work;
     }
+    return s;
+  },
+  // v3: dos equipos de fútbol; todo lo apuntado hasta ahora era del Sporting Pradillano
+  3: s => {
+    for (const w of s.habits?.workouts || []) if (w.type === "futbol" && !w.team) w.team = "sporting";
     return s;
   }
 };

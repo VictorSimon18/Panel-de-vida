@@ -99,7 +99,7 @@ function openGuide() {
 
     ${shortcut("5 · Entrenos", "he ido al gimnasio", [
       `Atajo <b>He ido al gimnasio</b> con una acción <b>Texto</b>:` + txt("tipo: gimnasio\nminutos: 60"),
-      `Atajo <b>He jugado al fútbol</b> con:` + txt("tipo: futbol\nminutos: 90") + `Para un partido, añade <code>partido: sí</code> (y si quieres <code>rival: …</code>, <code>resultado: 3-1</code>, <code>goles: 1</code>, <code>asistencias: 0</code>). Lo verás en el área <b>Fútbol</b>.`,
+      `Atajo <b>He jugado al fútbol</b> con:` + txt("tipo: futbol\nminutos: 90") + `Para un partido, añade <code>partido: sí</code> (y si quieres <code>rival: …</code>, <code>resultado: 3-1</code>, <code>goles: 1</code>, <code>asistencias: 0</code>). Para el Fénix de Azara añade <code>equipo: Fénix</code> (si no, va al Sporting Pradillano). Lo verás en el área <b>Fútbol</b>.`,
       send
     ])}
 

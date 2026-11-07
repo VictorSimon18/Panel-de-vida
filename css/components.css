@@ -862,3 +862,11 @@ textarea.input { resize: vertical; min-height: 120px; line-height: 1.5; }
 .rt-check .ico { width: 48px; height: 48px; fill: none; stroke: currentColor; stroke-width: 2; }
 /* con el cronómetro abierto, las confirmaciones salen por encima */
 body:has(#rt-run) .sheet-backdrop, body:has(#rt-run) .sheet { z-index: 90; }
+
+/* Fútbol: selector de equipo */
+.team-bar { display: grid; grid-template-columns: .8fr 1.2fr 1.2fr; gap: 4px; padding: 4px; margin: 2px 0 10px; border: 1px solid var(--line); border-radius: 12px; background: #111214; }
+.team-opt { min-height: 40px; padding: 6px 4px; border: 0; border-radius: 9px; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; line-height: 1.15; cursor: pointer; }
+.team-opt[aria-selected="true"] { background: var(--fut); color: #0b1020; }
+.team-opt[aria-selected="true"][data-t="fenix"] { background: #e0b467; }
+.team-tag { margin-left: 6px; --c: var(--fut); font-size: 10px; vertical-align: middle; }
+.team-tag[data-team="fenix"] { --c: #e0b467; }
