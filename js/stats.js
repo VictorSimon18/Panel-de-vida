@@ -101,6 +101,8 @@ export function streak(state, now = new Date()) {
 
 export function hasAnyData(state) {
   const f = state.finance, h = state.habits, a = state.agenda;
+  // el hábito «Rutina diaria» lo crea la app sola: no cuenta como dato tuyo
+  const myHabits = h.habits.filter(x => x.id !== "hb-rutina");
   return [f.accounts, f.transactions, f.recurring, f.goals,
-    h.habits, h.logs, h.workouts, h.body, h.sleep, h.mood, h.nutrition || [], h.activity || [], state.diary || [], a.tasks, a.events].some(arr => arr.length > 0);
+    myHabits, h.logs, h.routineLog || [], h.workouts, h.body, h.sleep, h.mood, h.nutrition || [], h.activity || [], state.diary || [], a.tasks, a.events].some(arr => arr.length > 0);
 }
