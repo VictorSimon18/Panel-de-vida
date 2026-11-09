@@ -1,12 +1,13 @@
 // Finanzas: saldo, movimientos, gastos por categoría, fijos, metas y cuentas.
 
 import { areaHeader } from "./area.js";
-import { getState } from "../state.js";
-import { esc, money } from "../ui.js";
+import { getState, update } from "../state.js";
+import { esc, money, toast, confirmSheet } from "../ui.js";
 import { icon } from "../icons.js";
 import { iso, parseISO } from "../stats.js";
 import { areaChart, ring } from "../charts.js";
 import { registerQuickAction } from "../quickadd.js";
+import { chargedInPeriod, chargeRecurringNow, nextAfterCharge } from "../finance.js";
 import { ACCOUNT_TYPES, FREQS, accountBalance, totalBalance, monthSummary, balanceHistory, catLabel, catColor } from "../finance.js";
 import { openTxForm, openAccountForm, openRecurringForm, openGoalForm, openContribute, openCategories } from "./finanzas-forms.js";
 
@@ -181,12 +182,21 @@ function fijosTab(state) {
     <div class="btn-row"><button class="btn primary" type="button" data-act="new-rec">${icon.plus} Nuevo fijo</button></div>
     ${rec.length ? `
       <div class="kv big"><span>Equivale al mes</span><b class="num ${monthly >= 0 ? "pos" : "neg"}">${signed(monthly)}</b></div>
-      <div class="list">${rec.map(r => `
-        <button class="item tap${r.active === false ? " is-off" : ""}" type="button" data-act="edit-rec" data-id="${r.id}">
-          <span class="cat-ico" style="--c:${catColor(state, r.categoryId)}"></span>
-          <span class="t">${esc(r.name)}<small>${FREQS[r.every] || "Mensual"} · ${r.active === false ? "En pausa" : `próximo ${shortDate(r.nextDate)}`}</small></span>
-          <b class="num ${r.amount > 0 ? "pos" : ""}">${signed(r.amount)}</b>
-        </button>`).join("")}</div>`
+      <div class="list">${rec.map(r => {
+        const paid = r.active === false ? null : chargedInPeriod(state, r);
+        const per = { week: "esta semana", year: "este año" }[r.every] || "este mes";
+        return `<div class="item rec-item${r.active === false ? " is-off" : ""}">
+          <button class="rec-main" type="button" data-act="edit-rec" data-id="${r.id}">
+            <span class="cat-ico" style="--c:${catColor(state, r.categoryId)}"></span>
+            <span class="t">${esc(r.name)}<small>${FREQS[r.every] || "Mensual"} · ${r.active === false ? "En pausa" : paid ? `${r.amount > 0 ? "cobrado" : "pagado"} el ${shortDate(paid.date)} · próximo ${shortDate(r.nextDate)}` : `próximo ${shortDate(r.nextDate)}`}</small></span>
+            <b class="num ${r.amount > 0 ? "pos" : ""}">${signed(r.amount)}</b>
+          </button>
+          ${r.active === false ? "" : paid
+            ? `<span class="rec-done" title="Ya apuntado ${per}">${icon.check}</span>`
+            : `<button class="btn small rec-charge" type="button" data-act="charge-rec" data-id="${r.id}">${r.amount > 0 ? "Cobrar" : "Pagar"} ya</button>`}
+        </div>`;
+      }).join("")}</div>
+      <p class="hint">Si un mes te lo cobran otro día, pulsa <b>Pagar ya</b>: se apunta hoy y ese mes ya no se vuelve a apuntar solo.</p>`
     : `<div class="empty">Añade tus suscripciones, el alquiler, la nómina… Se apuntarán solos cada vez que toque.</div>`}
   </section>`;
 }
@@ -253,6 +263,7 @@ export function mount(root, _state, signal) {
       case "edit-account": openAccountForm(id); break;
       case "new-rec": openRecurringForm(); break;
       case "edit-rec": openRecurringForm(id); break;
+      case "charge-rec": chargeRec(id); break;
       case "new-goal": openGoalForm(); break;
       case "edit-goal": openGoalForm(id); break;
       case "contrib": openContribute(id); break;
@@ -272,4 +283,22 @@ function paintSearch(root) {
   root.querySelector("#exp-hint").hidden = on;
   root.querySelector("#exp-cats").hidden = on;
   root.querySelector("#exp-results").innerHTML = on ? searchResults(getState()) : "";
+}
+
+// Cobro manual de un fijo: se apunta hoy y no se repite en el mismo periodo
+async function chargeRec(id) {
+  const st = getState();
+  const r = st.finance.recurring.find(x => x.id === id);
+  if (!r) return;
+  if (chargedInPeriod(st, r)) { toast("Ya está apuntado en este periodo"); return; }
+  const acc = st.finance.accounts.find(a => a.id === r.accountId)?.name || "su cuenta";
+  const ok = await confirmSheet({
+    title: `¿${r.amount > 0 ? "Cobrar" : "Pagar"} «${r.name}» hoy?`,
+    text: `Se apunta hoy ${signed(r.amount)} en ${acc}. ${({ week: "Esta semana", year: "Este año" })[r.every] || "Este mes"} ya no se volverá a apuntar solo; el siguiente será el ${shortDate(nextAfterCharge(r))}.`,
+    ok: r.amount > 0 ? "Cobrar" : "Pagar"
+  });
+  if (!ok) return;
+  let tx = null;
+  update(s => { tx = chargeRecurringNow(s, id); });
+  toast(tx ? `Apuntado: ${r.name} ${signed(r.amount)}` : "Ya estaba apuntado");
 }

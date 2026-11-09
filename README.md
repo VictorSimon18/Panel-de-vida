@@ -122,7 +122,7 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 - **Importes:** valen `12,50`, `1.234,56` o `12.5`.
 - **Buscador de gastos** (pestaña *Gastos*): busca en todos los meses por concepto, categoría, cuenta, importe (`12,50`) o fecha. Puedes poner varias palabras (p. ej. `super revolut`). Muestra cuántos gastos coinciden y su total; al tocar uno se abre para editarlo.
 - **Categorías:** hay una lista inicial con subcategorías y se puede cambiar en *Gastos → Categorías*. Al borrar una subcategoría, sus movimientos pasan a la categoría principal.
-- **Fijos:** se repiten cada mes, semana o año y se apuntan solos el día que toca, aunque la app lleve días sin abrirse.
+- **Fijos:** se repiten cada mes, semana o año y se apuntan solos el día que toca, aunque la app lleve días sin abrirse. Si un periodo te lo cobran otro día, el botón **Pagar ya** (o **Cobrar ya** si es un ingreso) lo apunta hoy y pasa su próxima fecha al periodo siguiente, así que ese mes (o esa semana, o ese año) no se vuelve a apuntar solo. Cuando ya está apuntado en el periodo actual, sale un ✓ en lugar del botón.
 - **Metas de ahorro:** objetivo, aportaciones y, si les pones fecha límite, cuánto tienes que ahorrar al mes para llegar.
 
 ## Fútbol

@@ -870,3 +870,11 @@ body:has(#rt-run) .sheet-backdrop, body:has(#rt-run) .sheet { z-index: 90; }
 .team-opt[aria-selected="true"][data-t="fenix"] { background: #e0b467; }
 .team-tag { margin-left: 6px; --c: var(--fut); font-size: 10px; vertical-align: middle; }
 .team-tag[data-team="fenix"] { --c: #e0b467; }
+
+/* Fijos: cobro manual */
+.rec-item { display: flex; align-items: center; gap: 8px; }
+.rec-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.rec-main .t { flex: 1; min-width: 0; }
+.rec-charge { flex: none; }
+.rec-done { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--fin); border: 1.5px solid var(--fin); }
+.rec-done .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }

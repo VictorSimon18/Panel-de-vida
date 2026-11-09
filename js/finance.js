@@ -130,6 +130,43 @@ export function applyRecurring(state, today = iso()) {
   return created;
 }
 
+// ---------- Cobro manual de un fijo (cuando el banco lo cobra otro día)
+/** Periodo de una fecha según la frecuencia: mes («2026-11»), semana (lunes) o año */
+export function periodOf(dateISO, every) {
+  if (every === "year") return dateISO.slice(0, 4);
+  if (every === "week") { const d = parseISO(dateISO); return iso(addDays(d, -((d.getDay() + 6) % 7))); }
+  return dateISO.slice(0, 7);
+}
+
+/** Movimiento de este fijo ya apuntado en el periodo actual (automático o manual), o null */
+export function chargedInPeriod(state, r, today = iso()) {
+  const p = periodOf(today, r.every);
+  return state.finance.transactions.find(t => t.recurringId === r.id && periodOf(t.date, r.every) === p) || null;
+}
+
+/** Próxima fecha que quedaría tras cobrarlo hoy a mano */
+export function nextAfterCharge(r, today = iso()) {
+  const cur = periodOf(today, r.every);
+  let d = r.nextDate, guard = 0;
+  while (d && periodOf(d, r.every) <= cur && guard++ < 400) d = nextOccurrence(d, r.every, r.day);
+  return d;
+}
+
+/**
+ * Muta el estado: apunta el fijo hoy y adelanta su próxima fecha al siguiente periodo, para que no se
+ * vuelva a cobrar solo este mes (o semana o año). Devuelve el movimiento creado o null si ya estaba cobrado.
+ */
+export function chargeRecurringNow(state, id, today = iso()) {
+  const r = state.finance.recurring.find(x => x.id === id);
+  if (!r || chargedInPeriod(state, r, today)) return null;
+  const tx = { id: uid(), date: today, amount: r.amount, accountId: r.accountId, categoryId: r.categoryId, note: r.name, auto: true, recurringId: r.id, manual: true };
+  state.finance.transactions.push(tx);
+  const cur = periodOf(today, r.every);
+  let guard = 0;
+  while (r.nextDate && periodOf(r.nextDate, r.every) <= cur && guard++ < 400) r.nextDate = nextOccurrence(r.nextDate, r.every, r.day);
+  return tx;
+}
+
 /** Asegura categorías por defecto y aplica fijos. Se llama al arrancar. */
 export function ensureFinance(state) {
   if (!state.finance.categories.length) state.finance.categories = defaultCategories();
