@@ -7,9 +7,9 @@ import { ensureFinance } from "./finance.js";
 import { ensureAgenda } from "./agenda.js";
 import { initQuickAdd, openQuickAdd } from "./quickadd.js";
 import { renderSidebar, SHORTCUT_ROUTES } from "./sidebar.js";
-import { initSync, noteLocalChange, onSyncStatus } from "./sync.js";
+import { initSync, noteLocalChange, onSyncStatus, syncNow } from "./sync.js";
 import { applyInbox, ensureStepsHabit } from "./inbox.js";
-import { ensureRoutine } from "./routine.js";
+import { ensureRoutine, progressionDue, applyProgression } from "./routine.js";
 import { paintSyncStatus, askConflict } from "./views/sync-ui.js";
 import { requestPersistence } from "./db.js";
 import { toast, closeSheet } from "./ui.js";
@@ -94,7 +94,15 @@ async function start() {
   initShortcuts();
   // Sincronización cifrada con GitHub (si está configurada en este dispositivo)
   onSyncStatus(paintSyncStatus);
-  initSync({ onConflict: askConflict, onInbox: receiveInbox });
+  // La subida semanal de la rutina se aplica DESPUÉS de sincronizar, para no chocar con el otro dispositivo
+  const weekly = () => syncNow().catch(() => {}).finally(() => {
+    if (!progressionDue(getState())) return;
+    let changes = [];
+    update(s => { changes = applyProgression(s); });
+    if (changes.length) toast("Tu rutina sube esta semana: míralo en Hábitos → Rutina", { ms: 4500 });
+  });
+  initSync({ onConflict: askConflict, onInbox: receiveInbox }).then(weekly, weekly);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && progressionDue(getState())) weekly(); });
   // iOS congela la app al salir: guardar cualquier cambio pendiente antes
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
   window.addEventListener("pagehide", flush);

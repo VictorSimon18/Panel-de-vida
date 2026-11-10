@@ -198,6 +198,31 @@ function fijosTab(state) {
       }).join("")}</div>
       <p class="hint">Si un mes te lo cobran otro día, pulsa <b>Pagar ya</b>: se apunta hoy y ese mes ya no se vuelve a apuntar solo.</p>`
     : `<div class="empty">Añade tus suscripciones, el alquiler, la nómina… Se apuntarán solos cada vez que toque.</div>`}
+  </section>
+  ${yearCostCard(state, rec)}`;
+}
+
+// Lo que cuestan al año los gastos fijos activos, del más caro al más barato
+const perYear = r => r.every === "week" ? r.amount * 52 : r.every === "year" ? r.amount : r.amount * 12;
+function yearCostCard(state, rec) {
+  const costs = rec.filter(r => r.active !== false && r.amount < 0).map(r => ({ r, year: -perYear(r) })).sort((a, b) => b.year - a.year);
+  if (!costs.length) return "";
+  const total = costs.reduce((s, c) => s + c.year, 0);
+  const income = rec.filter(r => r.active !== false && r.amount > 0).reduce((s, r) => s + perYear(r), 0);
+  const max = costs[0].year;
+  return `<section class="card">
+    <h2 class="card-h"><span class="h-dot" style="--c:var(--fin)"></span>Coste al año<span class="spacer"></span><small class="muted">${costs.length} ${costs.length === 1 ? "gasto fijo" : "gastos fijos"}</small></h2>
+    <div class="money-big num neg">${money(total)}</div>
+    <div class="money-sub">al año · ${money(total / 12)} al mes · ${money(total / 365)} al día</div>
+    <div class="hbars">${costs.map(({ r, year }) => `
+      <div class="hbar static" style="--c:${catColor(state, r.categoryId)}">
+        <span class="hb-top"><span class="hb-name">${esc(r.name)}<small>${FREQS[r.every] || "Mensual"} · ${money(-r.amount)}</small></span><span class="num">${money(year)} <small>${Math.round(year / total * 100)} %</small></span></span>
+        <span class="hb-track"><i style="width:${Math.max(2, year / max * 100)}%"></i></span>
+      </div>`).join("")}
+    </div>
+    ${income > 0 ? `<div class="kv big"><span>Ingresos fijos al año</span><b class="num pos">${signed(income)}</b></div>
+    <div class="kv big" style="margin-top:8px"><span>Te queda tras los fijos</span><b class="num ${income - total >= 0 ? "pos" : "neg"}">${signed(income - total)}</b></div>` : ""}
+    <p class="hint">Los semanales cuentan 52 veces y los mensuales 12. Los fijos en pausa no se incluyen.</p>
   </section>`;
 }
 

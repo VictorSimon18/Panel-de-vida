@@ -13,7 +13,7 @@ import { openHabitForm, openHabitDetail, openDayLog } from "./habitos-forms.js";
 import { nutricionTab, openNutritionGoals } from "./nutricion.js";
 import { weightTrendBlock, nutriWeightCard } from "./tendencia.js";
 import { pasosTab, openStepsGoal } from "./pasos.js";
-import { rutinaTab, openRoutineEditor, startRoutine } from "./rutina.js";
+import { rutinaTab, openRoutineEditor, startRoutine, undoRoutineUp } from "./rutina.js";
 import { openWorkoutForm, openRoutineForm, openBodyForm, openWellbeingForm, openRecordDetail } from "./deporte-forms.js";
 
 const ui = { tab: "habitos", archived: false, gymView: "entrenos", gymMonths: 3, recQuery: "" };
@@ -259,6 +259,7 @@ export function mount(root, _state, signal) {
       case "steps-goal": openStepsGoal(getState()); break;
       case "rt-start": startRoutine(); break;
       case "rt-edit": openRoutineEditor(); break;
+      case "rt-undo": undoRoutineUp(); break;
       case "gym-more": ui.gymMonths += 3; rerender(); break;
       case "gym-source": update(s => { s.settings.gymSource = b.dataset.v; }); break;
       case "new-routine": openRoutineForm(); break;

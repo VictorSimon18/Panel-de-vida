@@ -6,7 +6,29 @@ import { icon } from "../icons.js";
 import { iso, addDays, parseISO } from "../stats.js";
 import { seg } from "../forms.js";
 import { streaks } from "../habits.js";
-import { ROUTINE_HABIT, routineSecs, fmtClock, fmtDuration, stepText, completeRoutine, doneOn } from "../routine.js";
+import { ROUTINE_HABIT, routineSecs, fmtClock, fmtDuration, stepText, completeRoutine, doneOn, hasProgression, weekProgress, undoProgression, PROGRESS_DAYS } from "../routine.js";
+
+const valText = (kind, v) => kind === "time" ? fmtClock(v) : `${v} rep.`;
+/** «+5 s/semana (hasta 2:00)» o "" si ese ejercicio no sube */
+const incText = s => !(s.inc > 0) ? "" : (s.max > 0 && (s.kind === "time" ? s.secs : s.reps) >= s.max) ? "en su tope"
+  : `+${s.inc} ${s.kind === "time" ? "s" : "rep."}/semana${s.max > 0 ? ` (hasta ${valText(s.kind, s.max)})` : ""}`;
+
+/** Aviso de la subida de esta semana, o de por qué no ha subido */
+function progressNotice(state) {
+  const r = state.routine, last = r.progress?.last;
+  if (!last || last.week !== r.progress.week) return "";
+  if (last.changes?.length) return `<section class="card rt-up">
+    <h2 class="card-h"><span class="h-dot" style="--c:var(--fin)"></span>Esta semana sube<span class="spacer"></span><small class="muted">hiciste ${last.days} de 7 días</small></h2>
+    <div class="list">${last.changes.map(c => `<div class="kv"><span>${esc(c.name)}</span><span class="num">${valText(c.kind, c.from)} → <b style="color:var(--fin)">${valText(c.kind, c.to)}</b></span></div>`).join("")}</div>
+    <button class="btn small" type="button" data-act="rt-undo" style="margin-top:8px">Deshacer la subida</button>
+  </section>`;
+  if (last.undone) return "";
+  if (hasProgression(r) && last.days < PROGRESS_DAYS) return `<section class="card">
+    <h2 class="card-h"><span class="h-dot" style="--c:var(--agenda)"></span>Esta semana se queda igual</h2>
+    <p class="hint" style="margin-top:8px">La semana pasada hiciste la rutina ${last.days} de 7 días. Para que suba hacen falta ${PROGRESS_DAYS}.</p>
+  </section>`;
+  return "";
+}
 
 const time = ts => new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit" }).format(new Date(ts));
 
@@ -20,11 +42,12 @@ export function rutinaTab(state) {
   const logDays = new Set((state.habits.routineLog || []).map(l => l.date));
   const days = Array.from({ length: 14 }, (_, i) => iso(addDays(parseISO(today), i - 13)));
   const total = (state.habits.routineLog || []).length;
-  return `<section class="card">
+  const prog = hasProgression(r), wp = weekProgress(state, today);
+  return `${progressNotice(state)}<section class="card">
     <h2 class="card-h"><span class="h-dot" style="--c:var(--hab)"></span>Rutina de hoy<span class="spacer"></span>
       ${done.length ? `<span class="tag" style="--c:var(--fin)">Hecha · ${time(done.at(-1).at)}</span>` : `<span class="tag" style="--c:var(--agenda)">Pendiente</span>`}</h2>
     <div class="list rt-steps">${r.steps.map((s, i) => `
-      <div class="item"><span class="rt-n num">${i + 1}</span><span class="t">${esc(s.name)}<small>${s.kind === "time" ? "Por tiempo" : "Repeticiones"}</small></span><b class="num">${stepText(s)}</b></div>`).join("")}</div>
+      <div class="item"><span class="rt-n num">${i + 1}</span><span class="t">${esc(s.name)}<small>${s.kind === "time" ? "Por tiempo" : "Repeticiones"}${incText(s) ? ` · <span class="rt-inc">${incText(s)}</span>` : ""}</small></span><b class="num">${stepText(s)}</b></div>`).join("")}</div>
     <p class="hint">${r.rest ? `${r.rest} s de descanso entre ejercicios · ` : "Sin descanso · "}unos ${fmtDuration(routineSecs(r))} en total</p>
     <button class="btn primary rt-start" type="button" data-act="rt-start">${icon.bolt} ${done.length ? "Repetir rutina" : "Empezar"}</button>
     <button class="btn" type="button" data-act="rt-edit" style="width:100%;margin-top:8px">Editar rutina</button>
@@ -36,6 +59,9 @@ export function rutinaTab(state) {
       <div><b class="num">${st.best}</b><small>mejor racha</small></div>
       <div><b class="num">${total}</b><small>${total === 1 ? "vez en total" : "veces en total"}</small></div>
     </div>
+    ${prog ? `<div class="kv big"><span>Para subir el lunes</span><b class="num" style="color:${wp.ok ? "var(--fin)" : "var(--fg)"}">${wp.days} de ${wp.need} días${wp.ok ? " ✓" : ""}</b></div>
+    <p class="hint" style="margin-top:6px">${wp.ok ? "Conseguido: el lunes suben los ejercicios que tienen subida." : `Te ${wp.left === 1 ? "falta 1 día" : `faltan ${wp.left} días`} esta semana para que el lunes suba.`}</p>`
+      : `<p class="hint" style="margin-top:10px">¿Quieres que vaya subiendo sola? En <b>Editar rutina</b> pon a cada ejercicio cuánto sube por semana.</p>`}
     <div class="rt-days">${days.map(d => `<span class="${logDays.has(d) ? "on" : ""}${d === today ? " today" : ""}" title="${d}"><i></i><small>${parseISO(d).getDate()}</small></span>`).join("")}</div>
   </section>`;
 }
@@ -47,6 +73,8 @@ export function openRoutineEditor() {
     <input class="input" data-f="name" maxlength="40" autocomplete="off" value="${esc(s.name)}" placeholder="Ejercicio" aria-label="Nombre del ejercicio">
     <select class="input" data-f="kind" aria-label="Tipo"><option value="time"${s.kind === "time" ? " selected" : ""}>Segundos</option><option value="reps"${s.kind === "reps" ? " selected" : ""}>Repeticiones</option></select>
     <input class="input num" data-f="val" inputmode="numeric" autocomplete="off" value="${s.kind === "time" ? s.secs : s.reps}" aria-label="Cantidad">
+    <label class="rt-edit-inc"><span>Sube por semana</span><input class="input num" data-f="inc" inputmode="numeric" autocomplete="off" value="${s.inc || ""}" placeholder="0" aria-label="Cuánto sube por semana"></label>
+    <label class="rt-edit-inc"><span>Hasta (opcional)</span><input class="input num" data-f="max" inputmode="numeric" autocomplete="off" value="${s.max || ""}" placeholder="sin tope" aria-label="Tope"></label>
     <div class="rt-edit-btns"><button class="btn small" type="button" data-mv="-1" aria-label="Subir">↑</button><button class="btn small" type="button" data-mv="1" aria-label="Bajar">↓</button><button class="btn small" type="button" data-del aria-label="Quitar">✕</button></div>
   </div>`;
   const sheet = openSheet(`
@@ -56,6 +84,7 @@ export function openRoutineEditor() {
       <div class="field"><label>Ejercicios (en orden)</label><div id="rt-rows">${r.steps.map(row).join("")}</div>
         <div class="btn-row" style="margin-top:8px"><button class="btn small" type="button" data-add="time">${icon.plus} Por tiempo</button><button class="btn small" type="button" data-add="reps">${icon.plus} Por repeticiones</button></div>
       </div>
+      <p class="hint"><b>Sube por semana:</b> segundos o repeticiones que se añaden cada lunes si la semana anterior hiciste la rutina ${PROGRESS_DAYS} de 7 días. Déjalo vacío para que ese ejercicio no suba. <b>Hasta</b> es el tope (en segundos o repeticiones).</p>
       <p class="hint">Para una plancha lateral por cada lado, pon dos ejercicios (izquierda y derecha).</p>
       <div class="btn-row"><button class="btn" type="button" data-close>Cancelar</button><button class="btn primary" type="submit">Guardar</button></div>
     </form>`);
@@ -80,11 +109,16 @@ export function openRoutineEditor() {
       const val = Math.round(Number(el.querySelector("[data-f=val]").value));
       if (!name) { toast("Ponle nombre a cada ejercicio", { error: true }); return; }
       if (!(val > 0) || (kind === "time" ? val > 3600 : val > 1000)) { toast(`Revisa la cantidad de «${name}»`, { error: true }); return; }
-      steps.push(kind === "time" ? { id: el.dataset.id, name, kind, secs: val } : { id: el.dataset.id, name, kind, reps: val });
+      const inc = Math.max(0, Math.round(Number(el.querySelector("[data-f=inc]").value) || 0));
+      const max = Math.max(0, Math.round(Number(el.querySelector("[data-f=max]").value) || 0));
+      if (inc > 0 && max > 0 && max < val) { toast(`El tope de «${name}» es menor que su cantidad actual`, { error: true }); return; }
+      const step = kind === "time" ? { id: el.dataset.id, name, kind, secs: val } : { id: el.dataset.id, name, kind, reps: val };
+      if (inc > 0) { step.inc = inc; if (max > 0) step.max = max; }
+      steps.push(step);
     }
     if (!steps.length) { toast("Añade al menos un ejercicio", { error: true }); return; }
     const rest = Number(form.querySelector("[name=rest]:checked").value);
-    update(s => { s.routine = { rest, steps }; });
+    update(s => { s.routine = { ...s.routine, rest, steps }; });   // se conserva la progresión
     closeSheet();
     toast("Rutina guardada");
   });
@@ -221,4 +255,11 @@ function stop() {
   run.audio?.close?.().catch?.(() => {});
   run.el.remove();
   run = null;
+}
+
+/** Deshacer la subida de esta semana */
+export function undoRoutineUp() {
+  let ok = false;
+  update(s => { ok = undoProgression(s); });
+  toast(ok ? "Subida deshecha: vuelve a como estaba" : "No hay ninguna subida que deshacer");
 }

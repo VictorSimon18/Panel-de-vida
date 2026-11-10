@@ -878,3 +878,8 @@ body:has(#rt-run) .sheet-backdrop, body:has(#rt-run) .sheet { z-index: 90; }
 .rec-charge { flex: none; }
 .rec-done { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--fin); border: 1.5px solid var(--fin); }
 .rec-done .ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.rt-edit-inc { display: grid; gap: 4px; font-size: var(--fs-xs); color: var(--muted); }
+.rt-edit-inc:first-of-type { grid-column: 1 / 2; }
+.rt-edit-row .rt-edit-inc + .rt-edit-inc { grid-column: 2 / -1; }
+.rt-inc { color: var(--fin); }
+.card.rt-up { border-color: color-mix(in srgb, var(--fin) 35%, transparent); }
