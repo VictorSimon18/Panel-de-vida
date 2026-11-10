@@ -86,6 +86,11 @@ En **Ajustes → Perfil de jugador** puedes cambiar el alias y poner una **foto 
 
 En **Hábitos → Cuerpo**, la gráfica de los últimos 90 días muestra cada pesaje como un punto suave y, encima, la **media de 7 días**, que filtra las subidas y bajadas diarias. Arriba: la media actual y su cambio en 7 y 30 días; debajo, el ritmo en kg por semana.
 
+## Resumen del mes
+
+- **Los 3 primeros días de cada mes**, arriba del Resumen, sale la tarjeta **Tu mes pasado**: gasto frente al mes anterior, ahorro e ingresos, partidos (goles, asistencias, V/E/D y nota media), entrenos, días de rutina, días con todos los hábitos, pasos y calorías medias, peso y su cambio, tareas hechas, días escritos en el diario, el mayor gasto y **tu mejor día** (la entrada del diario con mejor ánimo). Se puede cerrar; el cierre se sincroniza.
+- En la pantalla **Semanas y meses** (`#semana`) el selector *Semana / Mes* permite ver cualquier mes anterior o el que está en curso.
+
 ## Resumen semanal
 
 - **Cada lunes**, arriba del Resumen, aparece la tarjeta **Tu semana pasada** (lunes a domingo): gasto frente a la semana anterior, partidos de fútbol (goles, asistencias y resultados), entrenos de gimnasio y fútbol, media de pasos, días con todos los hábitos cumplidos, calorías y proteína medias, peso (media de 7 días) y su cambio, y tareas hechas. Se puede cerrar; el cierre se sincroniza.
@@ -123,6 +128,7 @@ Si apuntas el gimnasio en **Hevy**, el panel importa tus entrenos con todos sus 
 - **Buscador de gastos** (pestaña *Gastos*): busca en todos los meses por concepto, categoría, cuenta, importe (`12,50`) o fecha. Puedes poner varias palabras (p. ej. `super revolut`). Muestra cuántos gastos coinciden y su total; al tocar uno se abre para editarlo.
 - **Categorías:** hay una lista inicial con subcategorías y se puede cambiar en *Gastos → Categorías*. Al borrar una subcategoría, sus movimientos pasan a la categoría principal.
 - **Fijos:** se repiten cada mes, semana o año y se apuntan solos el día que toca, aunque la app lleve días sin abrirse. Si un periodo te lo cobran otro día, el botón **Pagar ya** (o **Cobrar ya** si es un ingreso) lo apunta hoy y pasa su próxima fecha al periodo siguiente, así que ese mes (o esa semana, o ese año) no se vuelve a apuntar solo. Cuando ya está apuntado en el periodo actual, sale un ✓ en lugar del botón.
+- **Coste al año** (pestaña *Fijos*): lo que suman al año los gastos fijos activos (los semanales × 52, los mensuales × 12), con su equivalente al mes y al día, cada fijo ordenado del más caro al más barato con su porcentaje y, si hay ingresos fijos, lo que queda tras restarlos.
 - **Metas de ahorro:** objetivo, aportaciones y, si les pones fecha límite, cuánto tienes que ahorrar al mes para llegar.
 
 ## Fútbol
@@ -145,6 +151,7 @@ Sustituye al antiguo apartado «Trabajo y estudios» (sus datos se borraron al a
 - Al terminar se marca solo el hábito automático **Rutina diaria** (racha y XP) y se guarda en `habits.routineLog` con lo que duró.
 - **Editar rutina:** descanso (nada, 15 s, 30 s, 45 s o 1 min) y ejercicios por tiempo o por repeticiones, con nombre, cantidad y orden.
 - **Constancia:** días seguidos, mejor racha, veces en total y los últimos 14 días.
+- **Progresión sola:** en *Editar rutina*, cada ejercicio puede tener «Sube por semana» (segundos o repeticiones) y un tope opcional. Cada lunes, si la semana anterior hiciste la rutina **5 de 7 días**, suben esos ejercicios. Se aplica después de sincronizar (para no chocar con el otro dispositivo), se avisa en la pestaña («Esta semana sube: Plancha 1:00 → 1:05») y se puede **deshacer**. La pestaña muestra cuántos días llevas esta semana para subir el lunes.
 
 ## Diario
 

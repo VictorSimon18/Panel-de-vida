@@ -117,3 +117,59 @@ export function weekSummary(state, ws) {
 /** ¿Hay algo apuntado esa semana? */
 export const weekHasData = w => w.spend > 0 || w.income > 0 || w.matches > 0 || w.gym > 0 || w.futbolTrain > 0 || w.stepDays > 0 ||
   w.habitTracked > 0 || w.kcalDays > 0 || w.weight != null || w.tasksDone > 0;
+
+// ---------- Resumen del mes
+
+/** «AAAA-MM» del mes pasado */
+export const lastMonth = (today = iso()) => { const d = parseISO(today); return iso(new Date(d.getFullYear(), d.getMonth() - 1, 1)).slice(0, 7); };
+export const shiftYm = (ym, n) => { const [y, m] = ym.split("-").map(Number); return iso(new Date(y, m - 1 + n, 1)).slice(0, 7); };
+
+/** Datos de un mes («AAAA-MM»), comparados con el anterior donde tiene sentido */
+export function monthRecap(state, ym, today = iso()) {
+  const [y, m] = ym.split("-").map(Number);
+  const first = `${ym}-01`, lastDay = iso(new Date(y, m, 0));
+  const end = lastDay < today ? lastDay : today;                    // el mes en curso llega hasta hoy
+  const prevYm = shiftYm(ym, -1), prevEnd = iso(new Date(y, m - 1, 0));
+  const inM = (d, p = ym) => !!d && d.startsWith(p);
+  const tx = state.finance.transactions.filter(t => !t.transferId);
+  const spendOf = p => -tx.filter(t => t.amount < 0 && inM(t.date, p)).reduce((s, t) => s + t.amount, 0);
+  const income = tx.filter(t => t.amount > 0 && inM(t.date)).reduce((s, t) => s + t.amount, 0);
+  const spend = spendOf(ym);
+  const top = tx.filter(t => t.amount < 0 && inM(t.date)).sort((a, b) => a.amount - b.amount)[0] || null;
+
+  const wos = state.habits.workouts.filter(w => inM(w.date));
+  const matches = wos.filter(w => w.type === "futbol" && w.kind === "partido");
+  const res = r => matches.filter(x => x.gf != null && x.ga != null && (r === "V" ? x.gf > x.ga : r === "D" ? x.gf < x.ga : x.gf === x.ga)).length;
+  const rated = matches.map(x => x.rating).filter(v => v > 0);
+
+  const days = [];
+  for (let d = parseISO(first); iso(d) <= end; d = addDays(d, 1)) days.push(iso(d));
+  const levels = days.map(d => dayLevel(state, d));
+  const stepLogs = state.habits.logs.filter(l => l.habitId === "hb-pasos-salud" && inM(l.date) && l.value > 0);
+  const nut = (state.habits.nutrition || []).filter(x => x.kcal > 0 && inM(x.date) && x.date < today);
+  const wmap = weightByDay(state);
+  const wEnd = avg7(wmap, end), wStart = avg7(wmap, prevEnd);
+  const routineDays = new Set((state.habits.routineLog || []).filter(l => inM(l.date)).map(l => l.date)).size;
+
+  // mejor día: la entrada del diario con mejor ánimo (si empatan, la más reciente)
+  const moods = new Map(state.habits.mood.map(x => [x.date, x.value]));
+  const entries = (state.diary || []).filter(e => inM(e.date) && (e.text?.trim() || e.photoV || e.tags?.length));
+  const best = entries.filter(e => moods.get(e.date)).sort((a, b) => moods.get(b.date) - moods.get(a.date) || b.date.localeCompare(a.date))[0] || null;
+
+  return {
+    ym, first, end, daysCount: days.length, current: lastDay >= today,
+    spend, spendPrev: spendOf(prevYm), income, net: income - spend, top,
+    matches: matches.length, goals: matches.reduce((s, x) => s + (Number(x.goals) || 0), 0), assists: matches.reduce((s, x) => s + (Number(x.assists) || 0), 0),
+    V: res("V"), E: res("E"), D: res("D"), rating: mean(rated),
+    gym: wos.filter(w => w.type === "gym").length, futbolTrain: wos.filter(w => w.type === "futbol" && w.kind !== "partido").length,
+    routineDays, habitDays: levels.filter(l => l === 4).length, habitTracked: levels.filter(l => l != null).length,
+    steps: mean(stepLogs.map(l => l.value)), stepDays: stepLogs.length,
+    kcal: mean(nut.map(x => x.kcal)), protein: mean(nut.map(x => x.protein).filter(v => v > 0)), kcalDays: nut.length,
+    weight: wEnd, weightDelta: wEnd != null && wStart != null ? wEnd - wStart : null,
+    tasksDone: state.agenda.tasks.filter(t => t.done && t.doneAt && inM(t.doneAt.slice(0, 10))).length,
+    diaryDays: entries.length, best
+  };
+}
+
+export const monthHasData = r => r.spend > 0 || r.income > 0 || r.matches > 0 || r.gym > 0 || r.futbolTrain > 0 || r.routineDays > 0 ||
+  r.habitTracked > 0 || r.stepDays > 0 || r.kcalDays > 0 || r.weight != null || r.tasksDone > 0 || r.diaryDays > 0;

@@ -11,7 +11,7 @@ import { toggleTask } from "../agenda.js";
 import { weekChart, ring } from "../charts.js";
 import { catColor, catLabel } from "../finance.js";
 import { openTxForm } from "./finanzas-forms.js";
-import { weeklyBanner, closeWeekly } from "./semana.js";
+import { weeklyBanner, closeWeekly, monthlyBanner, closeMonthly, showMonths } from "./semana.js";
 import { diaryCard, viewEntry, openEntryForm } from "./diario.js";
 
 const PRI = { alta: ["Alta", "var(--danger)"], media: ["Media", "var(--agenda)"], baja: ["Baja", "var(--muted)"] };
@@ -38,6 +38,7 @@ export function render(state) {
     </header>
 
     ${banners(state)}
+    ${monthlyBanner(state)}
     ${weeklyBanner(state)}
 
     <div class="cols">
@@ -176,8 +177,11 @@ export function mount(root, _state, signal) {
     if (tx) { openTxForm({ id: tx.dataset.tx }); return; }
     const da = e.target.closest("[data-act=view-entry], [data-act=write-today]");
     if (da) { if (da.dataset.act === "write-today") openEntryForm(iso()); else viewEntry(da.dataset.date); return; }
+    const mc = e.target.closest("[data-act=monthly-close]");
+    if (mc) { closeMonthly(mc.dataset.ym); toast("Lo tienes cuando quieras en «Semanas y meses»"); return; }
+    if (e.target.closest("[data-act=open-months]")) { showMonths(); return; }   // el enlace navega solo
     const wc = e.target.closest("[data-act=weekly-close]");
-    if (wc) { closeWeekly(wc.dataset.ws); toast("Lo tienes cuando quieras en «Semanas»"); return; }
+    if (wc) { closeWeekly(wc.dataset.ws); toast("Lo tienes cuando quieras en «Semanas y meses»"); return; }
     const t = e.target.closest("[data-task]");
     if (t) {
       let r = null;

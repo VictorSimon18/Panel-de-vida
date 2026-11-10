@@ -32,7 +32,7 @@ const ROUTES = {
   agenda:   { view: agenda,   title: "Agenda",             area: "ag" },
   ajustes:  { view: ajustes,  title: "Ajustes" },
   logros:   { view: logros,   title: "Logros" },
-  semana:   { view: semana,   title: "Semanas" },
+  semana:   { view: semana,   title: "Semanas y meses" },
   diario:   { view: diario,   title: "Diario" }
 };
 
