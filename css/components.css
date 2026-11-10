@@ -864,7 +864,7 @@ textarea.input { resize: vertical; min-height: 120px; line-height: 1.5; }
 body:has(#rt-run) .sheet-backdrop, body:has(#rt-run) .sheet { z-index: 90; }
 
 /* Fútbol: selector de equipo */
-.team-bar { display: grid; grid-template-columns: .8fr 1.2fr 1.2fr; gap: 4px; padding: 4px; margin: 2px 0 10px; border: 1px solid var(--line); border-radius: 12px; background: #111214; }
+.team-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; margin: 2px 0 10px; border: 1px solid var(--line); border-radius: 12px; background: #111214; }
 .team-opt { min-height: 40px; padding: 6px 4px; border: 0; border-radius: 9px; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; line-height: 1.15; cursor: pointer; }
 .team-opt[aria-selected="true"] { background: var(--fut); color: #0b1020; }
 .team-opt[aria-selected="true"][data-t="fenix"] { background: #e0b467; }
