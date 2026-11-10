@@ -18,7 +18,7 @@ import { openWorkoutForm, openRoutineForm, openBodyForm, openWellbeingForm, open
 
 const ui = { tab: "habitos", archived: false, gymView: "entrenos", gymMonths: 3, recQuery: "" };
 const TABS = { habitos: "Hábitos", rutina: "Rutina", gym: "Gimnasio", cuerpo: "Cuerpo", nutricion: "Nutrición", pasos: "Pasos", bienestar: "Bienestar" };
-const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(n);
+const num = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1, useGrouping: "always" }).format(n);
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s)).replace(".", "");
 const dayName = s => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short" }).format(parseISO(s)).replace(/\./g, ""); return t[0].toUpperCase() + t.slice(1); };
 

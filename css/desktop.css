@@ -95,6 +95,22 @@ kbd {
 
   .celebrate-banner { bottom: 28px; left: calc(50% + var(--side-w) / 2); }
 
+  /* ---------- Acabado en pantalla ancha ---------- */
+  body::before { height: 520px; left: var(--side-w); }
+  .card { padding: 20px; }
+  .sidebar { background: #0b0c0e; border-right-color: rgba(255, 255, 255, .06); }
+  .nav { position: relative; transition: color .15s, background .15s; }
+  .nav[aria-current="page"] { background: linear-gradient(90deg, color-mix(in srgb, var(--c, var(--cyan)) 13%, var(--surface)), var(--surface)); }
+  .nav[aria-current="page"]::before {
+    content: ""; position: absolute; left: -14px; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0;
+    background: var(--c, var(--cyan));
+  }
+  .brand .logo { box-shadow: 0 0 0 2px #0b0c0e, 0 0 0 3.5px color-mix(in srgb, var(--cyan) 65%, transparent); }
+  .achs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .area-head h1, .page-h { font-size: 30px; }
+  .sheet { background: linear-gradient(180deg, #1c1d21, #17181b 140px); }
+  * { scrollbar-width: thin; scrollbar-color: #2e3036 transparent; }
+
   /* Los gráficos se dibujan a tamaño móvil: en pantalla ancha se limita su altura
      para que el texto no se agrande (el dibujo queda centrado) */
   .chart { max-height: 210px; }

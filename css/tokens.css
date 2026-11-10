@@ -47,6 +47,16 @@
   --warn: #e0b467;
   --danger: #e5736b;
 
+  /* Color del área que se está viendo: tiñe pestañas, campos activos y el fondo.
+     Lo fija app.js en <body data-area="…">; en el resumen y demás pantallas es el azul de interfaz. */
+  --area: var(--cyan);
+
+  /* Profundidad */
+  --surface-3: #24262b;
+  --shadow-card: inset 0 1px 0 rgba(255, 255, 255, .04), 0 10px 28px -18px rgba(0, 0, 0, .7);
+  --shadow-pop: 0 18px 50px -12px rgba(0, 0, 0, .75), 0 2px 8px rgba(0, 0, 0, .35);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+
   /* Tipografía */
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --fs-xs: 11px;
@@ -57,12 +67,19 @@
   --fs-xxl: 28px;
 
   /* Forma */
-  --r: 14px;
-  --r-lg: 14px;
+  --r: 18px;       /* tarjetas */
+  --r-md: 12px;    /* botones, campos y fichas interiores */
+  --r-sm: 8px;
+  --r-lg: 18px;
   --gap: 14px;
 
   /* Áreas seguras de iPhone */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --tabbar-h: 58px;
+  --tabbar-h: 64px;
 }
+
+body[data-area="fin"] { --area: var(--fin); }
+body[data-area="fut"] { --area: var(--fut); }
+body[data-area="hab"] { --area: var(--hab); }
+body[data-area="ag"]  { --area: var(--agenda); }

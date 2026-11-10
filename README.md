@@ -189,6 +189,17 @@ La opción **Solo lo nuevo** exporta únicamente lo creado o cambiado desde la �
 
 Si **Abrir en Calendario** no muestra el botón *Añadir todo*, usa **Compartir archivo** → *Guardar en Archivos*. Después, en la app Archivos, toca el `.ics` para importarlo.
 
+## Aspecto
+
+El estilo es «Grafito»: oscuro, neutro y sin brillos. Encima va una capa de acabado (`css/polish.css`):
+
+- **Color de área:** `app.js` pone `data-area` en `<body>` y `tokens.css` lo convierte en la variable `--area`. Con ella se tiñen el fondo de arriba (muy suave), las pestañas elegidas, los botones segmentados y el borde de los campos activos. En el Resumen y demás pantallas es el azul de interfaz.
+- **Barra inferior flotante**, con el icono de la sección activa en su color.
+- **Resumen:** saludo, anillo con tu nivel y las cuatro áreas como fichas con icono.
+- Tarjetas con algo de profundidad, radios unificados (`--r` 18 px en tarjetas, `--r-md` 12 px en botones, campos y fichas) y logros en cuadrícula.
+
+Para volver al aspecto anterior basta con quitar `polish.css` de `index.html` (y de la lista de `sw.js`).
+
 ## Navegación
 
 En cualquier pantalla que no sea el resumen, el botón de la casita (arriba a la izquierda) te devuelve al inicio.
@@ -239,6 +250,7 @@ css/
   tokens.css            Colores, tipografía y medidas (cambia aquí el estilo)
   base.css              Reset, fondo grafito y estructura
   components.css        Tarjetas, barras de XP, barra inferior, hojas, botones…
+  polish.css            Capa de acabado: profundidad, color de cada área (--area), barra inferior flotante
   desktop.css           Diseño de escritorio (≥ 1024 px): menú lateral, columnas, ventanas centrales
 fonts/inter-latin.woff2 Tipografía Inter (incluida para funcionar sin conexión)
 icons/                  Icono de la app (SVG y PNG)

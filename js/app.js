@@ -53,6 +53,7 @@ function render({ scrollTop = false } = {}) {
 
   viewEl.classList.toggle("enter", changed);
   viewEl.dataset.route = name;
+  document.body.dataset.area = route.area || "";   // color del área para toda la interfaz
   renderSidebar(getState(), name);
   viewEl.innerHTML = route.view.render(getState());
   mountCtl?.abort();

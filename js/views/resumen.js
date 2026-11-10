@@ -16,7 +16,7 @@ import { diaryCard, viewEntry, openEntryForm } from "./diario.js";
 
 const PRI = { alta: ["Alta", "var(--danger)"], media: ["Media", "var(--agenda)"], baja: ["Baja", "var(--muted)"] };
 const shortDate = s => new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(parseISO(s));
-const num1 = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1 }).format(n);
+const num1 = n => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 1, useGrouping: "always" }).format(n);
 
 const greeting = () => { const h = new Date().getHours(); return h < 6 ? "Buenas noches" : h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches"; };
 
@@ -32,7 +32,7 @@ export function render(state) {
     </header>
     <header class="topbar">
       <a class="logo" href="#resumen" aria-label="Resumen">${avatar(state)}</a>
-      <div class="who"><div class="alias">${esc(state.profile.alias)}</div><div class="title">${titleFor(lv.level)} · Nv. ${lv.level}</div></div>
+      <div class="who"><div class="hello">${greeting()},</div><div class="alias">${esc(state.profile.alias)}</div></div>
       <div class="streak${days ? "" : " off"}" title="Días seguidos apuntando algo">${icon.flame}<span class="num">${days}</span></div>
       <a class="icon-btn" href="#ajustes" aria-label="Ajustes">${icon.gear}</a>
     </header>
@@ -43,11 +43,18 @@ export function render(state) {
     <div class="cols">
     <div class="col col-1">
     <section class="card hud" aria-label="Experiencia">
-      <a class="xpmeta xp-link" href="#logros"><span>XP global · <b class="num">${(g.achievements || []).length}</b> logros</span><span class="num">${int(lv.into)} / ${int(lv.need)} ${icon.chevron}</span></a>
-      <div class="xpbar"><i style="width:${lv.pct}%"></i></div>
+      <a class="hud-top" href="#logros" aria-label="Nivel ${lv.level}: ver logros">
+        <span class="hud-ring">${ring(lv.pct, "#7cc4e4", { size: 68, stroke: 6 })}<b class="num">${lv.level}</b></span>
+        <span class="hud-t">
+          <small><em>${titleFor(lv.level)}</em> · ${(g.achievements || []).length} logros</small>
+          <b class="num">${int(lv.into)} <i>/ ${int(lv.need)} XP</i></b>
+          <small>Te faltan ${int(lv.need - lv.into)} XP para el nivel ${lv.level + 1}</small>
+        </span>
+        ${icon.chevron}
+      </a>
       <div class="area-levels">${Object.values(AREAS).map(a => {
         const al = levelFromXp(g.areaXp[a.key] || 0);
-        return `<a href="#${a.route}" style="--c:${a.color}"><div class="lbl">${a.short}</div><div class="lv">Nv. ${al.level}</div><div class="mini"><i style="width:${al.pct}%"></i></div></a>`;
+        return `<a href="#${a.route}" style="--c:${a.color}"><span class="al-ico">${icon[a.key]}</span><div class="lbl">${a.short}</div><div class="lv">Nv. ${al.level}</div><div class="mini"><i style="width:${al.pct}%"></i></div></a>`;
       }).join("")}</div>
     </section>
 
