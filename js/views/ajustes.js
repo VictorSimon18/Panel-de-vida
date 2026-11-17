@@ -2,7 +2,7 @@
 
 import { update, getState, replaceState, defaultState } from "../state.js";
 import { exportBackup, readBackupFile, applyBackup } from "../backup.js";
-import { replaceAllPhotos } from "../photos.js";
+import { replaceAllPhotos, squarePhoto, photoErrorText } from "../photos.js";
 import { esc, toast, confirmSheet, daysSince, avatar } from "../ui.js";
 import { icon } from "../icons.js";
 import { requestPersistence } from "../db.js";
@@ -44,7 +44,7 @@ export function render(state) {
           <label class="btn" for="photo-file">${state.profile.photo ? "Cambiar foto" : "Poner foto"}</label>
           ${state.profile.photo ? `<button class="btn" type="button" id="photo-del">Quitar</button>` : ""}
         </div>
-        <input type="file" id="photo-file" accept="image/*" hidden>
+        <input type="file" id="photo-file" accept="image/*,.heic,.heif" hidden>
       </div>
       <form id="profile-form" class="field" style="margin-top:10px">
         <label for="alias">Alias</label>
@@ -143,10 +143,11 @@ export function mount(root) {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const photo = await squarePhoto(file, 256);
+      const photo = await squarePhoto(file, 256, { onConvert: () => toast("Convirtiendo la foto HEIC… unos segundos", { ms: 15000 }) });
       update(s => { s.profile.photo = photo; });
       toast("Foto de perfil guardada");
-    } catch { toast("No se pudo leer esa imagen", { error: true }); }
+    } catch (err) { toast(photoErrorText(err), { error: true, ms: 5000 }); }
+    e.target.value = "";
   });
   root.querySelector("#photo-del")?.addEventListener("click", () => {
     update(s => { delete s.profile.photo; });
@@ -203,23 +204,5 @@ export function mount(root) {
   requestPersistence().then(ok => {
     const el = root.querySelector("#persist-state");
     if (el) el.textContent = ok ? "Activada" : (isStandalone() ? "No disponible" : "Instala la app para activarla");
-  });
-}
-
-/** Imagen → JPEG cuadrado (recorte centrado) de size × size, como data URL */
-function squarePhoto(file, size) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const side = Math.min(img.naturalWidth, img.naturalHeight);
-      const c = document.createElement("canvas");
-      c.width = c.height = size;
-      c.getContext("2d").drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
-      URL.revokeObjectURL(url);
-      resolve(c.toDataURL("image/jpeg", 0.85));
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("imagen")); };
-    img.src = url;
   });
 }

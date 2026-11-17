@@ -8,7 +8,7 @@ import { homeBtn } from "./area.js";
 import { MOODS, MOOD_COLOR } from "../sport.js";
 import { moodPicker } from "./habitos-forms.js";
 import { entryOf, moodOf, hasContent, diaryStreak, onThisDay, searchDiary, allTags } from "../diary.js";
-import { photoOf, setPhoto, removePhoto, shrinkPhoto, photoCount } from "../photos.js";
+import { photoOf, setPhoto, removePhoto, shrinkPhoto, photoCount, photoErrorText } from "../photos.js";
 
 const ui = { ym: iso().slice(0, 7), q: "" };
 const longDay = s => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(parseISO(s)); return t[0].toUpperCase() + t.slice(1); };
@@ -129,6 +129,7 @@ export function openEntryForm(date = iso()) {
   const e = entryOf(s, date);
   let photo = photoOf(date);          // foto actual (o la nueva elegida)
   let photoChanged = false;
+  let loading = null;                 // conversión de la foto en curso (no se guarda hasta que acaba)
   const sheet = openSheet(`
     <h2>${date === iso() ? "Hoy" : longDay(date)}</h2>
     <form class="form" id="de-form" novalidate>
@@ -143,7 +144,7 @@ export function openEntryForm(date = iso()) {
           <label class="btn" for="de-file">${photo ? "Cambiar foto" : "Añadir foto"}</label>
           <button class="btn" type="button" id="de-nophoto"${photo ? "" : " hidden"}>Quitar foto</button>
         </div>
-        <input type="file" id="de-file" accept="image/*" hidden>
+        <input type="file" id="de-file" accept="image/*,.heic,.heif" hidden>
       </div>
       <div class="btn-row">
         ${hasContent(e) ? `<button class="btn danger" type="button" id="de-del">Borrar</button>` : `<button class="btn" type="button" data-close>Cancelar</button>`}
@@ -156,16 +157,21 @@ export function openEntryForm(date = iso()) {
     form.querySelector("label[for=de-file]").textContent = photo ? "Cambiar foto" : "Añadir foto";
     form.querySelector("#de-nophoto").hidden = !photo;
   };
-  form.querySelector("#de-file").addEventListener("change", async ev => {
+  form.querySelector("#de-file").addEventListener("change", ev => {
     const f = ev.target.files?.[0];
+    ev.target.value = "";
     if (!f) return;
-    try { photo = await shrinkPhoto(f); photoChanged = true; paintPhoto(); }
-    catch { toast("No se pudo leer esa imagen", { error: true }); }
+    const box = form.querySelector("#de-photo");
+    loading = shrinkPhoto(f, 480, 0.72, { onConvert: () => { box.innerHTML = `<div class="de-converting">Convirtiendo la foto HEIC… unos segundos</div>`; } })
+      .then(src => { photo = src; photoChanged = true; })
+      .catch(err => toast(photoErrorText(err), { error: true, ms: 5000 }))
+      .finally(() => { loading = null; paintPhoto(); });
   });
   form.querySelector("#de-nophoto").addEventListener("click", () => { photo = null; photoChanged = true; paintPhoto(); });
 
   form.addEventListener("submit", async ev => {
     ev.preventDefault();
+    if (loading) await loading;       // si aún se está convirtiendo la foto, se espera
     const text = form.querySelector("#de-text").value.trim();
     const tags = [...new Set(form.querySelector("#de-tags").value.split(",").map(t => t.trim().replace(/^#/, "").toLowerCase()).filter(Boolean))].slice(0, 10);
     const mood = Number(form.querySelector("[name=mood]:checked")?.value || 0);
