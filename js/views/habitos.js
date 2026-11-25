@@ -10,7 +10,7 @@ import { update, getState } from "../state.js";
 import { freqText, habitValue, setHabitValue, streaks, dayLevel, heatDays, habitsToday, isScheduled, isDone, AUTO_LABEL } from "../habits.js";
 import { records, sportSummary, wellbeingDays, workoutVolume, avg, kg, MOODS, MOOD_COLOR, QUALITY } from "../sport.js";
 import { openHabitForm, openHabitDetail, openDayLog } from "./habitos-forms.js";
-import { nutricionTab, openNutritionGoals } from "./nutricion.js";
+import { nutricionTab, openNutritionGoals, openNutritionDay } from "./nutricion.js";
 import { weightTrendBlock, nutriWeightCard } from "./tendencia.js";
 import { pasosTab, openStepsGoal } from "./pasos.js";
 import { rutinaTab, openRoutineEditor, startRoutine, undoRoutineUp } from "./rutina.js";
@@ -256,6 +256,7 @@ export function mount(root, _state, signal) {
       case "view-workout": viewWorkout(_state, id); break;
       case "gym-view": ui.gymView = b.dataset.v; rerender(); break;
       case "nutri-goals": e.preventDefault(); openNutritionGoals(); break;
+      case "nutri-edit": openNutritionDay(); break;
       case "steps-goal": openStepsGoal(getState()); break;
       case "rt-start": startRoutine(); break;
       case "rt-edit": openRoutineEditor(); break;

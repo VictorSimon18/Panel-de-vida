@@ -1,7 +1,8 @@
 // Nutrición (datos de Foodvisor a través de Salud): calorías y macros del día, objetivos y evolución.
 
 import { getState, update } from "../state.js";
-import { esc, int, openSheet, closeSheet, toast } from "../ui.js";
+import { esc, int, openSheet, closeSheet, toast, confirmSheet, uid } from "../ui.js";
+import { parseAmount } from "../finance.js";
 import { iso, addDays, parseISO } from "../stats.js";
 import { seg, field } from "../forms.js";
 import { ring, stackChart } from "../charts.js";
@@ -20,8 +21,8 @@ export function nutricionTab(state) {
   const t = list.find(n => n.date === today);
 
   if (!list.length) return `<section class="card">
-    <h2 class="card-h">Nutrición<span class="spacer"></span><button class="btn small" type="button" data-act="nutri-goals">Objetivos</button></h2>
-    <div class="empty">Aún no han llegado datos de Foodvisor.<br>Monta el atajo <b>Nutrición al Panel</b> en <a href="#ajustes">Ajustes → Siri y Salud → Cómo crear los Atajos</a> (apartado 8).</div>
+    <h2 class="card-h">Nutrición<span class="spacer"></span><button class="btn small" type="button" data-act="nutri-edit">Editar día</button><button class="btn small" type="button" data-act="nutri-goals">Objetivos</button></h2>
+    <div class="empty">Aún no han llegado datos de Foodvisor.<br>Monta el atajo <b>Nutrición al Panel</b> en <a href="#ajustes">Ajustes → Siri y Salud → Cómo crear los Atajos</a> (apartado 8), o apunta un día a mano con <b>Editar día</b>.</div>
   </section>`;
 
   // ---- Hoy
@@ -38,7 +39,7 @@ export function nutricionTab(state) {
   const kcalColor = goals.mode === "max" && kcal > goals.kcal ? "#e5736b" : "#e0b467";
 
   const hoy = `<section class="card">
-    <h2 class="card-h"><span class="h-dot" style="--c:var(--agenda)"></span>Hoy<span class="spacer"></span>${t ? `<small class="muted">Foodvisor · ${time(t.at)}</small>` : ""}</h2>
+    <h2 class="card-h"><span class="h-dot" style="--c:var(--agenda)"></span>Hoy<span class="spacer"></span>${t ? `<small class="muted">${t.source === "manual" ? "A mano" : "Foodvisor"} · ${time(t.at)}</small>` : ""}</h2>
     ${t ? `
     <div class="nutri-hero">
       ${ring(kcalPct, kcalColor, { size: 76, stroke: 7, label: goals.kcal ? `${Math.round(kcal / goals.kcal * 100)}%` : "" })}
@@ -65,7 +66,7 @@ export function nutricionTab(state) {
   const inGoal = kHabit ? days.slice(-8, -1).filter(d => byDay.get(d) && meets(kHabit, byDay.get(d).kcal, d, today)).length : null;
 
   const evo = `<section class="card">
-    <h2 class="card-h">Últimos 14 días<span class="spacer"></span><button class="btn small" type="button" data-act="nutri-goals">Objetivos</button></h2>
+    <h2 class="card-h">Últimos 14 días<span class="spacer"></span><button class="btn small" type="button" data-act="nutri-edit">Editar día</button><button class="btn small" type="button" data-act="nutri-goals">Objetivos</button></h2>
     <div class="week-stats">
       <div><b class="num">${avg("kcal") != null ? int(avg("kcal")) : "—"}</b><small>kcal de media (7 días)</small></div>
       <div><b class="num" style="color:var(--hab)">${avg("protein") != null ? int(avg("protein")) + " g" : "—"}</b><small>proteína de media</small></div>
@@ -76,6 +77,58 @@ export function nutricionTab(state) {
   </section>`;
 
   return hoy + evo + nutriWeightCard(state);
+}
+
+// ---------- Editar un día a mano (por si olvidas apuntarlo en Foodvisor)
+const nutriNum = (v, { round = false } = {}) => { const n = parseAmount(String(v ?? "")); return Number.isFinite(n) && n >= 0 ? (round ? Math.round(n) : Math.round(n * 10) / 10) : null; };
+const longDay = d => { const t = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" }).format(parseISO(d)); return t[0].toUpperCase() + t.slice(1); };
+
+export function openNutritionDay(date = iso()) {
+  const today = iso();
+  if (date > today) date = today;
+  const prev = (getState().habits.nutrition || []).find(n => n.date === date) || null;
+  const val = k => prev?.[k] != null && prev[k] !== 0 ? String(prev[k]).replace(".", ",") : "";
+  const sheet = openSheet(`
+    <h2>Editar un día</h2>
+    <form class="form" id="nd-form" novalidate>
+      ${field("Día", "nd-date", `<input class="input" type="date" id="nd-date" max="${today}" value="${date}">`)}
+      <p class="hint" id="nd-state">${prev ? `Ya hay datos de este día (${prev.source === "manual" ? "apuntados a mano" : "de Foodvisor"}): al guardar se sustituyen.` : "Este día no tiene datos todavía."}</p>
+      ${field("Calorías (kcal)", "nd-kcal", `<input class="input amount" id="nd-kcal" inputmode="decimal" autocomplete="off" value="${prev?.kcal ? Math.round(prev.kcal) : ""}" placeholder="0">`)}
+      <div class="row2">
+        ${field("Proteína (g)", "nd-prot", `<input class="input" id="nd-prot" inputmode="decimal" autocomplete="off" value="${val("protein")}" placeholder="opcional">`)}
+        ${field("Carbohidratos (g)", "nd-carbs", `<input class="input" id="nd-carbs" inputmode="decimal" autocomplete="off" value="${val("carbs")}" placeholder="opcional">`)}
+      </div>
+      ${field("Grasas (g)", "nd-fat", `<input class="input" id="nd-fat" inputmode="decimal" autocomplete="off" value="${val("fat")}" placeholder="opcional">`)}
+      ${date === today ? `<p class="hint">Si hoy te llegan datos de Foodvisor (14:00, 18:00 y 23:45), sustituirán lo que pongas aquí. Para días anteriores no hay problema.</p>` : ""}
+      <div class="btn-row">
+        ${prev ? `<button class="btn danger" type="button" id="nd-del">Borrar día</button>` : `<button class="btn" type="button" data-close>Cancelar</button>`}
+        <button class="btn primary" type="submit">Guardar</button>
+      </div>
+    </form>`);
+  const form = sheet.querySelector("#nd-form");
+  // al cambiar de día se cargan los datos de ese día
+  form.querySelector("#nd-date").addEventListener("change", e => { if (e.target.value) openNutritionDay(e.target.value); });
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const d = form.querySelector("#nd-date").value || date;
+    if (d > today) { toast("No se puede apuntar un día futuro", { error: true }); return; }
+    const kcal = nutriNum(form.querySelector("#nd-kcal").value, { round: true });
+    if (!(kcal > 0) || kcal > 20000) { toast("Pon las calorías del día (un número mayor que 0)", { error: true }); return; }
+    const protein = nutriNum(form.querySelector("#nd-prot").value), carbs = nutriNum(form.querySelector("#nd-carbs").value), fat = nutriNum(form.querySelector("#nd-fat").value);
+    update(s => {
+      s.habits.nutrition ||= [];
+      const cur = s.habits.nutrition.find(n => n.date === d);
+      const data = { kcal, protein: protein ?? 0, carbs: carbs ?? 0, fat: fat ?? 0, source: "manual", at: new Date().toISOString() };
+      if (cur) Object.assign(cur, data); else s.habits.nutrition.push({ id: `man-${d}-${uid()}`, date: d, fiber: 0, sugar: 0, ...data });
+    });
+    closeSheet();
+    toast(`${longDay(d)}: ${int(kcal)} kcal guardadas`);
+  });
+  sheet.querySelector("#nd-del")?.addEventListener("click", async () => {
+    if (!await confirmSheet({ title: "¿Borrar los datos de este día?", text: `Se quitan las calorías y macros del ${longDay(date).toLowerCase()}.`, ok: "Borrar", danger: true })) return;
+    update(s => { s.habits.nutrition = (s.habits.nutrition || []).filter(n => n.date !== date); });
+    toast("Día borrado");
+  });
 }
 
 // ---------- Objetivos (crean o actualizan los hábitos automáticos)

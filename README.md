@@ -70,6 +70,7 @@ Foodvisor escribe en Apple Salud las calorías, los macros y el peso, pero **no 
 - **Hábitos → Nutrición:**
   - Hoy: calorías frente al objetivo con lo que te queda, barra de proteína y reparto de macros.
   - Últimos 14 días: gráfico con la línea del objetivo y medias de 7 días.
+- **Editar día:** si olvidas apuntar un día en Foodvisor, el botón **Editar día** (en la tarjeta de los últimos 14 días, y también cuando aún no hay datos) abre una hoja donde eliges el día y pones las calorías y, si quieres, proteína, carbohidratos y grasas. Si ese día ya tenía datos se sustituyen, y desde la misma hoja puedes borrarlo. Lo apuntado a mano lleva la marca «A mano». Solo días de hoy hacia atrás. Ojo con **hoy**: los envíos de Foodvisor de las 14:00, 18:00 y 23:45 sustituyen lo que hayas puesto; en días anteriores no hay problema.
 - **Objetivos:** calorías ("no pasarme" o "llegar") y proteína. Cada uno es un hábito automático con racha y XP. En modo "no pasarme", el día cuenta cuando termina.
 - **Peso:** el que registras en Foodvisor llega solo a Cuerpo.
 - **Peso vs calorías** (en Nutrición y en Cuerpo): las últimas 6 semanas con calorías y proteína medias (solo días terminados con registro) y el cambio de la media del peso respecto a la semana anterior. Con al menos 2 semanas completas (≥ 4 días de calorías) estima tus **calorías de mantenimiento**: kcal medias − cambio de peso semanal × 7.700 / 7.
